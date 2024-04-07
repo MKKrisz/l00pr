@@ -1,7 +1,7 @@
 #ifndef L00PR_GENERATOR_BUILTIN
 #define L00PR_GENERATOR_BUILTIN
 
-#include "../generator.hpp"
+#include "generator.hpp"
 #include <vector>
 
 #include "none.hpp"
