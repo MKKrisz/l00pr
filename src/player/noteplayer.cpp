@@ -4,14 +4,26 @@ void NotePlayer::addNote(Note& note) {
     m_notes.emplace_back(note);
     m_gen->addPhase();
 }
+void NotePlayer::addNote(SetterNote& note) {
+    std::vector phases = m_gen->getPhases();
+    delete m_gen;
+    if(note.getGen() == nullptr) {
+        m_gen = def_gen->copy();
+        m_gen->setPhases(phases);
+        return;
+    }
+    m_gen = note.getGen()->copy();
+    m_gen->setPhases(phases);
+}
 
-NotePlayer::NotePlayer(Generator* gen) : m_notes() , m_gen(gen->copy()) {}
+NotePlayer::NotePlayer(Generator* gen) : m_notes(), def_gen(gen->copy()), m_gen(gen->copy()){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
-    : m_notes(player.m_notes), m_gen(player.m_gen->copy()){}
+    : m_notes(player.m_notes), m_gen(player.m_gen->copy()), def_gen(player.def_gen->copy()){}
 
 NotePlayer::~NotePlayer() {
     delete m_gen;
+    delete def_gen;
 }
 
 

@@ -27,7 +27,8 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
     while(stream.good()) {
         std::string buf = "";
         while(true) {
-            if(stream.peek() == 0) throw parse_error(stream, "Something is not good...");
+            if(stream.peek() == 0) 
+                throw parse_error(stream, "Something is not good...");
             buf += tolower(stream.get());
             if(buf == "set") {
                 t.setEnv(stream);
@@ -44,6 +45,22 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
         }
         buf.clear();
         stream >> std::ws;
+    }
+    
+    for(int i = 0; i < t.getLaneCount(); i++) {
+        NoteStream& stream = t.getLane(i).stream;
+        for(int j = 0; j < stream.getSetterSize(); j++) {
+            SetterNote& note = stream.getSetterNote(j);
+            int id = note.getId();
+            if(note.getGen() != nullptr) continue;
+            if(id < -1 || id > t.getGenCount()) {
+                throw std::runtime_error(
+                        "Index out of range at setter note no. " 
+                        + std::to_string(j));
+            }
+            if(id != -1)
+                note.setGen(t.getGenerator(id));
+        }
     }
 
     return stream;
@@ -126,10 +143,15 @@ float Tune::getSample(float srate) {
     float sum = 0;
 
     for(auto& l : lanes) {
-        std::vector<Note> newNotes = l.stream.GetStartingNotes(t);
-        for(int j = 0; j < newNotes.size(); j++) {
-            std::cout << newNotes[j].getFreq() << ' ' << newNotes[j].getLen() <<std::endl;
-            l.player.addNote(newNotes[j]);
+        std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
+        std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
+        for(int j = 0; j < newPNotes.size(); j++) {
+            std::cout << newPNotes[j].getFreq() << ' ' << newPNotes[j].getLen() <<std::endl;
+            l.player.addNote(newPNotes[j]);
+        }
+        for(int j = 0; j < newSNotes.size(); j++) {
+            std::cout << "New Generator!!" <<std::endl;
+            l.player.addNote(newSNotes[j]);
         }
         sum += l.player.getSample(srate);
     }

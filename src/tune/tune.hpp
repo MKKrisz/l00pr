@@ -21,6 +21,18 @@ public:
     void addLane(std::istream& stream);
 
     float getLen();
+    inline float getLaneCount() { return lanes.size(); }
+    inline Lane& getLane(int id) {
+        if(id < 0 || id >= lanes.size())
+            throw std::runtime_error("Index out of range for tune lanes");
+        return lanes[id];
+    }
+    inline int getGenCount() { return generators.size(); }
+    inline Generator* getGenerator(int id) {
+        if(id < 0 || id >= generators.size())
+            throw std::runtime_error("Index out of range for generators");
+        return generators[id];
+    }
 
     inline int getSampleRate() { return srate; }
     

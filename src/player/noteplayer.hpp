@@ -3,6 +3,7 @@
 
 #include "../generator/generator.hpp"
 #include "note.hpp"
+#include "setnote.hpp"
 
 #include <vector>
 
@@ -15,9 +16,13 @@ class NotePlayer : AudioSource {
     /// The current generator
     Generator* m_gen;
 
+    /// The default generator this player was created with
+    Generator* def_gen;
+
 public:
     /// Adds a note to be played
     void addNote(Note& note);
+    void addNote(SetterNote& note);
 
     NotePlayer(Generator* gen);
     NotePlayer(const NotePlayer& player);
