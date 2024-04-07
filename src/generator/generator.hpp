@@ -34,6 +34,9 @@ public:
         phases.erase(std::next(phases.begin(), id));
     }
 
+    inline std::vector<float> getPhases() { return phases; }
+    inline void setPhases(std::vector<float> p) { phases = p;}
+
     virtual Generator* copy() = 0;
 
     /// Returns the sample from this generator with all the modifiers applied.
