@@ -3,9 +3,9 @@
 
 #include <fstream>
 #include <iostream>
-#include "tune.hpp"
-#include "device.h"
-#include "exceptions/parse_error.hpp"
+#include "src/tune/tune.hpp"
+#include "src/device.h"
+#include "src/exceptions/parse_error.hpp"
 
 int main(int argc, const char** argv) {
     SDL_Init(SDL_INIT_AUDIO);

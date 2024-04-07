@@ -1,2 +1,2 @@
-target_sources(${PLAYER_NAME} PUBLIC note.hpp note.cpp
+target_sources(${PROJECT_NAME} PUBLIC note.hpp note.cpp
                                      noteplayer.hpp noteplayer.cpp)
