@@ -1,6 +1,7 @@
 #include "notestream.hpp"
 #include "../util.hpp"
 #include "../exceptions/parse_error.hpp"
+#include "loop.hpp"
 
 NoteStream::NoteStream(Note n) : playable(), setter(){
     playable.push_back(std::make_pair(0, n));
@@ -75,16 +76,33 @@ void NoteStream::Add(std::pair<float, SetterNote> p) {
         setter.insert(std::next(setter.begin(), id), p);
 }
 
-
- std::pair<float, Note> NoteStream::PopFirst() {
-    std::pair<float, Note> ret = *playable.begin();
-    playable.erase(playable.begin());
-    return ret;
+void NoteStream::Add(std::pair<float, Loop> p) {
+    if(p.second.getRepAmount() < 0) {
+        //TODO: Infinite loops
+        return;
+    }
+    float timestamp = p.first;
+    Loop l = p.second;
+    float len = l.getRepAmount() * l.getLen();
+    int reps = 0;
+    for(int i = 0; l.playable[i].first + reps*l.getLen() < len; i++) {
+        if(i >= l.playable.size()) {
+            i = 0;
+            reps++;
+        }
+        Add(std::make_pair(timestamp + reps*l.getLen() + l.playable[i].first, l.playable[i].second));
+    }
+    for(reps = 0; reps < l.getRepAmount(); reps++) {
+        for(int i = 0; i < l.setter.size(); i++) {
+            Add(std::make_pair(timestamp + reps*l.getLen() + l.setter[i].first, l.setter[i].second));
+        }
+    }
+    
 }
 
 
 std::vector<Note> NoteStream::GetStartingPlayableNotes(float t) {
-    if(playable.size() == 0) return std::vector<Note>();
+    if(playable.size() == 0) return {};
     std::vector<Note> ret;
     auto i = playable.begin();
     for( ; i != playable.end() && i->first <= t; i++) {
@@ -129,11 +147,17 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
             char c;
             bool parsed = false;
             stream >> std::ws;
-            for(int i = 0; i < 3 && stream.get(c); i++) {
+            for(int i = 0; i < 4 && stream.get(c); i++) {
                 buf += tolower(c);
                 if(buf == "set") {
                     SetterNote n = SetterNote(stream);
                     ns.Add(std::make_pair(ts, n));
+                    parsed = true;
+                    break;
+                }
+                if(buf == "loop") {
+                    Loop l = Loop(stream);
+                    ns.Add(std::make_pair(ts, l));
                     parsed = true;
                     break;
                 }

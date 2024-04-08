@@ -4,8 +4,11 @@
 #include "../player/note.hpp"
 #include "../player/setnote.hpp"
 
+class Loop;
+
 /// A "stream" of notes...
 class NoteStream {
+protected:
     /// Returns the place where t should be in playable
     int getId(float t);
     int getSetterId(float t);
@@ -65,13 +68,11 @@ public:
     /// Adds a note at the appropriate location
     void Add(std::pair<float, Note> p);
     void Add(std::pair<float, SetterNote> p);
-
-    /// Removes the first float-Note pair from the stream then returns it
-    std::pair<float, Note> PopFirst();
+    void Add(std::pair<float, Loop> p);
 
     /// Returns all notes that start before t and have not been started yet
-    std::vector<Note> GetStartingPlayableNotes(float t);
-    std::vector<SetterNote> GetStartingSetterNotes(float t);
+    virtual std::vector<Note> GetStartingPlayableNotes(float t);
+    virtual std::vector<SetterNote> GetStartingSetterNotes(float t);
 };
 
 /// Parser
