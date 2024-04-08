@@ -144,8 +144,8 @@ void Tune::addLane(std::istream& stream) {
     lanes.push_back(Lane(NotePlayer(generators[genId]), str));
 }
 
-float Tune::getSample(float srate) {
-    float sum = 0;
+double Tune::getSample(double srate) {
+    double sum = 0;
     bool newNotes = false;
     for(auto& l : lanes) {
         std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
@@ -167,8 +167,8 @@ float Tune::getSample(float srate) {
     return sum;
 }
 
-float Tune::getLen() {
-    float max = 0;
+double Tune::getLen() {
+    double max = 0;
     for(auto l : lanes) {
         if(max < l.stream.getLen())
             max = l.stream.getLen();

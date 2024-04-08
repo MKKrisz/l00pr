@@ -7,11 +7,11 @@ NoteStream::NoteStream(Note n) : playable(), setter(){
     playable.push_back(std::make_pair(0, n));
 }
 
-NoteStream::NoteStream(float t, Note n) : playable(), setter(){
+NoteStream::NoteStream(double t, Note n) : playable(), setter(){
     playable.push_back(std::make_pair(t, n));
 }
 
-NoteStream::NoteStream(std::pair<float, Note> p) : playable(), setter(){
+NoteStream::NoteStream(std::pair<double, Note> p) : playable(), setter(){
     playable.push_back(p);
 }
 
@@ -19,7 +19,7 @@ NoteStream::NoteStream(const NoteStream& p) : playable(p.playable), setter(p.set
 
 /// Returns the index of the keyframe with timestamp "t"
 /// In case of failure the frame timestamp of playable[id] will differ from t
-int NoteStream::getId(float t) {
+int NoteStream::getId(double t) {
     if(playable.size() == 0) return 0;
     int min = 0;
     int max = playable.size()-1;
@@ -34,7 +34,7 @@ int NoteStream::getId(float t) {
     return mid;
 }
 
-int NoteStream::getSetterId(float t) {
+int NoteStream::getSetterId(double t) {
     if(setter.size() == 0) return 0;
     int min = 0;
     int max = setter.size()-1;
@@ -50,7 +50,7 @@ int NoteStream::getSetterId(float t) {
 }
 
 
-void NoteStream::Add(std::pair<float, Note> p) {
+void NoteStream::Add(std::pair<double, Note> p) {
     if(playable.empty()) { 
         playable.emplace_back(p);
         return;
@@ -63,7 +63,7 @@ void NoteStream::Add(std::pair<float, Note> p) {
         playable.insert(std::next(playable.begin(), id), p);
 }
 
-void NoteStream::Add(std::pair<float, SetterNote> p) {
+void NoteStream::Add(std::pair<double, SetterNote> p) {
     if(setter.empty()) { 
         setter.emplace_back(p);
         return;
@@ -76,21 +76,22 @@ void NoteStream::Add(std::pair<float, SetterNote> p) {
         setter.insert(std::next(setter.begin(), id), p);
 }
 
-void NoteStream::Add(std::pair<float, Loop> p) {
+void NoteStream::Add(std::pair<double, Loop> p) {
     if(p.second.getRepAmount() < 0) {
         //TODO: Infinite loops
         return;
     }
-    float timestamp = p.first;
+    double timestamp = p.first;
     Loop l = p.second;
-    float len = l.getRepAmount() * l.getLen();
+    double len = l.getRepAmount() * l.getLen();
     int reps = 0;
-    for(int i = 0; l.playable[i].first + reps*l.getLen() < len; i++) {
+    for(int i = 0; l.playable[i].first + reps*l.getLen() < len;) { 
+        Add(std::make_pair(timestamp + reps*l.getLen() + l.playable[i].first, l.playable[i].second));
+        i++;
         if(i >= l.playable.size()) {
             i = 0;
             reps++;
         }
-        Add(std::make_pair(timestamp + reps*l.getLen() + l.playable[i].first, l.playable[i].second));
     }
     for(reps = 0; reps < l.getRepAmount(); reps++) {
         for(int i = 0; i < l.setter.size(); i++) {
@@ -101,7 +102,7 @@ void NoteStream::Add(std::pair<float, Loop> p) {
 }
 
 
-std::vector<Note> NoteStream::GetStartingPlayableNotes(float t) {
+std::vector<Note> NoteStream::GetStartingPlayableNotes(double t) {
     if(playable.size() == 0) return {};
     std::vector<Note> ret;
     auto i = playable.begin();
@@ -112,7 +113,7 @@ std::vector<Note> NoteStream::GetStartingPlayableNotes(float t) {
     return ret;
 }
 
-std::vector<SetterNote> NoteStream::GetStartingSetterNotes(float t) {
+std::vector<SetterNote> NoteStream::GetStartingSetterNotes(double t) {
     if(setter.empty()) return {};
     std::vector<SetterNote> ret;
     auto i = setter.begin();
@@ -125,14 +126,14 @@ std::vector<SetterNote> NoteStream::GetStartingSetterNotes(float t) {
 
 std::istream& operator>>(std::istream& stream, NoteStream& ns) {
     bool poly = ns.getPolynote();
-    float sumlen = 0;
+    double sumlen = 0;
     while(true) {
 
         if((stream >> std::ws).peek() != '<') break;
         stream.get();
 
-        float ts = sumlen;
-        float len = 0;
+        double ts = sumlen;
+        double len = 0;
         if(poly) {
             stream >> ts;
             ts *= 60/ns.getBpm();

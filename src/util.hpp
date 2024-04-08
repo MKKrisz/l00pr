@@ -17,7 +17,7 @@
 ///         between A and G, interprets value as a float
 /// Throws:
 ///         parse_error on failure
-float getFreq(std::istream& stream);
+double getFreq(std::istream& stream);
 
 /// Same as the function above except for c-strings.
 /// @param n: number of characters read in

@@ -7,24 +7,24 @@
 class Generator : AudioSource {
 protected:
     /// The gain multiplier that should be applied
-    Interpolated<float> m_gain = 1.0f;
+    Interpolated<double> m_gain = 1.0f;
 
     /// The phase offset that should be applied
-    Interpolated<float> m_phaseoffset = 0.0f;
+    Interpolated<double> m_phaseoffset = 0.0f;
 
     /// The frequency multiplier that should be applied 
     /// Note that the implementation is kind of wonky and not the greatest
-    Interpolated<float> m_phasemul = 1.0f;
+    Interpolated<double> m_phasemul = 1.0f;
     
     /// The generator phases
-    std::vector<float> phases;
+    std::vector<double> phases;
 
 public: 
     /// Gets a sample of this generator
     /// @param phase: A value going from 0 to 1
     /// @param t: A timestamp so that the member values of type 
-    ///          Interpolated<float> can be applied porperly
-    virtual float getSample(float phase, float t) = 0;
+    ///          Interpolated<double> can be applied porperly
+    virtual double getSample(double phase, double t) = 0;
 
     virtual inline void addPhase() {
         phases.emplace_back(0);
@@ -34,14 +34,14 @@ public:
         phases.erase(std::next(phases.begin(), id));
     }
 
-    inline std::vector<float> getPhases() { return phases; }
-    inline void setPhases(std::vector<float> p) { phases = p;}
+    inline std::vector<double> getPhases() { return phases; }
+    inline void setPhases(std::vector<double> p) { phases = p;}
 
     virtual Generator* copy() = 0;
 
     /// Returns the sample from this generator with all the modifiers applied.
     /// Internally calls "getSample()"
-    virtual float operator()(int noteId, float delta, float t);
+    virtual double operator()(int noteId, double delta, double t);
 
     virtual ~Generator() {}
 };

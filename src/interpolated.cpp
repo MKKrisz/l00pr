@@ -9,13 +9,13 @@ float Interpolated<float>::basic_interpreter(const char* s, int* n) {
 }
 
 template<>
-std::istream& operator>> (std::istream& stream, Interpolated<float>& p) {
+std::istream& operator>> (std::istream& stream, Interpolated<double>& p) {
     stream >> std::ws;
     size_t start = stream.tellg();
     int i = 0;
     while(true) {
-        float t;
-        float val;
+        double t;
+        double val;
         if(isdigit((stream >> std::ws).peek())) {
             stream >> t;
             if ((stream >> std::ws).peek() != ':') {

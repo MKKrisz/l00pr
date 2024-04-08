@@ -9,10 +9,10 @@ class Register :public Generator {
 public:
     Register(std::vector<Generator*> gen);
 
-    float operator()(int noteId, float delta, float t);
+    double operator()(int noteId, double delta, double t);
     void addPhase();
     void removePhase(int id);
-    inline float getSample(float phase, float t) {return 0;}
+    inline double getSample(double phase, double t) {return 0;}
     Register(std::istream& stream);
     Generator* copy();
 

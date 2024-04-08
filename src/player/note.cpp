@@ -2,14 +2,15 @@
 #include "../util.hpp"
 #include <cmath>
 
-Note::Note(float l, Interpolated<float> freq, Interpolated<float> amp) 
+Note::Note(float l, Interpolated<double> freq, Interpolated<double> amp) 
     : len(l), freq(freq), ampl(amp), done(0) {
     freq.SetInterpolator(logarithmicInterpolator<float>);
     amp.SetInterpolator(logarithmicInterpolator<float>);
 }
 
 bool Note::isComplete() {
-    return done > len;
+    float tp = 1/freq(done/len);
+    return done > len + (tp-fmod(len, tp));
 }
 
 float Note::getDelta(int srate) {
@@ -20,6 +21,7 @@ float Note::getAmplitude(float t) {
     return ampl(t);
 }
 float Note::getAmplitude() {
+    //falloff: @^0.02
     return ampl(done/len);
 }
 
@@ -30,7 +32,7 @@ float Note::getFreq() {
     return freq(done/len);
 }
 
-Note::Note(std::istream& stream, float bpm) : len(0), freq(), ampl(1), done(0){
+Note::Note(std::istream& stream, double bpm) : len(0), freq(), ampl(1), done(0){
     if(!isNote((stream >> std::ws).peek()))
         throw parse_error(stream, "Cannot parse note");
     freq.Clear();

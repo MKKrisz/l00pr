@@ -1,13 +1,13 @@
 #include "square.hpp"
 
-SquareGenerator::SquareGenerator(Interpolated<float> amplitude, Interpolated<float> phasemul, Interpolated<float> offset, Interpolated<float> duty) {
+SquareGenerator::SquareGenerator(Interpolated<double> amplitude, Interpolated<double> phasemul, Interpolated<double> offset, Interpolated<double> duty) {
     m_gain = amplitude;
     m_phasemul = phasemul;
     m_phaseoffset = offset;
     m_dutyCycle = duty;
 }
 
-float SquareGenerator::getSample(float p, float t) {
+double SquareGenerator::getSample(double p, double t) {
     return p>m_dutyCycle(t)? 1 : -1;
 }
 
@@ -15,7 +15,7 @@ float SquareGenerator::getSample(float p, float t) {
 SquareGenerator::SquareGenerator(std::istream& stream) : SquareGenerator() {
     if((stream >> std::ws).peek() != '(') return;
     stream.get();
-    Interpolated<float> a[4] = {1, 1, 0.0f, 0.5f};
+    Interpolated<double> a[4] = {1, 1, 0.0f, 0.5f};
     for(int i = 0; i < 4; i ++) {
         if((stream >> std::ws).peek() == ')') break;
         a[i].Clear();

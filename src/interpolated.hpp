@@ -268,6 +268,6 @@ template<>
 float Interpolated<float>::basic_interpreter(const char* s, int* n);
 
 template<>
-std::istream& operator>> (std::istream& stream, Interpolated<float>& p);
+std::istream& operator>> (std::istream& stream, Interpolated<double>& p);
 
 #endif

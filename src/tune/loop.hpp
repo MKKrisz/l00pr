@@ -4,16 +4,16 @@
 #include "notestream.hpp"
 
 class Loop : public NoteStream {
-    float repAmount = -1;
+    double repAmount = -1;
 public:
-    float getRepAmount() { return repAmount; }
+    double getRepAmount() { return repAmount; }
 
-    Loop(NoteStream&, float);
-    Loop(std::istream& str, float bpm, bool poly);
+    Loop(NoteStream&, double);
+    Loop(std::istream& str, double bpm, bool poly);
 
-    std::vector<Note> getStartingPlayableNotes(float t);
+    std::vector<Note> getStartingPlayableNotes(double t);
 
-    std::vector<SetterNote> getStartingSetterNotes(float t);
+    std::vector<SetterNote> getStartingSetterNotes(double t);
 };
 
 #endif

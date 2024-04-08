@@ -1,8 +1,8 @@
 #include "loop.hpp"
 
-Loop::Loop(NoteStream& s, float r) : NoteStream(s), repAmount(r) {} 
+Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {} 
 
-Loop::Loop(std::istream& str, float bpm, bool poly) {
+Loop::Loop(std::istream& str, double bpm, bool poly) {
     setBpm(bpm); setPolynote(poly);
     if((str >> std::ws).peek() == '(') {
         str.get();
@@ -21,7 +21,7 @@ Loop::Loop(std::istream& str, float bpm, bool poly) {
     str.get();
 }
 
-std::vector<Note> Loop::getStartingPlayableNotes(float t) {
+std::vector<Note> Loop::getStartingPlayableNotes(double t) {
     if(playable.empty()) return {};
     if(repAmount != -1 && t > getLen()*repAmount) return {};
     t = fmod(t, getLen());
@@ -34,7 +34,7 @@ std::vector<Note> Loop::getStartingPlayableNotes(float t) {
     return ret;
 }
 
-std::vector<SetterNote> Loop::getStartingSetterNotes(float t) {
+std::vector<SetterNote> Loop::getStartingSetterNotes(double t) {
     if(setter.empty()) return {};
     if(repAmount != -1 && t > getLen()*repAmount) return {};
     t = fmod(t, getLen());

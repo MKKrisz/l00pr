@@ -4,16 +4,16 @@
 #include "generator.hpp"
 
 class SquareGenerator :public Generator {
-    Interpolated<float> m_dutyCycle;
+    Interpolated<double> m_dutyCycle;
 
 public: 
-    SquareGenerator(Interpolated<float> amplitude = 1.0f,
-                    Interpolated<float> phasemul = 1.0f,
-                    Interpolated<float> offset = 0.0f,
-                    Interpolated<float> duty = 0.5f);
+    SquareGenerator(Interpolated<double> amplitude = 1.0f,
+                    Interpolated<double> phasemul = 1.0f,
+                    Interpolated<double> offset = 0.0f,
+                    Interpolated<double> duty = 0.5f);
 
     SquareGenerator(std::istream& stream);
-    float getSample(float phase, float t);
+    double getSample(double phase, double t);
     Generator* copy();
 };
 
