@@ -94,6 +94,10 @@ void Tune::setEnv(std::istream& stream) {
             polynote = false;
             break;
         }
+        if(buf == "poly") {
+            polynote = true;
+            break;
+        }
     }
 }
 
