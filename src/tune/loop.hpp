@@ -9,7 +9,7 @@ public:
     float getRepAmount() { return repAmount; }
 
     Loop(NoteStream&, float);
-    Loop(std::istream& str);
+    Loop(std::istream& str, float bpm, bool poly);
 
     std::vector<Note> getStartingPlayableNotes(float t);
 

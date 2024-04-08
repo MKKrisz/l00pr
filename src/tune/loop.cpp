@@ -2,7 +2,8 @@
 
 Loop::Loop(NoteStream& s, float r) : NoteStream(s), repAmount(r) {} 
 
-Loop::Loop(std::istream& str) {
+Loop::Loop(std::istream& str, float bpm, bool poly) {
+    setBpm(bpm); setPolynote(poly);
     if((str >> std::ws).peek() == '(') {
         str.get();
         str >> repAmount;

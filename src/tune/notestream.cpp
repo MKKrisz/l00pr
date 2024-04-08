@@ -156,7 +156,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
                     break;
                 }
                 if(buf == "loop") {
-                    Loop l = Loop(stream);
+                    Loop l = Loop(stream, ns.getBpm(), ns.getPolynote());
                     ns.Add(std::make_pair(ts, l));
                     parsed = true;
                     break;

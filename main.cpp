@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include "src/tune/tune.hpp"
 #include "src/device.h"
 #include "src/exceptions/parse_error.hpp"
@@ -20,6 +21,7 @@ int main(int argc, const char** argv) {
     }
     AudioDevice device = AudioDevice(t.getSampleRate());
     device.setTune(&t);
+    std::cout << std::setw(7);
     device.start();
     sleep(t.getLen() + 1);
     device.stop();

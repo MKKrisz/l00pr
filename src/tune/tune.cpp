@@ -2,6 +2,7 @@
 #include "../exceptions/parse_error.hpp"
 
 #include <iostream>
+#include <iomanip>
 
 Tune::Tune() : lanes(), generators() {}
 
@@ -145,12 +146,14 @@ void Tune::addLane(std::istream& stream) {
 
 float Tune::getSample(float srate) {
     float sum = 0;
-
+    bool newNotes = false;
     for(auto& l : lanes) {
         std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
+        if(!newPNotes.empty()) 
+            newNotes = true;
         std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
         for(int j = 0; j < newPNotes.size(); j++) {
-            std::cout << newPNotes[j].getFreq() << ' ' << newPNotes[j].getLen() <<std::endl;
+            std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << "]    ";
             l.player.addNote(newPNotes[j]);
         }
         for(int j = 0; j < newSNotes.size(); j++) {
@@ -159,6 +162,7 @@ float Tune::getSample(float srate) {
         }
         sum += l.player.getSample(srate);
     }
+    if(newNotes) std::cout << std::endl;
     t += 1/srate;
     return sum;
 }
