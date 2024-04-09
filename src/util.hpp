@@ -2,6 +2,7 @@
 #define L00PR_UTIL
 
 #include <istream>
+#include <ranges>
 
 #include "generator/generator.hpp"
 #include "concepts.hpp"
@@ -39,6 +40,39 @@ inline T lerp(T a, T b, float t) {
 
 inline bool isNote(char c) {
     return isdigit(c) || (c >= 'A' && c <= 'G');
+}
+
+//TODO: Refactor template arguments...
+template <std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
+    requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
+int bSearch(U data, F t) {
+    if(data.size() == 0) return 0;
+    int min = 0;
+    int max = data.size()-1;
+    int mid = (min + max)/2;
+    while(min<=max && !almostEQ(data[mid].first, t)) {
+        if(data[mid].first < t)
+            min = mid+1;
+        else
+            max = mid-1;
+        mid = (min + max)/2;
+    }
+    return mid;
+}
+
+template<std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
+    requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
+void ordered_add(U& data, std::pair<F, T> p) {
+    if(data.empty()) { 
+        data.emplace_back(p);
+        return;
+    }
+    int id = bSearch(data, p.first);
+    if(data[id].first < p.first) id++;
+    if(id == data.size())
+        data.emplace_back(p);
+    else
+        data.insert(std::next(data.begin(), id), p);
 }
 
 
