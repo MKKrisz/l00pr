@@ -11,6 +11,8 @@ public:
     Loop(NoteStream&, double);
     Loop(std::istream& str, double bpm, bool poly);
 
+    NoteStream& getBaseStream() {return *this; }
+
     std::vector<Note> getStartingPlayableNotes(double t);
 
     std::vector<SetterNote> getStartingSetterNotes(double t);
