@@ -21,7 +21,8 @@ int main(int argc, const char** argv) {
     AudioDevice device = AudioDevice(t.getSampleRate());
     device.setTune(&t);
     device.start();
-    sleep(t.getLen() + 1);
+    uint len = t.getLen() == std::numeric_limits<double>::infinity()? std::numeric_limits<uint>::max() : t.getLen() + 1;
+    sleep(len);
     device.stop();
     SDL_Quit();
 }
