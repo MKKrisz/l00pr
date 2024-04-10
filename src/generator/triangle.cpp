@@ -1,15 +1,15 @@
 #include "triangle.hpp"
 #include "../util.hpp"
 
-TriangleGenerator::TriangleGenerator(Interpolated<float> amplitude, Interpolated<float> phasemul, Interpolated<float> offset, Interpolated<float> peak) {
+TriangleGenerator::TriangleGenerator(Interpolated<double> amplitude, Interpolated<double> phasemul, Interpolated<double> offset, Interpolated<double> peak) {
     m_gain = amplitude;
     m_phasemul = phasemul;
     m_phaseoffset = offset;
     m_peak = peak;
 }
 
-float TriangleGenerator::getSample(float p, float t) {
-    float peak = m_peak.Get(t);
+double TriangleGenerator::getSample(double p, double t) {
+    double peak = m_peak.Get(t);
     if(p < peak/2)
         return lerp(0.0f, 1.0f, p*2/peak);
     else if(p < (1-(peak/2)))
@@ -21,7 +21,7 @@ float TriangleGenerator::getSample(float p, float t) {
 TriangleGenerator::TriangleGenerator(std::istream& stream) : TriangleGenerator() {
     if((stream >> std::ws).peek() != '(') return;
     stream.get();
-    Interpolated<float> a[4] = {1, 1, 0.0f, 0.5f};
+    Interpolated<double> a[4] = {1, 1, 0.0f, 0.5f};
     for(int i = 0; i < 4; i ++) {
         if((stream >> std::ws).peek() == ')') break;
         a[i].Clear();

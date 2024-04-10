@@ -5,12 +5,12 @@
 
 class SineGenerator :public Generator {
 public: 
-    SineGenerator(Interpolated<float> amplitude = 1.0f,
-                  Interpolated<float> phasemul = 1.0f, 
-                  Interpolated<float> offset = 0.0f);
+    SineGenerator(Interpolated<double> amplitude = 1.0f,
+                  Interpolated<double> phasemul = 1.0f, 
+                  Interpolated<double> offset = 0.0f);
 
     SineGenerator(std::istream& stream);
-    float getSample(float phase, float t);
+    double getSample(double phase, double t);
     Generator* copy();
 };
 

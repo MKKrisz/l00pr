@@ -7,16 +7,16 @@
 class Note {
     
     /// The length of the note measured in seconds
-    float len = 1;
+    double len = 1;
 
     /// The frequency of the note measured in Hz
-    Interpolated<float> freq = 0.0;
+    Interpolated<double> freq = 0.0;
 
     /// The amplitude of the note
-    Interpolated<float> ampl = 0.0;
+    Interpolated<double> ampl = 1;
 
     /// The amount that is completed measured in seconds
-    float done = 0;
+    double done = 0;
 
 public:
     /// Returns the current phase value, then increments it according to the 
@@ -38,8 +38,8 @@ public:
     /// Returns true if done > len
     virtual bool isComplete();
 
-    Note(float l, Interpolated<float> freq, Interpolated<float> amp);
-    Note(std::istream& str, float bpm);
+    Note(float l, Interpolated<double> freq, Interpolated<double> amp);
+    Note(std::istream& str, double bpm);
 };
 
 

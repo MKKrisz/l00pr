@@ -2,22 +2,22 @@
 
 #include <cmath>
 
-SineGenerator::SineGenerator(Interpolated<float> amplitude,
-        Interpolated<float> phasemul, 
-        Interpolated<float> offset) {
+SineGenerator::SineGenerator(Interpolated<double> amplitude,
+        Interpolated<double> phasemul, 
+        Interpolated<double> offset) {
     m_gain = amplitude;
     m_phasemul = phasemul;
     m_phaseoffset = offset;
 }
 
-float SineGenerator::getSample(float p, float t) {
+double SineGenerator::getSample(double p, double t) {
     return std::sin(p*2*M_PI);
 }
 
 SineGenerator::SineGenerator(std::istream& stream) : SineGenerator() {
     if((stream >> std::ws).peek() != '(') return;
     stream.get();
-    Interpolated<float> a[3] = {1, 1, 0.0f};
+    Interpolated<double> a[3] = {1, 1, 0.0f};
     for(int i = 0; i < 3; i ++) {
         if((stream >> std::ws).peek() == ')') break;
         a[i].Clear();

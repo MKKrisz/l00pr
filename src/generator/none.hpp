@@ -6,7 +6,7 @@
 class NoGenerator : public Generator {
 public: 
     NoGenerator();
-    float getSample(float phase, float t);
+    double getSample(double phase, double t);
     Generator* copy();
 };
 

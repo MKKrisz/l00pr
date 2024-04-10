@@ -10,7 +10,7 @@ class Tune : public AudioSource {
     std::vector<Lane> lanes;
     std::vector<Generator*> generators;
 
-    float bpm = 60;
+    double bpm = 60;
     int srate = 48000;
     bool polynote = true;
 
@@ -20,7 +20,19 @@ public:
     void setGen(std::istream& stream);
     void addLane(std::istream& stream);
 
-    float getLen();
+    double getLen();
+    inline double getLaneCount() { return lanes.size(); }
+    inline Lane& getLane(int id) {
+        if(id < 0 || id >= lanes.size())
+            throw std::runtime_error("Index out of range for tune lanes");
+        return lanes[id];
+    }
+    inline int getGenCount() { return generators.size(); }
+    inline Generator* getGenerator(int id) {
+        if(id < 0 || id >= generators.size())
+            throw std::runtime_error("Index out of range for generators");
+        return generators[id];
+    }
 
     inline int getSampleRate() { return srate; }
     
@@ -32,7 +44,7 @@ public:
         requires std::same_as<std::ranges::range_value_t<T>, Lane>
     Tune(T data);
     
-    float getSample(float srate);
+    double getSample(double srate);
     ~Tune();
 };
 

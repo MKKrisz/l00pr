@@ -49,10 +49,10 @@ float getFreq(const char* s, int* n) {
     return 440*pow(2.0f, (octave-4) + note/12.0f);
 }
 
-float getFreq(std::istream& stream) {
+double getFreq(std::istream& stream) {
     //skips whitespace then checks if next char is a number
     if(isdigit((stream >> std::ws).peek())) {
-        float ret;
+        double ret;
         stream >> ret;
         return ret;
     }

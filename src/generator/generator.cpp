@@ -3,8 +3,8 @@
 
 #include <cmath>
 
-float Generator::operator()(int noteId, float delta, float t) {
-    float& phase = phases[noteId];
+double Generator::operator()(int noteId, double delta, double t) {
+    double& phase = phases[noteId];
     phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
     return getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t);
 }

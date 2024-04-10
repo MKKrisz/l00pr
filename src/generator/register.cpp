@@ -2,8 +2,8 @@
 
 Register::Register(std::vector<Generator*> gen) : generators(gen) {}
 
-float Register::operator()(int noteId, float d, float t) {
-    float sum = 0;
+double Register::operator()(int noteId, double d, double t) {
+    double sum = 0;
     for(Generator* g : generators) {
         sum += (*g)(noteId, d, t);
     }

@@ -2,6 +2,7 @@
 #include "../exceptions/parse_error.hpp"
 
 #include <iostream>
+#include <iomanip>
 
 Tune::Tune() : lanes(), generators() {}
 
@@ -27,7 +28,8 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
     while(stream.good()) {
         std::string buf = "";
         while(true) {
-            if(stream.peek() == 0) throw parse_error(stream, "Something is not good...");
+            if(stream.peek() == 0) 
+                throw parse_error(stream, "Something is not good...");
             buf += tolower(stream.get());
             if(buf == "set") {
                 t.setEnv(stream);
@@ -44,6 +46,22 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
         }
         buf.clear();
         stream >> std::ws;
+    }
+    
+    for(int i = 0; i < t.getLaneCount(); i++) {
+        NoteStream& stream = t.getLane(i).stream;
+        for(int j = 0; j < stream.getSetterSize(); j++) {
+            SetterNote& note = stream.getSetterNote(j);
+            int id = note.getId();
+            if(note.getGen() != nullptr) continue;
+            if(id < -1 || id > t.getGenCount()) {
+                throw std::runtime_error(
+                        "Index out of range at setter note no. " 
+                        + std::to_string(j));
+            }
+            if(id != -1)
+                note.setGen(t.getGenerator(id));
+        }
     }
 
     return stream;
@@ -75,6 +93,10 @@ void Tune::setEnv(std::istream& stream) {
         }
         if(buf == "nopoly") {
             polynote = false;
+            break;
+        }
+        if(buf == "poly") {
+            polynote = true;
             break;
         }
     }
@@ -122,23 +144,31 @@ void Tune::addLane(std::istream& stream) {
     lanes.push_back(Lane(NotePlayer(generators[genId]), str));
 }
 
-float Tune::getSample(float srate) {
-    float sum = 0;
-
+double Tune::getSample(double srate) {
+    double sum = 0;
+    bool newNotes = false;
     for(auto& l : lanes) {
-        std::vector<Note> newNotes = l.stream.GetStartingNotes(t);
-        for(int j = 0; j < newNotes.size(); j++) {
-            std::cout << newNotes[j].getFreq() << ' ' << newNotes[j].getLen() <<std::endl;
-            l.player.addNote(newNotes[j]);
+        std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
+        if(!newPNotes.empty()) 
+            newNotes = true;
+        std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
+        for(int j = 0; j < newPNotes.size(); j++) {
+            std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << "]    ";
+            l.player.addNote(newPNotes[j]);
+        }
+        for(int j = 0; j < newSNotes.size(); j++) {
+            std::cout << "New Generator!!" <<std::endl;
+            l.player.addNote(newSNotes[j]);
         }
         sum += l.player.getSample(srate);
     }
+    if(newNotes) std::cout << std::endl;
     t += 1/srate;
     return sum;
 }
 
-float Tune::getLen() {
-    float max = 0;
+double Tune::getLen() {
+    double max = 0;
     for(auto l : lanes) {
         if(max < l.stream.getLen())
             max = l.stream.getLen();
