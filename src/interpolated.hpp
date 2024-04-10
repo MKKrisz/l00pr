@@ -125,7 +125,8 @@ public:
  */
         int id = getId(t);
         if(almostEQ(data[id].first, t)) return data[id].second;
-                int aid, bid;
+
+        size_t aid, bid;
         if(data[id].first < t) { aid = id; bid = id + 1;}
         else { aid = id - 1; bid = id;}
 

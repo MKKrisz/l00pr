@@ -27,7 +27,7 @@ void NoteStream::Add(std::pair<double, Loop> p) {
     Loop l = p.second;
     double len = l.getRepAmount() * l.getLen();
     int reps = 0;
-    for(int i = 0; l.playable[i].first + reps*l.getLen() < len;) { 
+    for(size_t i = 0; l.playable[i].first + reps*l.getLen() < len;) { 
         Add(std::make_pair(timestamp + reps*l.getLen() + l.playable[i].first, l.playable[i].second));
         i++;
         if(i >= l.playable.size()) {
@@ -36,7 +36,7 @@ void NoteStream::Add(std::pair<double, Loop> p) {
         }
     }
     for(reps = 0; reps < l.getRepAmount(); reps++) {
-        for(int i = 0; i < l.setter.size(); i++) {
+        for(size_t i = 0; i < l.setter.size(); i++) {
             Add(std::make_pair(timestamp + reps*l.getLen() + l.setter[i].first, l.setter[i].second));
         }
     }
@@ -57,12 +57,12 @@ std::vector<Note> NoteStream::GetStartingPlayableNotes(double t) {
         ret.emplace_back(i->second);
     }
     playable.erase(playable.begin(), i);
-    for(int j = 0; j < loops.size(); j++) {
+    for(size_t j = 0; j < loops.size(); j++) {
         const double& ts = loops[j].first;
         NoteStream& l = loops[j].second;
         std::vector<Note> lsNotes = l.GetStartingPlayableNotes(t - ts);
         //hack
-        for(int k = 0; k < lsNotes.size(); k++) {
+        for(size_t k = 0; k < lsNotes.size(); k++) {
             l.playable.emplace_back(t + l.getLen(), lsNotes[k]);
         }
         //end of //hack

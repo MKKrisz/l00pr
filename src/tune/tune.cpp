@@ -156,7 +156,7 @@ double Tune::getSample(double srate) {
             std::cout << newPNotes[j] << "    ";
             l.player.addNote(newPNotes[j]);
         }
-        for(int j = 0; j < newSNotes.size(); j++) {
+        for(size_t j = 0; j < newSNotes.size(); j++) {
             std::cout << "New Generator!!" <<std::endl;
             l.player.addNote(newSNotes[j]);
         }

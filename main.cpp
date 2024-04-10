@@ -15,7 +15,7 @@ int main(int argc, const char** argv) {
     try{
         f >> t;
     }
-    catch(parse_error e) {
+    catch(parse_error& e) {
         std::cout << e.what() << std::endl;
         return 0;
     }
