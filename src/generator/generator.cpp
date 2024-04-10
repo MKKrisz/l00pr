@@ -12,7 +12,7 @@ double Generator::operator()(int noteId, double delta, double t) {
 std::istream& operator>> (std::istream& stream, Generator** gen) {
     stream >> skipws;
     std::string buf;
-    for(int i = 0; i < std::string("triangle").size(); i++) {
+    for(size_t i = 0; i < std::string("triangle").size(); i++) {
         buf += tolower(stream.get());
         if(buf == "sine")     { *gen = new SineGenerator(stream); break;}
         if(buf == "square")   { *gen = new SquareGenerator(stream); break; }

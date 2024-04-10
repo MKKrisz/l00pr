@@ -152,11 +152,11 @@ double Tune::getSample(double srate) {
         if(!newPNotes.empty()) 
             newNotes = true;
         std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
-        for(int j = 0; j < newPNotes.size(); j++) {
+        for(size_t j = 0; j < newPNotes.size(); j++) {
             std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << "]    ";
             l.player.addNote(newPNotes[j]);
         }
-        for(int j = 0; j < newSNotes.size(); j++) {
+        for(size_t j = 0; j < newSNotes.size(); j++) {
             std::cout << "New Generator!!" <<std::endl;
             l.player.addNote(newSNotes[j]);
         }

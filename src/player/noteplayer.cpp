@@ -16,7 +16,7 @@ void NotePlayer::addNote(SetterNote& note) {
     m_gen->setPhases(phases);
 }
 
-NotePlayer::NotePlayer(Generator* gen) : m_notes(), def_gen(gen->copy()), m_gen(gen->copy()){}
+NotePlayer::NotePlayer(Generator* gen) : m_notes(), m_gen(gen->copy()), def_gen(gen->copy()){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
     : m_notes(player.m_notes), m_gen(player.m_gen->copy()), def_gen(player.def_gen->copy()){}
@@ -29,7 +29,6 @@ NotePlayer::~NotePlayer() {
 
 float NotePlayer::getSample(float srate) {
     double sum = 0;
-    int i;
     for(auto it = m_notes.begin(); it != m_notes.end(); std::advance(it, 1)) {
         if(it->isComplete()) {
             m_gen->removePhase(std::distance(m_notes.begin(), it));
