@@ -10,6 +10,7 @@ double Generator::operator()(int noteId, double delta, double t) {
 }
 
 std::istream& operator>> (std::istream& stream, Generator** gen) {
+    stream >> skipws;
     std::string buf;
     for(int i = 0; i < std::string("triangle").size(); i++) {
         buf += tolower(stream.get());

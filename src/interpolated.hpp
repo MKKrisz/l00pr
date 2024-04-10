@@ -12,23 +12,7 @@
 #include "concepts.hpp"
 #include "exceptions/parse_error.hpp"
 #include "interpolator.hpp"
-
-//loptam gtest_lite-ból
-template <typename T>
-bool almostEQ(T a, T  b) {
-    // eps: ha a relatív, vagy abszolút hiba ettől kisebb, akkor elfogadjuk
-    T eps = 10 * std::numeric_limits<T>::epsilon(); // 10-szer a legkisebb érték
-    if (a == b) return true;
-    if (fabs(a - b) < eps)
-       return true;
-    double aa = fabs(a);
-    double ba = fabs(b);
-    if (aa < ba) {
-        aa = ba;
-        ba = fabs(a);
-    }
-    return (aa - ba) < aa * eps;
-}
+#include "util.hpp"
 
 
 template<Arithmetic T>
@@ -242,7 +226,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
         float t;
         T val;
         stream >> t;
-        if((stream >> std::ws).peek() != ':') {
+        if((stream >> skipws).peek() != ':') {
             if(i == 0)  {
                 stream.seekg(start) >> val;
                 p.data.emplace_back(std::make_pair(0, val));
@@ -253,7 +237,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
         stream.get();
         stream >> val;
         p.data.emplace_back(std::make_pair(t, val));
-        if((stream >> std::ws).peek() != '-') break;
+        if((stream >> skipws).peek() != '-') break;
         i++;
         stream.get();
     }

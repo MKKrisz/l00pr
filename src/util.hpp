@@ -4,7 +4,6 @@
 #include <istream>
 #include <ranges>
 
-#include "generator/generator.hpp"
 #include "concepts.hpp"
 
 /// Reads in a frequency value from the input stream.
@@ -42,6 +41,26 @@ inline bool isNote(char c) {
     return isdigit(c) || (c >= 'A' && c <= 'G');
 }
 
+//loptam gtest_lite-ból
+template <typename T>
+bool almostEQ(T a, T  b) {
+    // eps: ha a relatív, vagy abszolút hiba ettől kisebb, akkor elfogadjuk
+    T eps = 10 * std::numeric_limits<T>::epsilon(); // 10-szer a legkisebb érték
+    if (a == b) return true;
+    if (fabs(a - b) < eps)
+       return true;
+    double aa = fabs(a);
+    double ba = fabs(b);
+    if (aa < ba) {
+        aa = ba;
+        ba = fabs(a);
+    }
+    return (aa - ba) < aa * eps;
+}
+
+
+
+
 //TODO: Refactor template arguments...
 template <std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
@@ -74,6 +93,10 @@ void ordered_add(U& data, std::pair<F, T> p) {
     else
         data.insert(std::next(data.begin(), id), p);
 }
+
+
+
+std::istream& skipws(std::istream&);
 
 
 #endif

@@ -33,17 +33,17 @@ float Note::getFreq() {
 }
 
 Note::Note(std::istream& stream, double bpm) : len(0), freq(), ampl(1), done(0){
-    if(!isNote((stream >> std::ws).peek()))
+    if(!isNote((stream >> skipws).peek()))
         throw parse_error(stream, "Cannot parse note");
     freq.Clear();
     stream >> freq;
 
-    if(!isdigit((stream >> std::ws).peek()))
+    if(!isdigit((stream >> skipws).peek()))
         throw parse_error(stream, std::string("Unexpected ") + char(stream.peek()));
     stream >> len;
     len *= 60/bpm;
 
-    if(isdigit((stream >> std::ws).peek())) {
+    if(isdigit((stream >> skipws).peek())) {
         ampl.Clear();
         stream >> ampl;
     }

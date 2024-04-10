@@ -4,19 +4,19 @@ Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {}
 
 Loop::Loop(std::istream& str, double bpm, bool poly) {
     setBpm(bpm); setPolynote(poly);
-    if((str >> std::ws).peek() == '(') {
+    if((str >> skipws).peek() == '(') {
         str.get();
         str >> repAmount;
-        if((str >> std::ws).peek() != ')') {
+        if((str >> skipws).peek() != ')') {
             throw parse_error(str, "Expected ')'");
         }
         str.get();
     }
-    if((str >> std::ws).peek() != '{') 
+    if((str >> skipws).peek() != '{') 
         throw parse_error(str, "Expected '{'");
     str.get();
     str >> *this;
-    if((str >> std::ws).peek() != '}') 
+    if((str >> skipws).peek() != '}') 
         throw parse_error(str, "Expected '}'");
     str.get();
 }
