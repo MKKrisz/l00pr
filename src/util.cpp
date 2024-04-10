@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <string>
+#include <iostream>
 
 float getFreq(const char* s, int* n) {
     int note = -1; //from 0 to 12 the offset of the note
@@ -51,7 +52,7 @@ float getFreq(const char* s, int* n) {
 
 double getFreq(std::istream& stream) {
     //skips whitespace then checks if next char is a number
-    if(isdigit((stream >> std::ws).peek())) {
+    if(isdigit((stream >> skipws).peek())) {
         double ret;
         stream >> ret;
         return ret;
@@ -110,4 +111,12 @@ std::pair<int, int> getLineColNo(std::istream& stream) {
         colno++;
     }
     return std::make_pair(lineno, colno);
+}
+
+std::istream& skipws(std::istream& str) {
+    while((str >> std::ws).peek() == '#') {
+        char c;
+        while(str.get(c) && c != '\n') {}
+    }
+    return str;
 }

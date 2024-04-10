@@ -24,7 +24,7 @@ Tune::Tune(T data) : lanes() {
 
 
 std::istream& operator>>(std::istream& stream, Tune& t) {
-    stream >> std::ws;
+    stream >> skipws;
     while(stream.good()) {
         std::string buf = "";
         while(true) {
@@ -45,7 +45,7 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
             }
         }
         buf.clear();
-        stream >> std::ws;
+        stream >> skipws;
     }
     
     for(int i = 0; i < t.getLaneCount(); i++) {
@@ -71,12 +71,12 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
 // syntax: set bpm: 120    -- sets bpm to 120
 // syntax: set bpm         -- sets bpm to 60
 void Tune::setEnv(std::istream& stream) {
-    stream >> std::ws;
+    stream >> skipws;
     std::string buf;
     while(true) {
         buf += tolower(stream.get());
         if(buf == "bpm") {
-            if((stream >> std::ws).peek() != ':') { 
+            if((stream >> skipws).peek() != ':') { 
                 bpm = 60; break;
             }
             stream.get();
@@ -84,7 +84,7 @@ void Tune::setEnv(std::istream& stream) {
             break;
         }
         if(buf == "samplerate") {
-            if((stream >> std::ws).peek() != ':') { 
+            if((stream >> skipws).peek() != ':') { 
                 srate = 48000; break;
             }
             stream.get();
@@ -103,7 +103,7 @@ void Tune::setEnv(std::istream& stream) {
 }
 
 void Tune::setGen(std::istream& stream) {
-    stream >> std::ws;
+    stream >> skipws;
     if(stream.peek() != '{') {
         Generator* gen;
         stream >> &gen;
@@ -111,7 +111,7 @@ void Tune::setGen(std::istream& stream) {
         return;
     }
     stream.get();
-    while((stream >> std::ws).peek() != '}') {
+    while((stream >> skipws).peek() != '}') {
         Generator* gen;
         stream >> &gen;
         generators.emplace_back(gen);
@@ -120,23 +120,23 @@ void Tune::setGen(std::istream& stream) {
 }
 
 void Tune::addLane(std::istream& stream) {
-    stream >> std::ws;
+    stream >> skipws;
     int genId = 0;
     NoteStream str = NoteStream();
     if(stream.peek() == '(') {
         stream.get();
         stream >> genId;
-        if((stream >> std::ws).peek() != ')') {
+        if((stream >> skipws).peek() != ')') {
             throw parse_error(stream, "No closing ')' for player generator definition");
         }
         stream.get();
     }
-    if((stream >> std::ws).peek() == '{') {
+    if((stream >> skipws).peek() == '{') {
         stream.get();
         str.setPolynote(polynote);
         str.setBpm(bpm);
         stream >> str;
-        if((stream >> std::ws).peek() != '}') {
+        if((stream >> skipws).peek() != '}') {
             throw parse_error(stream, "No closing '}' for note stream definition");
         }
         stream.get();
