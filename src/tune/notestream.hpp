@@ -59,15 +59,15 @@ public:
     inline size_t getPlayableSize() { return playable.size(); }
     inline size_t getSetterSize() { return setter.size(); }
 
-    inline SetterNote& getSetterNote(int id) {
-        if(id < 0 || id >= setter.size())
-            throw std::runtime_error("Index out of range for generator setter notes");
+    inline SetterNote& getSetterNote(size_t id) {
+        if(id >= setter.size())
+            throw std::out_of_range("NoteStream.setter");
         return setter[id].second;
     }
 
-    inline Note& getPlayableNote(int id) {
-        if(id < 0 || id >= playable.size())
-            throw std::runtime_error("Index out of range for playable notes");
+    inline Note& getPlayableNote(size_t id) {
+        if(id >= playable.size())
+            throw std::out_of_range("NoteStream.playable");
         return playable[id].second;
     }
 
