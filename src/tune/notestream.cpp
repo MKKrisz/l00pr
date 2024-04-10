@@ -81,7 +81,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
     double sumlen = 0;
     while(true) {
 
-        if((stream >> std::ws).peek() != '<') break;
+        if((stream >> skipws).peek() != '<') break;
         stream.get();
 
         double ts = sumlen;
@@ -90,7 +90,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
             stream >> ts;
             ts *= 60/ns.getBpm();
         }
-        if(isNote((stream >> std::ws).peek())) {
+        if(isNote((stream >> skipws).peek())) {
             Note n = Note(stream, ns.getBpm());
             ns.Add(std::make_pair(ts, n));
             len = n.getLen();
@@ -99,7 +99,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
             std::string buf = "";
             char c;
             bool parsed = false;
-            stream >> std::ws;
+            stream >> skipws;
             for(int i = 0; i < 4 && stream.get(c); i++) {
                 buf += tolower(c);
                 if(buf == "set") {
@@ -119,13 +119,13 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
                 throw parse_error(stream, "Could not parse special note");
 
         }
-        if((stream >> std::ws).peek() != '>')
+        if((stream >> skipws).peek() != '>')
             throw parse_error(stream, "Missing closing '>' for note");
         stream.get();
 
         if(!poly)
             sumlen += len;
-        if((stream >> std::ws).peek() != '<') break;
+        if((stream >> skipws).peek() != '<') break;
     }
     return stream;
 }
