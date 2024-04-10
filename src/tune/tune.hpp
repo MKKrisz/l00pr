@@ -22,14 +22,14 @@ public:
 
     double getLen();
     inline double getLaneCount() { return lanes.size(); }
-    inline Lane& getLane(int id) {
-        if(id < 0 || id >= lanes.size())
+    inline Lane& getLane(size_t id) {
+        if(id >= lanes.size())
             throw std::runtime_error("Index out of range for tune lanes");
         return lanes[id];
     }
     inline int getGenCount() { return generators.size(); }
-    inline Generator* getGenerator(int id) {
-        if(id < 0 || id >= generators.size())
+    inline Generator* getGenerator(size_t id) {
+        if(id >= generators.size())
             throw std::runtime_error("Index out of range for generators");
         return generators[id];
     }
