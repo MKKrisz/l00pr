@@ -45,7 +45,7 @@ Most generators have no required parameters and a few optional arguments. Most o
 - sine: `[frequency] [amplitude] [phase offset]`
 - square: `[frequency] [amplitude] [phase offset] [duty cycle]`
 - triangle: `[frequency] [amplitude] [phase offset] [peak]`
-- register: `[frequency] [amplitude] [phase offset]` This generator is special, by itself it does nothing. You must define multiple generators within its definition in a similar way to how you define multiple generators at once. Complete syntax: `register([arguments]) { [generator 1] [generator 2] ... }
+- register: `[frequency] [amplitude] [phase offset]` This generator is special, by itself it does nothing. You must define multiple generators within its definition in a similar way to how you define multiple generators at once. Complete syntax: `register([arguments]) { [generator 1] [generator 2] ... }`
 
 #### Player
 A `player` statement defines a generator and a list of notes for that generator to play.
