@@ -16,12 +16,11 @@ The arguments may be subject to change. Listed arguments are always available bu
 - `-o <file>` / `--output <file>`: If specified, instead of playing the audio, the program puts the output into `file`. The format is always .wav, regardless of the extension
 
 ### File format
-The file is case-insensitive. The file consists of segments. One segment can span multiple lines. Each segment consists of a keyword and its corresponding arguments.
+The file is mostly case-insensitive. The file consists of segments. One segment can span multiple lines. Each segment consists of a keyword and its corresponding arguments. Comments can be written using `#` and end at the line ending
 Supported keywords:
 - `set`
 - `generator(s)`
 - `player`
-This list may grow or change, ex. defining loops outside of notes (will be explained later)
 
 #### Set
 A `set` statement sets file-wise arguments.
@@ -32,9 +31,6 @@ A `set` statement sets file-wise arguments.
 ##### Keywords
 - bpm: sets the beats-per-minute value. default: 60
 - [no]poly: sets wether playing multiple notes at the same time is allowed. Drastically alters the file format if enabled/disabled. A value cannot be provided for this keyword. (Later referenced as 'polynote')
-- separator: A character that separates some specific arguments. Cannot be alfanumeric. Specific characters that are used within the program also cannot be used. No character is defined by default, and where a separator is not specified, this can be used.   
-> Example: if the separator character is set to ',' by `set separator: ,` a sine generator definition (`generator sine(1 1 1)`) becomes `generator sine(1, 1, 1)`
-This list mmay be subject to change.
 
 #### Generator
 A `generator` statement defines one or multiple generators for use by the note players. (explained later) Multiple statements don't override eachother, instead they add to the already existing list.
@@ -50,7 +46,6 @@ Most generators have no required parameters and a few optional arguments. Most o
 - square: `[frequency] [amplitude] [phase offset] [duty cycle]`
 - triangle: `[frequency] [amplitude] [phase offset] [peak]`
 - register: `[frequency] [amplitude] [phase offset]` This generator is special, by itself it does nothing. You must define multiple generators within its definition in a similar way to how you define multiple generators at once. Complete syntax: `register([arguments]) { [generator 1] [generator 2] ... }
-This list may be subject to change.
 
 #### Player
 A `player` statement defines a generator and a list of notes for that generator to play.
@@ -83,5 +78,64 @@ There are multiple types of parameters that can be used.
 - `loop([repetitions]) { [note1] [note2] ... }`: A looping sequence of notes.
   - repetitions: How many times the sequence must be repeated. If not defined, the sequence repeats infinitely (or until the program is killed)
   - note: a note definition. Yes loops can contain other loops, altough infinite loops cannot contain other infinite loops.
-- `random([frequencies] [length] [amplitudes] [])`
+- `random([frequencies] [length] [lengths] [amplitudes])` or `random([length]) { [note1] [note2] ... }`: Generates a random note sequence based on the arguments
+  - frequencies: A range of different, possibly keyframed frequency values
+  - length: a non-keyframable length value. Specifies the last moment a note can start in the sequence.
+  - lengths: A range of length values
+  - amplitudes: A range of different, possibly keyframed floating point values between 0 and 1.
+
+#### Keyframed values
+Values that change with the passage of time.
+
+##### Syntax
+`<value>` or `<t1>: <value1> - [t2]: [value2] - ... - [t]: [value]`
+
+#### Ranges
+An array, or an interval of values.
+
+##### Syntax
+`<value>` or `(<value1> [value2] ... [value])` or `(<value1> -- <value2>)`
+Note that since the last type of syntax cannot be keyframed as it defines the "edges" of an interval
+
+### Example
+The following lines of code makes the program play Whitespace from hit indie game Omori
+```
+set bpm:100
+
+generators {
+    square(1 0: 0.1 - 0.02: 0.3 - 0.3: 0.2 - 1.3: 0)
+}
+
+#this is a comment. The code should skip it
+#Should work for multiple lines
+
+#Even if there are spaces inbetween
+
+player(0) {
+    #<0 loop{ 
+        <0 loop(4){
+            <0   D#6 1 0:1 - 0.5:1 - 0.8:0>
+            <1   C#6 1 0:1 - 0.5:1 - 0.8:0>
+            <2   C6  1 0:1 - 0.5:1 - 0.8:0>
+        }>
+        <0 loop(2){
+            <0 F#4 1 0:1 - 0.5:1 - 0.8:0>
+            <1 A#4 1 0:1 - 0.5:1 - 0.8:0>
+            <2 C#5 1 0:1 - 0.5:1 - 0.8:0>
+            <3 F#5 3>
+        }>
+        <12 loop(4){
+            <0   C#6 1 0:1 - 0.5:1 - 0.8:0>
+            <1   F5 1 0:1 - 0.5:1 - 0.8:0>
+            <2   G#5 1 0:1 - 0.5:1 - 0.8:0>
+        }>
+        <12 loop(2){
+            <0 F4 1 0:1 - 0.5:1 - 0.8:0>
+            <1 G#4 1 0:1 - 0.5:1 - 0.8:0>
+            <2 C#5 1 0:1 - 0.5:1 - 0.8:0>
+            <3 F5 3>
+        #}>
+    }>
+}
+```
 
