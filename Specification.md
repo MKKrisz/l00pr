@@ -2,7 +2,7 @@
 
 ## Specification
 
-The project is an overcomplicated function generator / a very simple music player
+An overcomplicated function generator / a very simple music player
 
 ### Dependencies
 - `SDL`: for audio playing
