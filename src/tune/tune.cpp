@@ -153,7 +153,7 @@ double Tune::getSample(double srate) {
             newNotes = true;
         std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
         for(int j = 0; j < newPNotes.size(); j++) {
-            std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << "]    ";
+            std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << ' ' << newPNotes[j].getAmplitude() << "]    ";
             l.player.addNote(newPNotes[j]);
         }
         for(int j = 0; j < newSNotes.size(); j++) {

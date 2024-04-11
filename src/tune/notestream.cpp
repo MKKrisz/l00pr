@@ -1,6 +1,7 @@
 #include "notestream.hpp"
 #include "../exceptions/parse_error.hpp"
 #include "loop.hpp"
+#include "../player/random_note.hpp"
 
 NoteStream::NoteStream(Note n) : playable(), setter(), loops(){
     playable.push_back(std::make_pair(0, n));
@@ -39,9 +40,14 @@ void NoteStream::Add(std::pair<double, Loop> p) {
             Add(std::make_pair(timestamp + reps*l.getLen() + l.setter[i].first, l.setter[i].second));
         }
     }
-    
 }
 
+void NoteStream::Add(std::pair<double, RandomNote> p) {
+    std::vector<std::pair<double, Note>> notes = p.second.Serialize(p.first);
+    for(auto n : notes){
+        Add(n);
+    }
+}
 
 std::vector<Note> NoteStream::GetStartingPlayableNotes(double t) {
     if(playable.empty() && loops.empty()) return {};
@@ -100,7 +106,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
             char c;
             bool parsed = false;
             stream >> skipws;
-            for(int i = 0; i < 4 && stream.get(c); i++) {
+            for(int i = 0; i < 6 && stream.get(c); i++) {
                 buf += tolower(c);
                 if(buf == "set") {
                     SetterNote n = SetterNote(stream);
@@ -111,6 +117,14 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
                 if(buf == "loop") {
                     Loop l = Loop(stream, ns.getBpm(), ns.getPolynote());
                     ns.Add(std::make_pair(ts, l));
+                    len = l.getLen();
+                    parsed = true;
+                    break;
+                }
+                if(buf == "random") {
+                    RandomNote r = RandomNote(stream, ns.getBpm());
+                    ns.Add(std::make_pair(ts, r));
+                    len = r.getLen();
                     parsed = true;
                     break;
                 }

@@ -169,7 +169,7 @@ std::vector<std::pair<double, Note>> RandomNote::Serialize(double start) {
 
             if(fixFreq) {
                 id = rand() % amplitudes.size();
-                ampl = frequencies[id];
+                ampl = amplitudes[id];
             }
             else 
                 ampl = lerp(amplitudes[0][0].second, amplitudes[1][0].second, double(rand())/RAND_MAX);

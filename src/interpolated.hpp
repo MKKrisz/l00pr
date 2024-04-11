@@ -110,6 +110,8 @@ public:
         if(offset != nullptr) *offset = i;
     }
 
+    size_t Size() {return data.size();}
+
     T Get(float t) {
         int id = getId(t);
         if(almostEQ(data[id].first, t)) return data[id].second;
@@ -225,6 +227,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
     while(true) {
         float t;
         T val;
+        if(!isalpha((stream >> skipws).peek())) break;
         stream >> t;
         if((stream >> skipws).peek() != ':') {
             if(i == 0)  {

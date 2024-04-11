@@ -6,6 +6,7 @@
 #include "../util.hpp"
 
 class Loop;
+class RandomNote;
 
 /// A "stream" of notes...
 class NoteStream {
@@ -55,8 +56,8 @@ public:
         return len;
     }
 
-    inline double getPlayableSize() { return playable.size(); }
-    inline double getSetterSize() { return setter.size(); }
+    inline size_t getPlayableSize() { return playable.size(); }
+    inline size_t getSetterSize() { return setter.size(); }
 
     inline SetterNote& getSetterNote(int id) {
         if(id < 0 || id >= setter.size())
@@ -81,6 +82,7 @@ public:
     void Add(std::pair<double, Note> p) { ordered_add(playable, p); }
     void Add(std::pair<double, SetterNote> p) { ordered_add(setter, p); }
     void Add(std::pair<double, Loop> p);
+    void Add(std::pair<double, RandomNote> p);
 
     /// Returns all notes that start before t and have not been started yet
     virtual std::vector<Note> GetStartingPlayableNotes(double t);
