@@ -74,7 +74,7 @@ There are multiple types of parameters that can be used.
     - octave: a number defining the octave of the note.
   - length: a non-keyframable value representing the note length.
   - amplitude: a keyframable value between 0 and 1 representing the amplitude of the generated wave's amplitude.
-- `set([generator-id])`: sets the player's generator to the one defined. Same rules apply as when making a player.
+- `set([generator-id])`: sets the player's generator to the one defined. Same rules apply as when making a player. If generator-id is ommitted, resets the generator to the default value
 - `loop([repetitions]) { [note1] [note2] ... }`: A looping sequence of notes.
   - repetitions: How many times the sequence must be repeated. If not defined, the sequence repeats infinitely (or until the program is killed)
   - note: a note definition. Yes loops can contain other loops, altough infinite loops cannot contain other infinite loops.
