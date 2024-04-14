@@ -25,7 +25,7 @@
 //      <timestmp random(len){ notes }>
 
 class RandomNote {
-    std::vector<Interpolated<double>> frequencies;
+    std::vector<Interpolated<Frequency>> frequencies;
     bool fixFreq = false;
     bool useContinuousFreq = false;
     

@@ -13,7 +13,7 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
         int pos = str.tellg();
         if(str.peek() == '(') {
             str.get();
-            Interpolated<double> val;
+            Interpolated<Frequency> val;
             str >> val;
             frequencies.emplace_back(val);
             if((str >> skipws).peek() == '-') {
@@ -38,13 +38,14 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
             }
         }
         else {
-            Interpolated<double> val;
+            Interpolated<Frequency> val;
             str >> val;
             if((str >> skipws).peek() == ')') {
                 if(val.Size() > 1) {
                     throw parse_error(str, "Sequence length cannot be interpolated");
                 }
-                len = val.Get(0);
+                len = val.Get(0).getFreq();
+                len *= 60/bpm;
                 noteBased = true;
                 str.get();
             }
@@ -57,22 +58,26 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
         if(!noteBased) {
 
             str >> len;
+            len *= 60/bpm;
 
             if((str >> skipws).peek() == '(') {
                 str.get();
                 double val;
                 str >> val;
+                val *= 60/bpm;
                 lengths.emplace_back(val);
                 if((str >> skipws).peek() == '-') {
                     str.get();
                     str.get();
                     str >> val;
+                    val *= 60/bpm;
                     lengths.emplace_back(val);
                 }
                 else {
                     fixLen = true;
                     while(isdigit((str >> skipws).peek())) {
                         str >> val;
+                        val *= 60/bpm;
                         lengths.emplace_back(val);
                     }
                 }
@@ -149,7 +154,7 @@ std::vector<std::pair<double, Note>> RandomNote::Serialize(double start) {
     }
     else {
         while(t < len) {
-            Interpolated<double> freq;
+            Interpolated<Frequency> freq;
             double length;
             Interpolated<double> ampl;
             int id;
