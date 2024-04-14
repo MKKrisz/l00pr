@@ -112,11 +112,22 @@ public:
 
     size_t Size() {return data.size();}
 
-    T Get(float t) {
+    T Get(double t) {
+        if(data.size() == 1) return data[0].second;
+        /*
+        if(low_buf == nullptr && high_buf == nullptr)
+            throw std::runtime_error("Something very bad happened");
+        if(low_buf == nullptr) return high_buf->second;
+        if(high_buf == nullptr) return low_buf->second;
+        if(low_buf->first <= t && high_buf->first > t) {
+            return itp(low_buf->second, high_buf->second, (t - low_buf->first) / (high_buf->first - low_buf->first));
+        }
+ */
         int id = getId(t);
         if(almostEQ(data[id].first, t)) return data[id].second;
 
         size_t aid, bid;
+
         if(data[id].first < t) { aid = id; bid = id + 1;}
         else { aid = id - 1; bid = id;}
 
@@ -232,11 +243,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
     while(true) {
         double t;
         T val;
-<<<<<<< HEAD
         //if(!isalpha((stream >> skipws).peek())) break;
-=======
-        if(!isalpha((stream >> skipws).peek())) break;
->>>>>>> 831aa6e (Random notes are cool shit!! (fixed merge confl.))
         stream >> t;
         if((stream >> skipws).peek() != ':') {
             if(i == 0)  {
