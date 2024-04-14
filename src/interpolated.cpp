@@ -8,8 +8,8 @@ float Interpolated<float>::basic_interpreter(const char* s, int* n) {
     return getFreq(s, n);
 }
 
-template<>
-std::istream& operator>> (std::istream& stream, Interpolated<double>& p) {
+template<std::floating_point F>
+std::istream& operator>> (std::istream& stream, Interpolated<F>& p) {
     stream >> std::ws;
     size_t start = stream.tellg();
     int i = 0;

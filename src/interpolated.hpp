@@ -254,7 +254,7 @@ std::function<T(T, T, float)> Interpolated<T>::defitp = linearInterpolator<T>;
 template<>
 float Interpolated<float>::basic_interpreter(const char* s, int* n);
 
-template<>
-std::istream& operator>> (std::istream& stream, Interpolated<double>& p);
+template<std::floating_point F>
+std::istream& operator>> (std::istream& stream, Interpolated<F>& p);
 
 #endif
