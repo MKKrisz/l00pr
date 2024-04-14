@@ -62,7 +62,7 @@ double getFreq(std::istream& stream) {
     int note;
     stream >> buf;
     
-    if(buf < 'A' || buf > 'G') 
+    if(buf < 'A' || buf > 'G')
         throw parse_error(stream, "Couldn't interpret stream as a note or float");
 
     //same thing as above except in a tightly packed ternary-chain
