@@ -1,26 +1,27 @@
+#include <iostream>
+
 #include "freq.hpp"
 
 
 std::istream& operator>>(std::istream& str, Frequency& f) {
-    std::stringstream tex{};
     str >> skipws;
-
-    char c;
+    std::stringstream ss {""};
     if(!isdigit(str.peek())) {
-        for(int i = 0; i < 2 && str.get(c); i++) {
-            tex << c;
-        }
-
-        if(isNoteMod(c) && str.get(c))
-            tex << c;
+        ss << char(str.get());
+        if(isNoteMod(str.peek())) 
+            ss << char(str.get());
     }
-    //this one is cursed...
-    while(isdigit(str.peek()) && str.get(c)) {
-        tex << c;
-    }
-
-    f = Frequency(tex);
+    int n;
+    str >> n;
+    ss << std::to_string(n);
+    f = Frequency(ss);
     return str;
 }
 
 std::ostream& operator<<(std::ostream& str, Frequency& f) { return str << f.getName(); }
+
+template<>
+Frequency logarithmicInterpolator <> (Frequency a, Frequency b, double t) {
+    return pow(a.getFreq(), 1-t)*pow(b.getFreq(), t);
+}
+
