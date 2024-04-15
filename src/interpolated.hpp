@@ -21,6 +21,12 @@ class Interpolated;
 template<typename T>
 std::istream& operator>>(std::istream& stream, Interpolated<T>& p);
 
+template<typename T>
+struct is_interpolated : public std::false_type {};
+
+template<typename T>
+struct is_interpolated<Interpolated<T>> : public std::true_type {};
+
 
 ///<summary>
 /// Data structures for storing and evaluating a keyframe-based interpolation
@@ -28,7 +34,6 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p);
 template <Arithmetic T>
 class Interpolated {
 protected:
-
     ///<summary>
     /// Internal data structure = map ;)
     ///</summary>
@@ -38,7 +43,9 @@ protected:
     static std::function<T(T, T, double)> defitp;
 
 public:
-    
+
+    typedef T value_type;
+
     ///<summary> Default constructor </Summary>
     Interpolated() : data(), itp(defitp) {}
     Interpolated(const Interpolated& ip) : data(ip.data), itp(ip.itp){}
@@ -219,6 +226,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
         if((stream >> skipws).peek() != '-') break;
         i++;
         stream.get();
+        if((stream >> skipws).peek() == '-') break;
     }
     p.sort();
     return stream;
