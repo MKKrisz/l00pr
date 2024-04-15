@@ -66,50 +66,6 @@ public:
     
     static T basic_interpreter(const char* s, int* n = nullptr) {return T(s);}
 
-
-    Interpolated(const char* s, 
-                 int* offset = nullptr,
-                 std::function<T(const char*, int*)> interpreter = basic_interpreter) 
-        : data(), itp(linearInterpolator<T>) {
-
-        int i = 0;
-        int iterc = 0;
-        while(true) {
-            float t = 0;
-            T val = interpreter(&s[i], nullptr);
-            while(isspace(s[i])) i++;
-            for( ; s[i] != '\0'; i++) {
-                if(!isdigit(s[i])) break;
-                t*=10;
-                t+=s[i]-'0';
-            } 
-            if(s[i] == '.') {
-                i++;
-                for(int j = 0; s[i + j] != '\0'; j++) {
-                    if(!isdigit(s[i+j])) {i += j; break;}
-                    t += (s[i+j]-'0')/pow(10.0f, j+1);
-                }
-            }
-            if(s[i++] != ':') {
-                if(iterc == 0) {
-                    data.emplace_back(std::make_pair(0, val));
-                }
-                return;
-            }
-            while(isspace(s[i])) i++;
-            int offset;
-            val = interpreter(&s[i], &offset);
-            i += offset;
-            data.emplace_back(std::make_pair(t, val));
-            if(s[i] != '-') break;
-            i++;
-            while(isspace(s[i])) i++;
-            iterc++;
-        }
-        sort();
-        if(offset != nullptr) *offset = i;
-    }
-
     size_t Size() {return data.size();}
 
     T Get(double t) {
@@ -270,9 +226,5 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
 
 template<Arithmetic T> 
 std::function<T(T, T, double)> Interpolated<T>::defitp = linearInterpolator<T>;
-
-template<>
-float Interpolated<float>::basic_interpreter(const char* s, int* n);
-
 
 #endif
