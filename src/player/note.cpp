@@ -2,20 +2,20 @@
 #include "../util.hpp"
 #include <cmath>
 
-Note::Note(float l, Interpolated<double> freq, Interpolated<double> amp) 
+Note::Note(float l, Interpolated<Frequency> freq, Interpolated<double> amp) 
     : len(l), freq(freq), ampl(amp), done(0) {
-    freq.SetInterpolator(logarithmicInterpolator<float>);
+    freq.SetInterpolator(logarithmicInterpolator<Frequency>);
     amp.SetInterpolator(logarithmicInterpolator<float>);
 }
 
 bool Note::isComplete() {
-    float tp = 1/freq(done/len);
+    float tp = 1/freq(done/len).getFreq();
     return done > len + (tp-fmod(len, tp));
 }
 
 float Note::getDelta(int srate) {
     done += 1/float(srate);
-    return freq(done/len)/srate;
+    return freq(done/len).getFreq()/srate;
 }
 float Note::getAmplitude(float t) {
     return ampl(t);
@@ -26,10 +26,10 @@ float Note::getAmplitude() {
 }
 
 float Note::getFreq(float t) {
-    return freq(t);
+    return freq(t).getFreq();
 }
 float Note::getFreq() {
-    return freq(done/len);
+    return freq(done/len).getFreq();
 }
 
 Note::Note(std::istream& stream, double bpm) : len(0), freq(), ampl(1), done(0){
@@ -49,3 +49,6 @@ Note::Note(std::istream& stream, double bpm) : len(0), freq(), ampl(1), done(0){
     }
 }
 
+std::ostream& operator<<(std::ostream& str, Note& n) {
+    return str << n.toString(); 
+}

@@ -3,7 +3,6 @@
 
 #include <istream>
 #include <ranges>
-
 #include "concepts.hpp"
 
 /// Reads in a frequency value from the input stream.
@@ -19,12 +18,6 @@
 ///         parse_error on failure
 double getFreq(std::istream& stream);
 
-/// Same as the function above except for c-strings.
-/// @param n: number of characters read in
-/// Remarks: this version of the function silently fails instead of throwing
-///          an error
-float getFreq(const char* s, int* n = nullptr);
-
 /// Gets the line and column number of the current stream position in the most
 /// inefficent way imaginable
 /// Returns:
@@ -39,6 +32,9 @@ inline T lerp(T a, T b, float t) {
 
 inline bool isNote(char c) {
     return isdigit(c) || (c >= 'A' && c <= 'G');
+}
+inline bool isNoteMod(char c) {
+    return (c == '#' || c == 'x' || c == 'b');
 }
 
 //loptam gtest_lite-ból
