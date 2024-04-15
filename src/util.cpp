@@ -5,51 +5,6 @@
 #include <string>
 #include <iostream>
 
-float getFreq(const char* s, int* n) {
-    int note = -1; //from 0 to 12 the offset of the note
-    int octave = -1;
-    bool sharp = false; //wether 
-
-    // initialize n
-    if(n != nullptr) *n = 0;
-
-    if(isdigit(s[0])){ 
-
-        // skip numeric characters and decimal points
-        int i = 0;
-        while(isdigit(s[i]) || s[i] == '.') i++;
-
-        if(n != nullptr) *n = i;
-        return atof(s);
-    }
-
-    // early return
-    if(s[0] < 'A' || s[0] > 'G') return 0;
-    note = (s[0] -'A')*2;       //
-
-    // remove inaccuracy caused by the missing black keys between B-C and E-F
-    if(s[0] > 'B') note--;
-    if(s[0] > 'E') note--;
-
-    // handling modifiers
-    if(s[1] == '#')      {note++;    sharp = true;}
-    else if(s[1] == 'x') {note += 2; sharp = true;}
-    else if(s[1] == 'b') {note--;    sharp = true;}
-
-    // return if next char is not a digit
-    else if(!isdigit(s[sharp?2:1])) return 0;
-
-    octave = s[sharp?2:1] - '0';
-
-    // since we caluclate every note upwards from 'A', notes would get one 
-    // octave higher if not for this
-    if(s[0] > 'B') octave--;
-    if(n != nullptr) { *n = sharp?3:2; } //setting n
-    
-    // crazy calculation explained one function below
-    return 440*pow(2.0f, (octave-4) + note/12.0f);
-}
-
 double getFreq(std::istream& stream) {
     //skips whitespace then checks if next char is a number
     if(isdigit((stream >> skipws).peek())) {

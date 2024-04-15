@@ -18,12 +18,6 @@
 ///         parse_error on failure
 double getFreq(std::istream& stream);
 
-/// Same as the function above except for c-strings.
-/// @param n: number of characters read in
-/// Remarks: this version of the function silently fails instead of throwing
-///          an error
-float getFreq(const char* s, int* n = nullptr);
-
 /// Gets the line and column number of the current stream position in the most
 /// inefficent way imaginable
 /// Returns:
