@@ -5,6 +5,7 @@
 #include <istream>
 #include "../interpolated.hpp"
 #include "../util.hpp"
+#include "../range.hpp"
 #include "note.hpp"
 #include "../tune/notestream.hpp"
 
@@ -25,15 +26,12 @@
 //      <timestmp random(len){ notes }>
 
 class RandomNote {
-    std::vector<Interpolated<Frequency>> frequencies;
-    bool fixFreq = false;
+    Range<Interpolated<Frequency>> frequencies;
     bool useContinuousFreq = false;
     
-    std::vector<double> lengths;
-    bool fixLen = false;
+    Range<double> lengths;
 
-    std::vector<Interpolated<double>> amplitudes = {1};
-    bool fixAmpl = false;
+    Range<Interpolated<double>> amplitudes = {1};
 
     NoteStream notes;
     bool noteBased = false;
