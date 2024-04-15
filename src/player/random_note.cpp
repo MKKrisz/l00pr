@@ -2,7 +2,7 @@
 #include "../exceptions/parse_error.hpp"
 
 RandomNote::RandomNote(std::istream& str, double bpm = 60) : 
-    bpm(bpm), frequencies(), lengths(), notes(){
+    frequencies(), lengths(), notes(), bpm(bpm) {
     //random|( (A4, C5, E5))
     notes.setBpm(bpm);
     notes.setPolynote(false);
@@ -10,7 +10,6 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
     if((str >> skipws).peek() == '(') {
         str.get();                      //random(| (A4, C5, E5))
         str >> skipws;                  //random( |(A4, C5, E5))
-        int pos = str.tellg();
         if(str.peek() == '(') {
             str.get();
             Interpolated<Frequency> val;
