@@ -9,12 +9,13 @@
 
 int main(int argc, const char** argv) {
     SDL_Init(SDL_INIT_AUDIO);
+    srand(time(0));
     std::fstream f = std::fstream(argc>=2?argv[1]:"test.tn");
     Tune t;
     try{
         f >> t;
     }
-    catch(parse_error e) {
+    catch(parse_error& e) {
         std::cout << e.what() << std::endl;
         return 0;
     }

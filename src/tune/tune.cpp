@@ -50,7 +50,7 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
     
     for(int i = 0; i < t.getLaneCount(); i++) {
         NoteStream& stream = t.getLane(i).stream;
-        for(int j = 0; j < stream.getSetterSize(); j++) {
+        for(size_t j = 0; j < stream.getSetterSize(); j++) {
             SetterNote& note = stream.getSetterNote(j);
             int id = note.getId();
             if(note.getGen() != nullptr) continue;
@@ -152,11 +152,11 @@ double Tune::getSample(double srate) {
         if(!newPNotes.empty()) 
             newNotes = true;
         std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
-        for(int j = 0; j < newPNotes.size(); j++) {
-            std::cout << '[' << newPNotes[j].getFreq() << std::setw(7) << ' ' << newPNotes[j].getLen() << std::setw(7) << "]    ";
+        for(size_t j = 0; j < newPNotes.size(); j++) {
+            std::cout << newPNotes[j] << "    ";
             l.player.addNote(newPNotes[j]);
         }
-        for(int j = 0; j < newSNotes.size(); j++) {
+        for(size_t j = 0; j < newSNotes.size(); j++) {
             std::cout << "New Generator!!" <<std::endl;
             l.player.addNote(newSNotes[j]);
         }

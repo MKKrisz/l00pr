@@ -2,6 +2,7 @@
 #define L00PR_NOTE
 
 #include "../interpolated.hpp"
+#include "../freq.hpp"
 
 /// Contains note stuff
 class Note {
@@ -10,7 +11,7 @@ class Note {
     double len = 1;
 
     /// The frequency of the note measured in Hz
-    Interpolated<double> freq = 0.0;
+    Interpolated<Frequency> freq = Frequency(0.0);
 
     /// The amplitude of the note
     Interpolated<double> ampl = 1;
@@ -26,6 +27,9 @@ public:
     /// Gets the "done" value
     inline float getTime() { return done; }
     inline float getLen()  { return len; }
+    inline std::string toString() {
+        return "[" + freq[0].second.getName() + (freq.Size() == 1 ? "       " : "-/\\/-- ") + std::to_string(len)  + "    " + std::to_string(ampl[0].second) + "] ";
+    }
 
     /// Returns the amplitude
     float getAmplitude(float t);
@@ -34,13 +38,15 @@ public:
     /// Returns the frequency
     float getFreq(float t);
     float getFreq();
+    
 
     /// Returns true if done > len
     virtual bool isComplete();
 
-    Note(float l, Interpolated<double> freq, Interpolated<double> amp);
+    Note(float l, Interpolated<Frequency> freq, Interpolated<double> amp);
     Note(std::istream& str, double bpm);
 };
 
+std::ostream& operator<<(std::ostream& str, Note& n); 
 
 #endif

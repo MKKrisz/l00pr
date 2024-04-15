@@ -3,7 +3,6 @@
 
 #include <istream>
 #include <ranges>
-
 #include "concepts.hpp"
 
 /// Reads in a frequency value from the input stream.
@@ -19,12 +18,6 @@
 ///         parse_error on failure
 double getFreq(std::istream& stream);
 
-/// Same as the function above except for c-strings.
-/// @param n: number of characters read in
-/// Remarks: this version of the function silently fails instead of throwing
-///          an error
-float getFreq(const char* s, int* n = nullptr);
-
 /// Gets the line and column number of the current stream position in the most
 /// inefficent way imaginable
 /// Returns:
@@ -39,6 +32,9 @@ inline T lerp(T a, T b, float t) {
 
 inline bool isNote(char c) {
     return isdigit(c) || (c >= 'A' && c <= 'G');
+}
+inline bool isNoteMod(char c) {
+    return (c == '#' || c == 'x' || c == 'b');
 }
 
 //loptam gtest_lite-ból
@@ -64,11 +60,11 @@ bool almostEQ(T a, T  b) {
 //TODO: Refactor template arguments...
 template <std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
-int bSearch(U data, F t) {
+size_t bSearch(U data, F t) {
     if(data.size() == 0) return 0;
-    int min = 0;
-    int max = data.size()-1;
-    int mid = (min + max)/2;
+    size_t min = 0;
+    size_t max = data.size()-1;
+    size_t mid = (min + max)/2;
     while(min<=max && !almostEQ(data[mid].first, t)) {
         if(data[mid].first < t)
             min = mid+1;
@@ -86,7 +82,7 @@ void ordered_add(U& data, std::pair<F, T> p) {
         data.emplace_back(p);
         return;
     }
-    int id = bSearch(data, p.first);
+    size_t id = bSearch(data, p.first);
     if(data[id].first < p.first) id++;
     if(id == data.size())
         data.emplace_back(p);
