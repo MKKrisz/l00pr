@@ -11,7 +11,7 @@ class AudioDevice {
 
     /// The music this thing is playing
     //TODO: Add support for multiple tunes simultaenously
-    Tune* tune = nullptr;
+    std::vector<Tune> tunes;
 
     //TODO: make this work
     bool running;
@@ -27,8 +27,8 @@ public:
     int getSampleRate();
 
 
-    void setTune(Tune* t);
-    Tune* getTune();
+    void addTune(const Tune& t);
+//    Tune getTune();
 
     AudioDevice(int srate = 48000, int bufsize = 4096);
     AudioDevice(SDL_AudioSpec& spec);

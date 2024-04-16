@@ -20,7 +20,7 @@ int main(int argc, const char** argv) {
         return 0;
     }
     AudioDevice device = AudioDevice(t.getSampleRate());
-    device.setTune(&t);
+    device.addTune(t);
     device.start();
     uint len = t.getLen() == std::numeric_limits<double>::infinity()? std::numeric_limits<uint>::max() : t.getLen() + 1;
     sleep(len);
