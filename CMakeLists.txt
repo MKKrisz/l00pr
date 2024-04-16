@@ -14,7 +14,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 find_package(SDL2 REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
-add_library(libl00pr SHARED src/audiosource.h
+add_library(libl00pr STATIC l00pr.hpp
+                            src/audiosource.h
                             src/concepts.hpp
                             src/device.h src/device.cpp
                             src/freq.hpp src/freq.cpp
