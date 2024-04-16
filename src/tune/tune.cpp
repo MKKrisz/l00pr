@@ -167,7 +167,7 @@ double Tune::getSample(double srate) {
     return sum;
 }
 
-double Tune::getLen() {
+double Tune::getLen() const {
     double max = 0;
     for(auto l : lanes) {
         if(max < l.stream.getLen())

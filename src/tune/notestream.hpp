@@ -87,6 +87,14 @@ public:
     /// Returns all notes that start before t and have not been started yet
     virtual std::vector<Note> GetStartingPlayableNotes(double t);
     virtual std::vector<SetterNote> GetStartingSetterNotes(double t);
+
+    NoteStream& operator=(const NoteStream& s){
+        if(&s == this) return *this;
+        playable = s.playable;
+        setter = s.setter;
+        loops = s.loops;
+        return *this;
+    }
 };
 
 /// Parser
