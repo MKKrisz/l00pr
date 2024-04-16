@@ -12,12 +12,15 @@ double Generator::operator()(int noteId, double delta, double t) {
 std::istream& operator>> (std::istream& stream, Generator** gen) {
     stream >> skipws;
     std::string buf;
+    bool parsed = false;
     for(size_t i = 0; i < std::string("triangle").size(); i++) {
         buf += tolower(stream.get());
-        if(buf == "sine")     { *gen = new SineGenerator(stream); break;}
-        if(buf == "square")   { *gen = new SquareGenerator(stream); break; }
-        if(buf == "triangle") { *gen = new TriangleGenerator(stream); break; }
-        if(buf == "register") { *gen = new Register(stream); break; }
+        if(buf == "sine")     { *gen = new SineGenerator(stream); parsed = true; break;}
+        if(buf == "square")   { *gen = new SquareGenerator(stream); parsed = true; break; }
+        if(buf == "triangle") { *gen = new TriangleGenerator(stream); parsed = true; break; }
+        if(buf == "register") { *gen = new Register(stream); parsed = true; break; }
     }
+    if(!parsed)
+        throw parse_error(stream, "Generator type \"" + buf + "\" does not exist.");
     return stream;
 }

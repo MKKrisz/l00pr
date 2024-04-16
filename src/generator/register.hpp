@@ -12,7 +12,7 @@ public:
     double operator()(int noteId, double delta, double t);
     void addPhase();
     void removePhase(int id);
-    inline double getSample(double phase, double t) {return 0;}
+    inline double getSample(double, double) {return 0;}
     Register(std::istream& stream);
     Generator* copy();
 

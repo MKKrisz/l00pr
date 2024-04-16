@@ -10,7 +10,7 @@ SineGenerator::SineGenerator(Interpolated<double> amplitude,
     m_phaseoffset = offset;
 }
 
-double SineGenerator::getSample(double p, double t) {
+double SineGenerator::getSample(double p, double) {
     return std::sin(p*2*M_PI);
 }
 

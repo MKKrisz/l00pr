@@ -10,7 +10,7 @@ public:
                   Interpolated<double> offset = 0.0f);
 
     SineGenerator(std::istream& stream);
-    double getSample(double phase, double t);
+    double getSample(double, double);
     Generator* copy();
 };
 
