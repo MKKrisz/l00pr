@@ -35,7 +35,7 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
                 t.setEnv(stream);
                 break;
             }
-            if(buf == "generators") {
+            if(buf == "generator") {
                 t.setGen(stream);
                 break;
             }
@@ -103,13 +103,24 @@ void Tune::setEnv(std::istream& stream) {
 }
 
 void Tune::setGen(std::istream& stream) {
+    bool multiple = false;
+
+    if(stream.peek() == 's') {
+        multiple = true;
+        stream.get();
+    }
     stream >> skipws;
+
     if(stream.peek() != '{') {
+        if(multiple)
+            std::cout << "Warning: 'generators' specified, but using single generator syntax." << std::endl;
         Generator* gen;
         stream >> &gen;
         generators.emplace_back(gen);
         return;
     }
+    if(!multiple)
+        std::cout << "Warning: 'generator' specified, but using multiple generator syntax." << std::endl;
     stream.get();
     while((stream >> skipws).peek() != '}') {
         Generator* gen;
