@@ -11,11 +11,11 @@ void AudioDevice::setSampleRate(int sr) {
 
 int AudioDevice::getSampleRate() { return spec.freq; }
 
-void AudioDevice::setTune(Tune* t) {
-    tune = t;
+void AudioDevice::addTune(const Tune& t) {
+    tunes.emplace_back(t);
 }
 
-Tune* AudioDevice::getTune() { return tune; }
+//Tune* AudioDevice::getTune() { return tune; }
 
 void AudioDevice::setSpec(SDL_AudioSpec& s) {
     std::cout << "Asked for: " <<  s.freq << " " << s.format << " " << s.channels << " " << s.samples << std::endl;;
@@ -30,7 +30,7 @@ void AudioDevice::setSpec(SDL_AudioSpec& s) {
     }
 }
 
-AudioDevice::AudioDevice(int srate, int bufsize) {
+AudioDevice::AudioDevice(int srate, int bufsize) : tunes() {
     spec.freq = srate;
     spec.format = AUDIO_F32;
     spec.channels = 1;
@@ -40,11 +40,11 @@ AudioDevice::AudioDevice(int srate, int bufsize) {
     setSpec(spec);
 }
 
-AudioDevice::AudioDevice(SDL_AudioSpec& spec) {
+AudioDevice::AudioDevice(SDL_AudioSpec& spec) : tunes() {
     setSpec(spec);    
 }
 
-AudioDevice::AudioDevice(AudioDevice& dev) {
+AudioDevice::AudioDevice(AudioDevice& dev) : tunes() {
     *this = dev;
 }
 
@@ -52,11 +52,19 @@ AudioDevice::~AudioDevice() {
     SDL_CloseAudioDevice(devHandle);
 }
 
+void AudioDevice::fastForward(double t) {
+    SDL_LockAudioDevice(devHandle);
+    int srate = getSampleRate();
+    for(int i = 0; i < t * srate; i++)
+        tunes[0].discardSample(srate);
+    SDL_UnlockAudioDevice(devHandle);
+}
+
 void AudioDevice::callback(void* userdata, uint8_t* stream, int bytelen) {
     int len = bytelen / 4;
     AudioDevice* dev = (AudioDevice*)userdata;
     for(int i = 0; i < len; i++) {
-        float sample = dev->tune->getSample(dev->spec.freq);
+        float sample = dev->tunes[0].getSample(dev->getSampleRate());
         //std::cout << sample << std::endl;
         std::memcpy(&stream[4*i], &sample, 4);
     }
@@ -76,7 +84,7 @@ AudioDevice& AudioDevice::operator=(const AudioDevice& dev) {
     }
     spec = dev.spec;
     devHandle = dev.devHandle;
-    tune = dev.tune;
+    tunes = dev.tunes;
     running = dev.running;
     return *this;
 }

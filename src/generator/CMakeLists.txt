@@ -4,4 +4,5 @@
                                 sine.hpp sine.cpp
                                 square.hpp square.cpp
                                 triangle.hpp triangle.cpp
-                                register.hpp register.cpp)
+                                register.hpp register.cpp
+                                noise.hpp noise.cpp)

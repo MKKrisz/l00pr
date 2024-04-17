@@ -20,14 +20,15 @@ public:
     void setGen(std::istream& stream);
     void addLane(std::istream& stream);
 
-    double getLen();
-    inline double getLaneCount() { return lanes.size(); }
+    double getLen() const;
+    inline bool isComplete() const { return t > getLen();}
+    inline double getLaneCount() const { return lanes.size(); }
     inline Lane& getLane(size_t id) {
         if(id >= lanes.size())
             throw std::runtime_error("Index out of range for tune lanes");
         return lanes[id];
     }
-    inline int getGenCount() { return generators.size(); }
+    inline int getGenCount() const { return generators.size(); }
     inline Generator* getGenerator(size_t id) {
         if(id >= generators.size())
             throw std::runtime_error("Index out of range for generators");
@@ -39,12 +40,14 @@ public:
     Tune();
     Tune(NotePlayer&, NoteStream&);
     Tune(Lane& p);
+    Tune(const Tune& t);
 
     template <std::ranges::range T>
         requires std::same_as<std::ranges::range_value_t<T>, Lane>
     Tune(T data);
     
     double getSample(double srate);
+    double discardSample(double srate);
     ~Tune();
 };
 

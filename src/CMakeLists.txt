@@ -4,7 +4,8 @@ target_sources(${PROJECT_NAME} PUBLIC audiosource.h
                                interpolated.hpp
                                freq.hpp freq.cpp
                                range.hpp
-                               util.hpp util.cpp)
+                               util.hpp util.cpp
+                               argmgr.hpp argmgr.cpp)
 add_subdirectory(exceptions)
 add_subdirectory(generator)
 add_subdirectory(player)
