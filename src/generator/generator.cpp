@@ -19,6 +19,7 @@ std::istream& operator>> (std::istream& stream, Generator** gen) {
         if(buf == "square")   { *gen = new SquareGenerator(stream); parsed = true; break; }
         if(buf == "triangle") { *gen = new TriangleGenerator(stream); parsed = true; break; }
         if(buf == "register") { *gen = new Register(stream); parsed = true; break; }
+        if(buf == "noise")    { *gen = new NoiseGenerator(stream); parsed = true; break; }
     }
     if(!parsed)
         throw parse_error(stream, "Generator type \"" + buf + "\" does not exist.");

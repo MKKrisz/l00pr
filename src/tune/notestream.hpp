@@ -46,13 +46,12 @@ public:
     /// Returns how many seconds it takes to play the stream
     inline double getLen() {
         if(!loops.empty()) return std::numeric_limits<double>::infinity();
-        //if(playable.empty()) return 0;
+        if(playable.empty()) return 0;
         if (len < 0) {
             std::pair<double, Note> last = playable[playable.size()-1];
             lastNoteTs = last.first;
             len = last.first + last.second.getLen();
         }
-        if(playable.empty()) return 0;
         return len;
     }
 

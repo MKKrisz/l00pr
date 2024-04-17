@@ -11,7 +11,11 @@ SetterNote::SetterNote(std::istream& str){
         throw parse_error(str, "Missing '('");
 
     str.get();
-    str >> generatorId;
+    str >>skipws;
+    if(isdigit(str.peek()))
+        str >> generatorId;
+    else
+        str >> &gen;
     if((str >> std::ws).peek() != ')')
         throw parse_error(str, "Missing ')'");
     str.get();

@@ -9,5 +9,6 @@
 #include "square.hpp"
 #include "triangle.hpp"
 #include "register.hpp"
+#include "noise.hpp"
 
 #endif

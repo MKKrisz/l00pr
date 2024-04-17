@@ -40,12 +40,14 @@ public:
     Tune();
     Tune(NotePlayer&, NoteStream&);
     Tune(Lane& p);
+    Tune(const Tune& t);
 
     template <std::ranges::range T>
         requires std::same_as<std::ranges::range_value_t<T>, Lane>
     Tune(T data);
     
     double getSample(double srate);
+    double discardSample(double srate);
     ~Tune();
 };
 

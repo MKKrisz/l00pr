@@ -52,16 +52,19 @@ AudioDevice::~AudioDevice() {
     SDL_CloseAudioDevice(devHandle);
 }
 
+void AudioDevice::fastForward(double t) {
+    SDL_LockAudioDevice(devHandle);
+    int srate = getSampleRate();
+    for(int i = 0; i < t * srate; i++)
+        tunes[0].discardSample(srate);
+    SDL_UnlockAudioDevice(devHandle);
+}
+
 void AudioDevice::callback(void* userdata, uint8_t* stream, int bytelen) {
     int len = bytelen / 4;
     AudioDevice* dev = (AudioDevice*)userdata;
     for(int i = 0; i < len; i++) {
-        float sample = 0;
-        for(auto t = dev->tunes.begin(); t != dev->tunes.end(); t++) {
-            sample += t->getSample(dev->getSampleRate());
-            if(t->isComplete())
-                t = dev->tunes.erase(t);
-        }
+        float sample = dev->tunes[0].getSample(dev->getSampleRate());
         //std::cout << sample << std::endl;
         std::memcpy(&stream[4*i], &sample, 4);
     }

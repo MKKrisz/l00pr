@@ -35,7 +35,7 @@ public:
     }
 
     inline std::vector<double> getPhases() { return phases; }
-    inline void setPhases(std::vector<double> p) { phases = p;}
+    inline void setPhases(std::vector<double>& p) { phases = p;}
 
     virtual Generator* copy() = 0;
 

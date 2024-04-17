@@ -28,7 +28,9 @@ public:
 
 
     void addTune(const Tune& t);
-//    Tune getTune();
+    //Tune getTune();
+
+    void fastForward(double);
 
     AudioDevice(int srate = 48000, int bufsize = 4096);
     AudioDevice(SDL_AudioSpec& spec);

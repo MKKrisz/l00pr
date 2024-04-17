@@ -6,8 +6,8 @@
 class Register :public Generator {
     std::vector<Generator*> generators;
 
-public:
     Register(std::vector<Generator*> gen);
+public:
 
     double operator()(int noteId, double delta, double t);
     void addPhase();

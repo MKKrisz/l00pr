@@ -14,6 +14,12 @@ Tune::Tune(Lane& p) : lanes() {
     lanes.push_back(p);
 }
 
+Tune::Tune(const Tune& t) : lanes(t.lanes), generators(), bpm(t.bpm), srate(t.srate), polynote(t.polynote){
+    for(Generator* g : generators) {
+        generators.emplace_back(g->copy());
+    }
+}
+
 template <std::ranges::range T>
     requires std::same_as<std::ranges::range_value_t<T>, Lane>
 Tune::Tune(T data) : lanes() {
@@ -121,11 +127,19 @@ void Tune::setGen(std::istream& stream) {
 
 void Tune::addLane(std::istream& stream) {
     stream >> skipws;
-    int genId = 0;
+    Generator* gen;
     NoteStream str = NoteStream();
     if(stream.peek() == '(') {
         stream.get();
-        stream >> genId;
+        int genId;
+        stream >> skipws;
+        if(isdigit(stream.peek())) {
+            stream >> genId;
+            gen = generators[genId];
+        }
+        else
+            stream >> &gen;
+
         if((stream >> skipws).peek() != ')') {
             throw parse_error(stream, "No closing ')' for player generator definition");
         }
@@ -141,7 +155,7 @@ void Tune::addLane(std::istream& stream) {
         }
         stream.get();
     }
-    lanes.push_back(Lane(NotePlayer(generators[genId]), str));
+    lanes.push_back(Lane(NotePlayer(gen), str));
 }
 
 double Tune::getSample(double srate) {
@@ -152,13 +166,14 @@ double Tune::getSample(double srate) {
         if(!newPNotes.empty()) 
             newNotes = true;
         std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
-        for(size_t j = 0; j < newPNotes.size(); j++) {
-            std::cout << newPNotes[j] << "    ";
-            l.player.addNote(newPNotes[j]);
-        }
         for(size_t j = 0; j < newSNotes.size(); j++) {
             std::cout << "New Generator!!" <<std::endl;
             l.player.addNote(newSNotes[j]);
+        }
+
+        for(size_t j = 0; j < newPNotes.size(); j++) {
+            std::cout << newPNotes[j] << "    ";
+            l.player.addNote(newPNotes[j]);
         }
         sum += l.player.getSample(srate);
     }
@@ -166,6 +181,24 @@ double Tune::getSample(double srate) {
     t += 1/srate;
     return sum;
 }
+
+double Tune::discardSample(double srate) {
+    double sum = 0;
+    for(auto& l : lanes) {
+        std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
+        std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
+        for(size_t j = 0; j < newSNotes.size(); j++) {
+            l.player.addNote(newSNotes[j]);
+        }
+        for(size_t j = 0; j < newPNotes.size(); j++) {
+            l.player.addNote(newPNotes[j]);
+        }
+        sum += l.player.getSample(srate);
+    }
+    t += 1/srate;
+    return sum;
+}
+
 
 double Tune::getLen() const {
     double max = 0;
