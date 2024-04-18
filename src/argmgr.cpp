@@ -13,7 +13,8 @@ Arguments::Arguments(int argc, const char** argv) : inputFiles() {
                 << std::endl << "Arguments:" << std::endl 
                 << "-h\t--help\t\t\tPrints this message" << std::endl
                 << "-s <t>\t--seek-forward <t>\tSeeks forward 't' seconds" << std::endl
-                << "-o <f>\t--output <f>\t\tInstead of playing, the program will export the tune to 'f' in a wav format" << std::endl;
+                << "-o <f>\t--output <f>\t\tInstead of playing, the program will export the tune to 'f' in a wav format" << std::endl
+                << "-c\t--cursed\t\t\tReverts to using the first working version of the wav exporter. << std::endl";
             continue;
         }
         if(arg == "-s" || arg == "--seek-forward") {
@@ -25,6 +26,10 @@ Arguments::Arguments(int argc, const char** argv) : inputFiles() {
             outputToFile = true;
             i++;
             outputFile = argv[i];
+            continue;
+        }
+        if(arg == "-c" || arg == "--cursed") {
+            cursed = true;
             continue;
         }
         inputFiles.emplace_back(argv[i]);
@@ -45,10 +50,11 @@ void Arguments::Run() {
             std::cout << "Exception while parsing \"" << inputFiles[i] << '"' << std::endl << e.what() << std::endl;
             return;
         }
+        file.close();
     }
+    AudioDevice dev{tune.getSampleRate()};
+    dev.addTune(tune);
     if(!outputToFile) {
-        AudioDevice dev{tune.getSampleRate()};
-        dev.addTune(tune);
         dev.fastForward(seekfwd);
         dev.start();
         uint len = tune.getLen();
@@ -60,5 +66,10 @@ void Arguments::Run() {
         dev.stop();
         return;
     }
-    std::cout << "Not Implemented" << std::endl;
+    std::ofstream file(outputFile);
+    if(cursed)
+        dev.renderCursed(file);
+    else
+        dev.render(file);
+    file.close();
 }

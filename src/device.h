@@ -31,6 +31,8 @@ public:
     //Tune getTune();
 
     void fastForward(double);
+    void render(std::ostream&);
+    void renderCursed(std::ostream&);
 
     AudioDevice(int srate = 48000, int bufsize = 4096);
     AudioDevice(SDL_AudioSpec& spec);
