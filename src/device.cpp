@@ -88,3 +88,65 @@ AudioDevice& AudioDevice::operator=(const AudioDevice& dev) {
     running = dev.running;
     return *this;
 }
+
+void put32(std::ostream& str, uint n) {
+    str.put(n << 24 >> 24);
+    str.put(n >> 8 << 24 >> 24);
+    str.put(n >> 16 << 24 >> 24);
+    str.put(n >> 24);
+}
+void put16(std::ostream& str, ushort n) {
+    str.put(n << 8 >> 8);
+    str.put(n >> 8);
+}
+
+void AudioDevice::render(std::ostream& stream) {
+    stream << "RIFF";
+    int size = stream.tellp();          //Position of "size" for later
+    stream << "    WAVEfmt ";
+    put32(stream, 16);                  //length of fmt chunk
+    put16(stream, 3);                   //PCM float
+    put16(stream, 1);                   //Mono
+    put32(stream, spec.freq);           //Sample rate
+    put32(stream, spec.freq * 4);       //Byte rate
+    put16(stream, 2);                   //Block size
+    put16(stream, 32);                  //Bits
+    stream << "data";
+    int size2 = stream.tellp();         //Position of chunk size for later
+    stream << "    ";
+    uint samples = 0;
+    while(!tunes[0].isComplete()) {
+        put32(stream, std::bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
+        samples++;
+    }
+    stream.seekp(size);
+    put32(stream, samples * 4 + 36);
+    stream.seekp(size2);
+    put32(stream, samples * 4);
+    stream.flush();
+}
+void AudioDevice::renderCursed(std::ostream& stream) {
+    stream << "RIFF";
+    int size = stream.tellp();
+    stream << "    WAVEfmt ";
+    put32(stream, 16);
+    put16(stream, 1);                   //PCM int
+    put16(stream, 1);
+    put32(stream, spec.freq);
+    put32(stream, spec.freq * 4);
+    put16(stream, 2);
+    put16(stream, 32);
+    stream << "data";
+    int size2 = stream.tellp();
+    stream << "    ";
+    uint samples = 0;
+    while(!tunes[0].isComplete()) {
+        put32(stream, (tunes[0].getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
+        samples++;
+    }
+    stream.seekp(size);
+    put32(stream, samples * 4 + 36);
+    stream.seekp(size2);
+    put32(stream, samples * 4);
+    stream.flush();
+}

@@ -8,6 +8,7 @@ class Arguments {
     double seekfwd = 0;
     std::vector<std::string> inputFiles;
     bool outputToFile = false;
+    bool cursed = false;
     std::string outputFile;
 
 public:
