@@ -6,17 +6,17 @@
 
 /// A special note that when put on a player changes the player's generator
 class SetterNote {
-    int generatorId = -1;
-    Generator* gen = nullptr;
+    int srcId = -1;
+    AudioSource* gen = nullptr;
 public:
     SetterNote(int id);
-    SetterNote(Generator* ptr);
-    SetterNote(std::istream& str);
+    SetterNote(AudioSource* ptr);
+    SetterNote(std::istream& str, int srate = 44100);
 
     ///getters/setters
-    inline int getId() { return generatorId; }
-    inline Generator* getGen() { return gen; }
-    inline void setGen(Generator* gen) { this->gen = gen; }
+    inline int getId() { return srcId; }
+    inline AudioSource* getGen() { return gen; }
+    inline void setGen(AudioSource* gen) { this->gen = gen; }
 };
 
 #endif

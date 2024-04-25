@@ -3,18 +3,18 @@
 
 #include "generator.hpp"
 
-class Register :public Generator {
-    std::vector<Generator*> generators;
+class Register : public Generator {
+    std::vector<AudioSource*> generators;
 
-    Register(std::vector<Generator*> gen);
+    Register(std::vector<AudioSource*> gen);
 public:
 
-    double operator()(int noteId, double delta, double t);
+    double operator()(int noteId, double delta, double t, double srate);
     void addPhase();
     void removePhase(int id);
     inline double getSample(double, double) {return 0;}
-    Register(std::istream& stream);
-    Generator* copy();
+    Register(std::istream& stream, int , MakeFlags& = MakeFlags::all);
+    AudioSource* copy();
 
     ~Register();
 };

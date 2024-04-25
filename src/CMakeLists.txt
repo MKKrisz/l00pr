@@ -1,4 +1,4 @@
-target_sources(${PROJECT_NAME} PUBLIC audiosource.h
+target_sources(${PROJECT_NAME} PUBLIC audiosource.hpp audiosource.cpp
                                concepts.hpp
                                device.h device.cpp
                                interpolated.hpp
@@ -10,3 +10,4 @@ add_subdirectory(exceptions)
 add_subdirectory(generator)
 add_subdirectory(player)
 add_subdirectory(tune)
+add_subdirectory(filter)

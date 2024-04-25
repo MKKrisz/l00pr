@@ -7,7 +7,7 @@ class NoGenerator : public Generator {
 public: 
     NoGenerator();
     double getSample(double, double);
-    Generator* copy();
+    AudioSource* copy();
 };
 
 #endif

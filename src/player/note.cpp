@@ -2,33 +2,33 @@
 #include "../util.hpp"
 #include <cmath>
 
-Note::Note(float l, Interpolated<Frequency> freq, Interpolated<double> amp) 
+Note::Note(double l, Interpolated<Frequency> freq, Interpolated<double> amp) 
     : len(l), freq(freq), ampl(amp), done(0) {
     freq.SetInterpolator(logarithmicInterpolator<Frequency>);
-    amp.SetInterpolator(logarithmicInterpolator<float>);
+    amp.SetInterpolator(logarithmicInterpolator<double>);
 }
 
 bool Note::isComplete() {
-    float tp = 1/freq(done/len).getFreq();
+    double tp = 1/freq(done/len).getFreq();
     return done > len + (tp-fmod(len, tp));
 }
 
-float Note::getDelta(int srate) {
-    done += 1/float(srate);
+double Note::getDelta(int srate) {
+    done += 1/double(srate);
     return freq(done/len).getFreq()/srate;
 }
-float Note::getAmplitude(float t) {
+double Note::getAmplitude(double t) {
     return ampl(t);
 }
-float Note::getAmplitude() {
+double Note::getAmplitude() {
     //falloff: @^0.02
     return ampl(done/len);
 }
 
-float Note::getFreq(float t) {
+double Note::getFreq(double t) {
     return freq(t).getFreq();
 }
-float Note::getFreq() {
+double Note::getFreq() {
     return freq(done/len).getFreq();
 }
 

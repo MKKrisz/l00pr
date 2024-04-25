@@ -4,11 +4,11 @@
 #include "../player/random_note.hpp"
 
 NoteStream::NoteStream(Note n) : playable(), setter(), loops(){
-    playable.push_back(std::make_pair(0, n));
+    playable.emplace_back(std::make_pair(0, n));
 }
 
 NoteStream::NoteStream(double t, Note n) : playable(), setter(), loops(){
-    playable.push_back(std::make_pair(t, n));
+    playable.emplace_back(std::make_pair(t, n));
 }
 
 NoteStream::NoteStream(std::pair<double, Note> p) : playable(), setter(), loops(){
@@ -109,7 +109,7 @@ std::istream& operator>>(std::istream& stream, NoteStream& ns) {
             for(int i = 0; i < 6 && stream.get(c); i++) {
                 buf += tolower(c);
                 if(buf == "set") {
-                    SetterNote n = SetterNote(stream);
+                    SetterNote n = SetterNote(stream, ns.getSampleRate());
                     ns.Add(std::make_pair(ts, n));
                     parsed = true;
                     break;

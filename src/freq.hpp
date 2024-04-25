@@ -42,7 +42,7 @@ inline Frequency operator*(double f, Frequency& fr) { return Frequency(fr.getFre
 
 
 std::istream& operator>>(std::istream& str, Frequency& f);
-std::ostream& operator<<(std::ostream& str, Frequency& f);
+std::ostream& operator<<(std::ostream& str, const Frequency& f);
 
 template<>
 Frequency logarithmicInterpolator <> (Frequency a, Frequency b, double t);

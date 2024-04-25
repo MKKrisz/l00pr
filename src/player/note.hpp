@@ -22,28 +22,28 @@ class Note {
 public:
     /// Returns the current phase value, then increments it according to the 
     /// sample rate, the frequency and the multiplier value.
-    float getDelta(int srate = 48000);
+    double getDelta(int srate = 48000);
 
     /// Gets the "done" value
-    inline float getTime() { return done; }
-    inline float getLen()  { return len; }
+    inline double getTime() { return done; }
+    inline double getLen()  { return len; }
     inline std::string toString() {
         return "[" + freq[0].second.getName() + (freq.Size() == 1 ? "       " : "-/\\/-- ") + std::to_string(len)  + "    " + std::to_string(ampl[0].second) + "] ";
     }
 
     /// Returns the amplitude
-    float getAmplitude(float t);
-    float getAmplitude();
+    double getAmplitude(double t);
+    double getAmplitude();
 
     /// Returns the frequency
-    float getFreq(float t);
-    float getFreq();
+    double getFreq(double t);
+    double getFreq();
     
 
     /// Returns true if done > len
     virtual bool isComplete();
 
-    Note(float l, Interpolated<Frequency> freq, Interpolated<double> amp);
+    Note(double l, Interpolated<Frequency> freq, Interpolated<double> amp);
     Note(std::istream& str, double bpm);
 };
 

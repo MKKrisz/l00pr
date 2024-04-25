@@ -188,3 +188,6 @@ player(0) {
 }
 ```
 
+### UML graph
+
+![UML graph](./uml.png)

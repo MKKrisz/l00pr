@@ -13,8 +13,9 @@ public:
                     Interpolated<double> duty = 0.5f);
 
     SquareGenerator(std::istream& stream);
+    SquareGenerator(const SquareGenerator& g);
     double getSample(double phase, double t);
-    Generator* copy();
+    AudioSource* copy();
 };
 
 #endif

@@ -28,20 +28,25 @@ protected:
     /// Beats per minute, used for parsing (so you don't need to count the seconds)
     double bpm = 60;
 
-    double len = -1;
-    double lastNoteTs = -1;
-
     /// Enables playing multiple notes at the same time.
     /// This is achieved by changing the parsing format to include a timestamp 
     /// at the beginning
     bool polynote = true;
+
+    int srate = 48000;
     
+    double len = -1;
+    double lastNoteTs = -1;
 public:
     /// self explanatory getters/setters
     inline void setBpm(double val) { bpm = val; }
     inline double getBpm() const { return bpm;}
+
     inline void setPolynote(bool val) { polynote = val; }
     inline bool getPolynote() const { return polynote; }
+
+    inline void setSampleRate(double val) { srate = val; }
+    inline int getSampleRate() const { return srate; }
 
     /// Returns how many seconds it takes to play the stream
     inline double getLen() {

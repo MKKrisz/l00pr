@@ -14,7 +14,7 @@ class Range {
     std::vector<T> data;
     bool fixValue = true;
 public:
-    inline void add(T& t) { data.emplace_back(t); }
+    inline void add(const T& t) { data.emplace_back(t); }
     inline void setFix(bool t) { fixValue = t; }
     inline bool isFix() { return fixValue; }
     inline size_t size() { return data.size();}

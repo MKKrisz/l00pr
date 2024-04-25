@@ -1,54 +1,45 @@
 #ifndef L00PR_GENERATOR_H
 #define L00PR_GENERATOR_H
 
-#include "../audiosource.h"
+#include "../audiosource.hpp"
 #include "../interpolated.hpp"
 
-class Generator : AudioSource {
+class Generator : public AudioSource {
 protected:
-    /// The gain multiplier that should be applied
-    Interpolated<double> m_gain = 1.0f;
-
-    /// The phase offset that should be applied
-    Interpolated<double> m_phaseoffset = 0.0f;
-
     /// The frequency multiplier that should be applied 
     /// Note that the implementation is kind of wonky and not the greatest
-    Interpolated<double> m_phasemul = 1.0f;
-    
-    /// The generator phases
-    std::vector<double> phases;
+    Interpolated<double> m_phasemul;
 
+    /// The gain multiplier that should be applied
+    Interpolated<double> m_gain;
+
+    /// The phase offset that should be applied
+    Interpolated<double> m_phaseoffset;
+
+    Generator(Interpolated<double> mul = 1.0f, Interpolated<double> gain = 1.0f, Interpolated<double> offs = 0.0f)
+        : AudioSource(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
+
+    Generator(const Generator& g) 
+        : AudioSource(g), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {}
+    
+    Generator(std::istream&);
+    bool shouldBeDefault;
 public: 
     /// Gets a sample of this generator
     /// @param phase: A value going from 0 to 1
     /// @param t: A timestamp so that the member values of type 
-    ///          Interpolated<double> can be applied porperly
+    ///          Interpolated<double> can be applied properly
     virtual double getSample(double phase, double t) = 0;
-
-    virtual inline void addPhase() {
-        phases.emplace_back(0);
-    }
-
-    virtual inline void removePhase(int id) {
-        phases.erase(std::next(phases.begin(), id));
-    }
-
-    inline std::vector<double> getPhases() { return phases; }
-    inline void setPhases(std::vector<double>& p) { phases = p;}
-
-    virtual Generator* copy() = 0;
 
     /// Returns the sample from this generator with all the modifiers applied.
     /// Internally calls "getSample()"
-    virtual double operator()(int noteId, double delta, double t);
+    double operator()(int noteId, double delta, double t, double srate);
 
     virtual ~Generator() {}
+
+    static bool ValidName(std::string&);
+    static size_t LongestName();
+    static Generator* Make(std::string&, std::istream&, int, MakeFlags& = MakeFlags::all);
 };
 
-/// Creates a Generator from any given input stream
-/// Remarks: out is a fouble pointer because pointer references are not a
-///              thing, you cannot allocate at a specific address, and the 
-///              value must be able to be accessedd from the outside
-std::istream& operator>> (std::istream& stream, Generator** out);
 #endif

@@ -44,7 +44,7 @@ AudioDevice::AudioDevice(SDL_AudioSpec& spec) : tunes() {
     setSpec(spec);    
 }
 
-AudioDevice::AudioDevice(AudioDevice& dev) : tunes() {
+AudioDevice::AudioDevice(const AudioDevice& dev) : tunes() {
     *this = dev;
 }
 
