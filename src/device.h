@@ -36,7 +36,7 @@ public:
 
     AudioDevice(int srate = 48000, int bufsize = 4096);
     AudioDevice(SDL_AudioSpec& spec);
-    AudioDevice(AudioDevice& dev);
+    AudioDevice(const AudioDevice& dev);
 
     ~AudioDevice();
 
