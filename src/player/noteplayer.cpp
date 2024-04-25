@@ -2,44 +2,44 @@
 
 void NotePlayer::addNote(Note& note) {
     m_notes.emplace_back(note);
-    m_gen->addPhase();
+    m_src->addPhase();
 }
 void NotePlayer::addNote(SetterNote& note) {
-    std::vector phases = m_gen->getPhases();
-    delete m_gen;
+    std::vector phases = m_src->getPhases();
+    delete m_src;
     if(note.getGen() == nullptr) {
-        m_gen = def_gen->copy();
-        m_gen->setPhases(phases);
+        m_src = def_src->copy();
+        m_src->setPhases(phases);
         return;
     }
-    m_gen = note.getGen()->copy();
-    m_gen->setPhases(phases);
+    m_src = note.getGen()->copy();
+    m_src->setPhases(phases);
 }
 
-NotePlayer::NotePlayer(Generator* gen) : m_notes(), m_gen(gen->copy()), def_gen(gen->copy()){}
+NotePlayer::NotePlayer(AudioSource* src) : m_notes(), m_src(src->copy()), def_src(src->copy()){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
-    : m_notes(player.m_notes), m_gen(player.m_gen->copy()), def_gen(player.def_gen->copy()){}
+    : m_notes(player.m_notes), m_src(player.m_src->copy()), def_src(player.def_src->copy()){}
 
 NotePlayer::~NotePlayer() {
-    delete m_gen;
-    delete def_gen;
+    delete m_src;
+    delete def_src;
 }
 
 
-float NotePlayer::getSample(float srate) {
+float NotePlayer::getSample(double srate) {
     double sum = 0;
     for(auto it = m_notes.begin(); it != m_notes.end(); std::advance(it, 1)) {
         if(it->isComplete()) {
-            m_gen->removePhase(std::distance(m_notes.begin(), it));
+            m_src->removePhase(std::distance(m_notes.begin(), it));
             it = m_notes.erase(it);
             std::advance(it, -1);
             continue;
         }
         double t = it->getTime();
-        Generator& gen = *m_gen;
+        AudioSource& src = *m_src;
 
-        double sample = gen(std::distance(m_notes.begin(), it), it->getDelta(srate), t);
+        double sample = src(std::distance(m_notes.begin(), it), it->getDelta(srate), t, srate);
         sum += (*it).getAmplitude() * sample;
         
     }
@@ -52,6 +52,6 @@ NotePlayer& NotePlayer::operator=(const NotePlayer& player) {
         return *this;
     }
     m_notes = player.m_notes;
-    m_gen = player.m_gen;
+    m_src = player.m_src;
     return *this;
 }

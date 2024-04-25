@@ -8,28 +8,28 @@
 #include <vector>
 
 // Plays notes
-class NotePlayer : AudioSource {
+class NotePlayer {
 
     /// The notes the player is currently playing
     std::vector<Note> m_notes;
 
     /// The current generator
-    Generator* m_gen;
+    AudioSource* m_src;
 
     /// The default generator this player was created with
-    Generator* def_gen;
+    AudioSource* def_src;
 
 public:
     /// Adds a note to be played
     void addNote(Note& note);
     void addNote(SetterNote& note);
 
-    NotePlayer(Generator* gen);
+    NotePlayer(AudioSource* gen);
     NotePlayer(const NotePlayer& player);
     ~NotePlayer();
 
     /// Returns the current sample value. Called by callback
-    float getSample(float srate = 48000);
+    float getSample(double srate = 48000);
 
     NotePlayer& operator=(const NotePlayer& player);
 };
