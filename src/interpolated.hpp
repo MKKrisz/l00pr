@@ -40,25 +40,25 @@ protected:
     std::vector<std::pair<double, T>> data;
     std::function<T(T, T, double)> itp;
 
-    static std::function<T(T, T, double)> defitp;
+    static std::function<T(T, T, double)> def_itp;
 
 public:
 
     typedef T value_type;
 
     ///<summary> Default constructor </Summary>
-    Interpolated() : data(), itp(defitp) {}
+    Interpolated() : data(), itp(def_itp) {}
     Interpolated(const Interpolated& ip) : data(ip.data), itp(ip.itp){}
 
-    Interpolated(const T& data) : data(), itp(defitp){
+    Interpolated(const T& data) : data(), itp(def_itp){
         this->data.emplace_back(std::make_pair(0.0f, data));
     }
 
-    Interpolated(double t, const T& data) : data(), itp(defitp) {
+    Interpolated(double t, const T& data) : data(), itp(def_itp) {
         this->data.emplace_back(std::make_pair(t, data));
     }
 
-    Interpolated(std::pair<double, T>& data) : data(), itp(defitp) {
+    Interpolated(std::pair<double, T>& data) : data(), itp(def_itp) {
         this->data.emplace_back(data);
     }
 
@@ -73,9 +73,9 @@ public:
     
     static T basic_interpreter(const char* s, int* n = nullptr) {return T(s);}
 
-    size_t Size() {return data.size();}
+    size_t Size() const {return data.size();}
 
-    T Get(double t) {
+    T Get(double t) const {
         if(data.size() == 1) return data[0].second;
         /*
         if(low_buf == nullptr && high_buf == nullptr)
@@ -109,7 +109,7 @@ public:
         return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
     }
     
-    void Set(float t, T& data) {
+    void Set(double t, const T& data) {
         Set(std::make_pair(t, data));
     }
     void Set(std::pair<float, T> p) {
@@ -129,7 +129,7 @@ public:
         itp = func;
     }
     static void SetDefaultInterpolator(std::function<T(T, T, float)> func) {
-        defitp = func;
+        def_itp = func;
     }
 
     Interpolated& operator=(const Interpolated& i) {
@@ -138,7 +138,7 @@ public:
         this->itp = i.itp;
         return *this;
     }
-    T operator()(float t) {return Get(t);}
+    T operator()(double t) const {return Get(t);}
 
     std::pair<double,T>& operator[](size_t i) {return data[i];}
 
@@ -174,7 +174,7 @@ protected:
     
     /// Returns the index of the keyframe with timestamp "t"
     /// In case of failure the frame timestamp of data[id] will differ from t
-    int getId(double t) {
+    int getId(double t) const {
         if(data.size() == 0) return 0;
         int min = 0;
         int max = data.size()-1;
@@ -191,7 +191,7 @@ protected:
         return mid;
     }
 
-    std::optional<std::pair<float, T>> find(float t) {
+    std::optional<std::pair<double, T>> find(double t) const {
         std::pair<float, T> ret = data[getId(t)];
         if(almostEQ(ret.first, t)) return ret;
         return std::optional<std::pair<float, T>>();
@@ -233,6 +233,6 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
 }
 
 template<Arithmetic T> 
-std::function<T(T, T, double)> Interpolated<T>::defitp = linearInterpolator<T>;
+std::function<T(T, T, double)> Interpolated<T>::def_itp = linearInterpolator<T>;
 
 #endif
