@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <ranges>
+#include <cmath>
 #include "concepts.hpp"
 
 /// Reads in a frequency value from the input stream.
@@ -93,6 +94,12 @@ void ordered_add(U& data, std::pair<F, T> p) {
 
 
 std::istream& skipws(std::istream&);
+struct exp_p {
+    char val;
+};
+
+exp_p expect(char c);
+std::istream& operator>>(std::istream&, const exp_p&);
 
 
 #endif

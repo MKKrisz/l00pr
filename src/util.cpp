@@ -75,3 +75,12 @@ std::istream& skipws(std::istream& str) {
     }
     return str;
 }
+
+exp_p expect(char c) {return exp_p{c};}
+std::istream& operator>>(std::istream& str, const exp_p& c) {
+    str >> skipws;
+    if(str.peek() != c.val)
+        throw parse_error(str, std::string("Expected '") + c.val + "'");
+    str.get();
+    return str;
+}
