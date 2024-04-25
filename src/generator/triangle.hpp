@@ -12,9 +12,10 @@ public:
                       Interpolated<double> offset = 0.0f, 
                       Interpolated<double> peak = 0.5f);
     TriangleGenerator(std::istream& stream);
+    TriangleGenerator(const TriangleGenerator&);
 
     double getSample(double phase, double t);
-    Generator* copy();
+    AudioSource* copy();
 };
 
 #endif

@@ -1,12 +1,11 @@
 #include "triangle.hpp"
 #include "../util.hpp"
 
-TriangleGenerator::TriangleGenerator(Interpolated<double> amplitude, Interpolated<double> phasemul, Interpolated<double> offset, Interpolated<double> peak) {
-    m_gain = amplitude;
-    m_phasemul = phasemul;
-    m_phaseoffset = offset;
-    m_peak = peak;
-}
+TriangleGenerator::TriangleGenerator(Interpolated<double> amplitude, 
+        Interpolated<double> phasemul, 
+        Interpolated<double> offset, 
+        Interpolated<double> peak) 
+    : Generator(phasemul, amplitude, offset), m_peak(peak){}
 
 double TriangleGenerator::getSample(double p, double t) {
     double peak = m_peak.Get(t);
@@ -18,27 +17,21 @@ double TriangleGenerator::getSample(double p, double t) {
         return lerp(-1.0f, 0.0f, (p+(peak/2)-1)*2/peak);
 }
 
-TriangleGenerator::TriangleGenerator(std::istream& stream) : TriangleGenerator() {
-    if((stream >> std::ws).peek() != '(') return;
-    stream.get();
-    Interpolated<double> a[4] = {1, 1, 0.0f, 0.5f};
-    for(int i = 0; i < 4; i ++) {
-        if((stream >> std::ws).peek() == ')') break;
-        a[i].Clear();
-        stream >> a[i];
+TriangleGenerator::TriangleGenerator(const TriangleGenerator& g) 
+    : Generator(g), m_peak(g.m_peak) {}
+
+TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), m_peak(0.5){
+    if(shouldBeDefault) return;
+    if((stream >> skipws).peek() != ')') {
+        m_peak.Clear();
+        stream >> m_peak;
     }
-    if((stream >> std::ws).peek() != ')') 
+    if((stream >> skipws).peek() != ')') 
         throw parse_error(stream, "Excepted ')'");
     stream.get();
-    m_gain = a[1];
-    m_phasemul = a[0];
-    m_phaseoffset = a[2];
-    m_peak = a[3];
 }
 
-Generator* TriangleGenerator::copy() { 
-    TriangleGenerator* ret = new TriangleGenerator(m_gain, m_phasemul, m_phaseoffset);
-    ret->phases = phases;
-    return ret;
+AudioSource* TriangleGenerator::copy() {
+    return new TriangleGenerator(*this);
 }
 

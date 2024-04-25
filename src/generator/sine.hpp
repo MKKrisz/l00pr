@@ -8,10 +8,11 @@ public:
     SineGenerator(Interpolated<double> amplitude = 1.0f,
                   Interpolated<double> phasemul = 1.0f, 
                   Interpolated<double> offset = 0.0f);
+    SineGenerator(const SineGenerator& g);
 
     SineGenerator(std::istream& stream);
     double getSample(double, double);
-    Generator* copy();
+    AudioSource* copy();
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include "none.hpp"
 
-NoGenerator::NoGenerator() {}
+NoGenerator::NoGenerator() : Generator() {}
 double NoGenerator::getSample(double, double) { return 0; }
-Generator* NoGenerator::copy() {return new NoGenerator();}
+AudioSource* NoGenerator::copy() {return new NoGenerator();}
