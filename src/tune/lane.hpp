@@ -7,7 +7,7 @@
 struct Lane {
     NotePlayer player;
     NoteStream stream;
-    Lane(NotePlayer p, NoteStream s) : player(p), stream(s) {}
+    Lane(const NotePlayer& p, const NoteStream& s) : player(p), stream(s) {}
 };
 
 #endif

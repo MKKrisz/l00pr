@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 
-Tune::Tune() : lanes(), generators() {}
+Tune::Tune() : lanes(), sources() {}
 
 Tune::Tune(NotePlayer& p, NoteStream& s) : lanes() {
     lanes.push_back(Lane(p, s));
@@ -14,9 +14,9 @@ Tune::Tune(Lane& p) : lanes() {
     lanes.push_back(p);
 }
 
-Tune::Tune(const Tune& t) : lanes(t.lanes), generators(), bpm(t.bpm), srate(t.srate), polynote(t.polynote){
-    for(Generator* g : generators) {
-        generators.emplace_back(g->copy());
+Tune::Tune(const Tune& t) : lanes(t.lanes), sources(), bpm(t.bpm), srate(t.srate), polynote(t.polynote){
+    for(AudioSource* s : t.sources) {
+        sources.emplace_back(s->copy());
     }
 }
 
@@ -42,11 +42,11 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
                 break;
             }
             if(buf == "generators") {
-                t.setGen(stream);
+                t.setGen(stream, t.getSampleRate());
                 break;
             }
             if(buf == "player") {
-                t.addLane(stream);
+                t.addLane(stream, t.getSampleRate());
                 break;
             }
         }
@@ -108,26 +108,24 @@ void Tune::setEnv(std::istream& stream) {
     }
 }
 
-void Tune::setGen(std::istream& stream) {
+void Tune::setGen(std::istream& stream, int srate) {
     stream >> skipws;
     if(stream.peek() != '{') {
-        Generator* gen;
-        stream >> &gen;
-        generators.emplace_back(gen);
+        AudioSource* gen = AudioSource::Make(stream, srate);
+        sources.emplace_back(gen);
         return;
     }
     stream.get();
     while((stream >> skipws).peek() != '}') {
-        Generator* gen;
-        stream >> &gen;
-        generators.emplace_back(gen);
+        AudioSource* gen = AudioSource::Make(stream, srate);
+        sources.emplace_back(gen);
     }
     stream.get();
 }
 
-void Tune::addLane(std::istream& stream) {
+void Tune::addLane(std::istream& stream, int srate) {
     stream >> skipws;
-    Generator* gen;
+    AudioSource* gen;
     NoteStream str = NoteStream();
     if(stream.peek() == '(') {
         stream.get();
@@ -135,27 +133,20 @@ void Tune::addLane(std::istream& stream) {
         stream >> skipws;
         if(isdigit(stream.peek())) {
             stream >> genId;
-            gen = generators[genId];
+            gen = sources[genId];
         }
         else
-            stream >> &gen;
-
-        if((stream >> skipws).peek() != ')') {
-            throw parse_error(stream, "No closing ')' for player generator definition");
-        }
-        stream.get();
+            gen = AudioSource::Make(stream, srate);
+        stream >> expect(')');
     }
     if((stream >> skipws).peek() == '{') {
         stream.get();
         str.setPolynote(polynote);
         str.setBpm(bpm);
         stream >> str;
-        if((stream >> skipws).peek() != '}') {
-            throw parse_error(stream, "No closing '}' for note stream definition");
-        }
-        stream.get();
+        stream >> expect('}');    
     }
-    lanes.push_back(Lane(NotePlayer(gen), str));
+    lanes.emplace_back(Lane(NotePlayer(gen), str));
 }
 
 double Tune::getSample(double srate) {
@@ -210,6 +201,6 @@ double Tune::getLen() const {
 }
 
 Tune::~Tune() {
-    for(auto g : generators)
+    for(auto g : sources)
         delete g;
 }
