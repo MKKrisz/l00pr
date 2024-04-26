@@ -9,15 +9,33 @@
 #include "util.hpp"
 #include "exceptions/parse_error.hpp"
 
+/// <summary> 
+/// Data structure to parse, store and interpolate between values with no specific time value 
+/// Mostly used for random note generation to define the ranges of values to use.
+/// <summary>
+/// <seealso cref="Interpolated"/>
+/// <seealso cref="RandomNote"/>
 template <typename T>
 class Range {
+
+    /// <summary> Internal data structure. </summary>
     std::vector<T> data;
+
+    /// <summary> Boolean that indicates wether the return value of get should be interpolated or a fix value. </summary>
     bool fixValue = true;
 public:
+    /// <summary> Adds a value to this Range. </summary>
     inline void add(const T& t) { data.emplace_back(t); }
+
+    /// <summary> Sets the fixvalue flag. </summary>
     inline void setFix(bool t) { fixValue = t; }
+    /// <summary> Gets the fixvalue flag. </summary>
     inline bool isFix() { return fixValue; }
+
+    /// <summary> Returns the size of the internal data structure. </summary>
     inline size_t size() { return data.size();}
+
+    /// <summary> Returns 
     inline T get(double val) {
         if(val < 0 || val > 1) 
             throw std::out_of_range("Range float-based getter");
@@ -31,6 +49,7 @@ public:
             return linearInterpolator(data[0], data[1], val);
     }
 
+    // Constructors
     Range() : data() {}
     Range(const T& data) : data() {this->data.emplace_back(data);}
     Range(const T& low, const T& high) : data(), fixValue(false) {
@@ -45,6 +64,7 @@ public:
         }
     }
 
+    /// <summary> Returns a reference to the value in internal structure at index 'i' </summary>
     T& operator[](size_t i) { 
         if(i >= data.size())
             throw std::out_of_range("Range");
@@ -52,6 +72,7 @@ public:
     }
 };
 
+/// <summary> Parser for Ranges. Range syntax can be: <value>; (<value1> -- <value2>); (<value1> <value2> ... <value_n>) </summary>
 template<typename T>
 std::istream& operator>>(std::istream& str, Range<T>& range) {
     T val;
@@ -67,12 +88,9 @@ std::istream& operator>>(std::istream& str, Range<T>& range) {
     val = T();
     if(str.peek() == '-') {
         str.get();
-        str >> skipws >> val >> skipws;
+        str >> skipws >> val >> expect(')');
         range.setFix(false);
         range.add(val);
-        if(str.peek() != ')')
-            throw parse_error(str, "Expected ')'");
-        str.get();
         return str;
     }
     while(str.good() && str.peek() != ')') {

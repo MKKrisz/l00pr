@@ -6,23 +6,26 @@
 #include <cmath>
 #include "concepts.hpp"
 
+/// <summary> 
 /// Reads in a frequency value from the input stream.
 /// Format: 
 ///         <A-G>[b#x]<int> where 
 ///         <>: one of the specified characters must be present
 ///         []: one of the specified characters may be present
 ///         int: integer
-/// Remarks:
+/// </summary>
+/// <remarks>
 ///         If the first character is a digit instead of a capital letter
 ///         between A and G, interprets value as a float
-/// Throws:
-///         parse_error on failure
+/// </remarks>
+/// <exception cref="parse_error"> On failure. </exception>
 double getFreq(std::istream& stream);
 
+/// <summary>
 /// Gets the line and column number of the current stream position in the most
 /// inefficent way imaginable
-/// Returns:
-///         An std::pair containing the line number and the column number (in this order)
+/// </summary>
+/// <returns> An std::pair containing the line number and the column number (in this order) </returns>
 std::pair<int, int> getLineColNo(std::istream& stream);
 
 /// Linear Interpolation for Arithmetic types
@@ -55,10 +58,7 @@ bool almostEQ(T a, T  b) {
     return (aa - ba) < aa * eps;
 }
 
-
-
-
-//TODO: Refactor template arguments...
+/// <summary> Binary search algorithm for arbitrary ordered ranges of std::pair<F, T>, where F is a floating point type </summary>
 template <std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
 size_t bSearch(U data, F t) {
@@ -76,6 +76,7 @@ size_t bSearch(U data, F t) {
     return mid;
 }
 
+/// <summary> Ordered insertion for arbitrary ranges of std::pair<F, T> where F is a floating point type </summary>
 template<std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
 void ordered_add(U& data, std::pair<F, T> p) {
@@ -91,13 +92,15 @@ void ordered_add(U& data, std::pair<F, T> p) {
         data.insert(std::next(data.begin(), id), p);
 }
 
-
-
+/// <summary> Stream manipulator that skips whitespace and comments </summary>
 std::istream& skipws(std::istream&);
+
+/// <summary> expect() stream manipulator helper struct </summary>
 struct exp_p {
     char val;
 };
 
+/// <summary> Stream manipulator that throws an exception if the next non-whitespace character is not 'c' </summary>
 exp_p expect(char c);
 std::istream& operator>>(std::istream&, const exp_p&);
 

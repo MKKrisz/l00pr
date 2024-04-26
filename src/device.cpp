@@ -17,7 +17,7 @@ void AudioDevice::addTune(const Tune& t) {
 
 //Tune* AudioDevice::getTune() { return tune; }
 
-void AudioDevice::setSpec(SDL_AudioSpec& s) {
+void AudioDevice::setSpec(const SDL_AudioSpec& s) {
     std::cout << "Asked for: " <<  s.freq << " " << s.format << " " << s.channels << " " << s.samples << std::endl;;
     SDL_AudioSpec temp;
     devHandle = SDL_OpenAudioDevice(nullptr, 0, &s, &temp, 0);

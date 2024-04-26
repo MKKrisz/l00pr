@@ -6,25 +6,34 @@
 #include "util.hpp"
 #include "interpolator.hpp"
 
+/// <summary> Class to parse frequency (and also piano key name) values into </summary>
 class Frequency {
+    /// <summary> The string that got parsed when constructing this object </summary>
     std::string name = "";
+
+    /// <summary> The actual frequency representation of this object </summary>
     double val = 0;
 public:
+    /// <summary> Returns this object's value </summary>
     inline constexpr double getFreq() const noexcept {return val;}
+
+    /// <summary> Returns the string representation of this object </summary>
     inline constexpr std::string getName() const noexcept {
         if(name != "")
             return name;
         return std::to_string(val);
     }
 
+    // Constructors
     inline Frequency() {}
-    inline Frequency(std::string& name) : name(name), val(0) {
+    inline Frequency(const std::string& name) : name(name), val(0) {
         std::stringstream ss(name);
         val = ::getFreq(ss);
     }
     inline Frequency(std::stringstream& name) : name(name.str()), val(::getFreq(name)) {}
     inline Frequency(double val) noexcept : name(""), val(val) {}
 
+    // Operators to support interpolation
     inline Frequency operator+(Frequency f) const { return Frequency(val + f.val); }
     inline Frequency operator-(Frequency f) const { return Frequency(val - f.val); }
     inline Frequency operator*(Frequency f) const { return Frequency(val * f.val); }
@@ -34,16 +43,17 @@ public:
     inline Frequency operator-(double f) const { return Frequency(val - f); }
     inline Frequency operator*(double f) const { return Frequency(val * f); }
     inline Frequency operator/(double f) const { return Frequency(val / f); }
-
 };
-
 
 inline Frequency operator*(double f, Frequency& fr) { return Frequency(fr.getFreq() * f); }
 
-
+/// <summary> Parses a frequency value from 'str'. </summary>
 std::istream& operator>>(std::istream& str, Frequency& f);
+
+/// <summary> Outputs a frequency value (preferably it's name member) to 'str'. </summary>
 std::ostream& operator<<(std::ostream& str, const Frequency& f);
 
+/// <summary> Overloaded interpolator for frequencies </summary>
 template<>
 Frequency logarithmicInterpolator <> (Frequency a, Frequency b, double t);
 
