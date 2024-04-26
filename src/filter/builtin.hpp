@@ -5,5 +5,6 @@
 #include "delay.hpp"
 #include "gain.hpp"
 #include "feedback.hpp"
+#include "quantize.hpp"
 
 #endif
