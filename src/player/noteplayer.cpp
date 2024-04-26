@@ -28,7 +28,6 @@ NotePlayer::~NotePlayer() {
 
 
 float NotePlayer::getSample(double srate) {
-    double sum = 0;
     for(auto it = m_notes.begin(); it != m_notes.end(); std::advance(it, 1)) {
         if(it->isComplete()) {
             m_src->removePhase(std::distance(m_notes.begin(), it));
@@ -39,11 +38,9 @@ float NotePlayer::getSample(double srate) {
         double t = it->getTime();
         AudioSource& src = *m_src;
 
-        double sample = src(std::distance(m_notes.begin(), it), it->getDelta(srate), t, srate);
-        sum += (*it).getAmplitude() * sample;
-        
+        src(std::distance(m_notes.begin(), it), it->getDelta(srate), t, srate, it->getAmplitude());
     }
-    return sum;
+    return m_src->calc();
 }
 
 
