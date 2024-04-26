@@ -3,10 +3,16 @@
 
 Register::Register(std::vector<AudioSource*> gen) : generators(gen) {}
 
-double Register::operator()(int noteId, double d, double t, double srate) {
+void Register::operator()(int noteId, double d, double t, double srate, double extmul) {
+    for(AudioSource* g : generators) {
+        (*g)(noteId, d, t, srate, extmul);
+    }
+}
+
+double Register::calc() {
     double sum = 0;
     for(AudioSource* g : generators) {
-        sum += (*g)(noteId, d, t, srate);
+        sum += g->calc();
     }
     return sum;
 }
@@ -29,7 +35,7 @@ Register::~Register() {
     }
 }
 
-Register::Register(std::istream& stream, int srate, MakeFlags& flags) : Generator(stream) {
+Register::Register(std::istream& stream, const int srate, const MakeFlags& flags) : Generator(stream) {
     if((stream >> skipws).peek() != '{') 
         throw parse_error(stream, "Missing '{'");
     stream.get();

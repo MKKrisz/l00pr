@@ -40,7 +40,7 @@ PassFilter::PassFilter(const Interpolated<double>& dp, int srate, AudioSource* s
     sbuf = std::vector<double>(kern.size(), 0);
 }
 
-PassFilter::PassFilter(std::istream& str, int srate, MakeFlags& flags) {
+PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
     Interpolated<double> dp;
     AudioSource* src = nullptr;
     str >> expect('(') >> dp;

@@ -8,19 +8,19 @@
 //TODO: allow sample-based delaying
 class DelayFilter : public Filter {
     std::vector<double> sbuf;
-    size_t bufId;
+    size_t bufId = 0;
 public:
-    DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0), bufId(0) {}
-    DelayFilter(std::istream& str, int srate, MakeFlags& flags = MakeFlags::all) {
+    DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0) {}
+
+    DelayFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
         double t;
-        AudioSource* src = nullptr;
         str >> expect('(') >> t >> expect(')') >> skipws;
         if(str.peek() == '{') {
             str.get();
             src = AudioSource::Make(str, srate, flags);
             str >> expect('}');
         }
-        *this = DelayFilter(t, src, srate);
+        sbuf = std::vector<double>(t*srate, 0);
     }
     DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId){}
     double filter(double sample, double, double, double) {

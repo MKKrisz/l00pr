@@ -33,13 +33,13 @@ public:
 
     /// Returns the sample from this generator with all the modifiers applied.
     /// Internally calls "getSample()"
-    double operator()(int noteId, double delta, double t, double srate);
+    void operator()(int noteId, double delta, double t, double srate, double extmul);
 
     virtual ~Generator() {}
 
     static bool ValidName(std::string&);
     static size_t LongestName();
-    static Generator* Make(std::string&, std::istream&, int, MakeFlags& = MakeFlags::all);
+    static Generator* Make(std::string&, std::istream&, const int, const MakeFlags& = MakeFlags::all);
 };
 
 #endif

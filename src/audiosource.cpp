@@ -1,28 +1,25 @@
 #include "audiosource.hpp"
 #include "util.hpp"
-#include "generator/builtin.hpp"
-#include "filter/builtin.hpp"
+#include "generator/generator.hpp"
+#include "filter/filter.hpp"
 
-MakeFlags MakeFlags::all = {true, true};
+const MakeFlags MakeFlags::all = {true, true};
+const MakeFlags MakeFlags::onlyFilters = {true, false};
+const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
-AudioSource* AudioSource::Make(std::istream& str, int srate, MakeFlags& flags) {
+AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     str >> skipws;
     std::string buf;
     char c;
-    while(str.get(c)) {
+    size_t len = std::max(Filter::LongestName(), Generator::LongestName());
+    while(buf.size() < len && str.get(c)) {
         buf += tolower(c);
-        if(flags.filters && buf.size() <= Filter::LongestName()) {
-            if(Filter::ValidName(buf)) {
-                return Filter::Make(buf, str, srate);
-            }
+        if(flags.filters && Filter::ValidName(buf)) {
+            return Filter::Make(buf, str, srate);
         }
-        else break;
-        if(flags.generators && buf.size() <= Generator::LongestName()) {
-            if(Generator::ValidName(buf)) {
-                return Generator::Make(buf, str, srate, flags);
-            }
+        if(flags.generators && Generator::ValidName(buf)) {
+            return Generator::Make(buf, str, srate, flags);
         }
-        else break;
     }
     throw parse_error(str, "No source with name \"" + buf + "\" exists");
 }

@@ -29,10 +29,10 @@ Generator::Generator(std::istream& str) : AudioSource() {
 
 }
 
-double Generator::operator()(int noteId, double delta, double t, double) {
+void Generator::operator()(int noteId, double delta, double t, double, double extmul) {
     double& phase = phases[noteId];
     phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
-    return getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t);
+    accumulator += (getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * extmul);
 }
 
 const std::vector<std::string> genNames = {"sine", "square", "triangle", "noise", "register"};
@@ -52,7 +52,7 @@ size_t Generator::LongestName() {
     return l;
 }
 
-Generator* Generator::Make(std::string& name, std::istream& str, int srate, MakeFlags& flags) {
+Generator* Generator::Make(std::string& name, std::istream& str, const int srate, const MakeFlags& flags) {
     if(name == "sine")     return new SineGenerator(str);
     if(name == "square")   return new SquareGenerator(str);
     if(name == "triangle") return new TriangleGenerator(str);
