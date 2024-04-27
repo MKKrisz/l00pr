@@ -3,6 +3,10 @@
 
 #include "generator.hpp"
 
+/// <summary> 
+/// Generates a sine wave 
+/// Syntax: sine or sine([frequency_multiplier] [gain] [phase_offset])
+/// </summary>
 class SineGenerator :public Generator {
 public: 
     SineGenerator(Interpolated<double> amplitude = 1.0f,

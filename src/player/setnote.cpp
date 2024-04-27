@@ -1,4 +1,5 @@
 #include "setnote.hpp"
+#include "../util.hpp"
 
 SetterNote::SetterNote(int id) : srcId(id) {}
 SetterNote::SetterNote(AudioSource* gen) : gen(gen){}

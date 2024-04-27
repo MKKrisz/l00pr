@@ -34,5 +34,9 @@ Filter* Filter::Make(std::string& name, std::istream& str, const int srate, cons
     if(name == "gain")     return new GainFilter(str, srate, flags);
     if(name == "feedback") return new Feedback(str, srate, flags);
     if(name == "quantize") return new QuantizeFilter(str, srate, flags);
-    throw parse_error(str, "No filter with name \"" + name + "\" exists");
+    std::string err = "No filter with name \"" + name + "\" exists.\n Available filter names:\n";
+    for(const std::string& s : filterNames) {
+        err += s + "\n";
+    }
+    throw parse_error(str, err);
 }

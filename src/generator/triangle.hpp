@@ -3,7 +3,14 @@
 
 #include "generator.hpp"
 
+/// <summary> 
+/// Generates a Triangle wave 
+/// Syntax: triangle
+/// or triangle([freq_multiplier] [gain] [phase_offset] [peak])
+/// </summary>
+/// <remarks> In this context, Sawtooth waves are also triangles </summary>
 class TriangleGenerator :public Generator {
+    /// <summary> A value between 0 and 1, marks the point where the wave peaks. </summary>
     Interpolated<double> m_peak;
     
 public:

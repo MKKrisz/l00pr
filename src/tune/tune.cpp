@@ -2,7 +2,7 @@
 #include "../exceptions/parse_error.hpp"
 
 #include <iostream>
-#include <iomanip>
+#include <string>
 
 Tune::Tune() : lanes(), sources() {}
 
@@ -33,24 +33,29 @@ std::istream& operator>>(std::istream& stream, Tune& t) {
     stream >> skipws;
     while(stream.good()) {
         std::string buf = "";
-        while(true) {
-            if(stream.peek() == 0) 
-                throw parse_error(stream, "Something is not good...");
-            buf += tolower(stream.get());
+        char c;
+        bool parsed = false;
+        while(stream.get(c) && buf.size() < std::string("generators").size()) { 
+            buf += tolower(c);
             if(buf == "set") {
                 t.setEnv(stream);
+                parsed = true;
                 break;
             }
 
-            if(buf == "generators") {
+            if(buf == "generator") {
                 t.setGen(stream, t.getSampleRate());
+                parsed = true;
                 break;
             }
             if(buf == "player") {
                 t.addLane(stream, t.getSampleRate());
+                parsed = true;
                 break;
             }
         }
+        if(!parsed)
+            throw parse_error(stream, "Unparsable keyword \"" + buf + "\". Try these: set, generator, player");
         buf.clear();
         stream >> skipws;
     }
@@ -139,6 +144,7 @@ void Tune::addLane(std::istream& stream, int srate) {
     stream >> skipws;
     AudioSource* gen;
     NoteStream str = NoteStream();
+    bool hasNotes = false;
     if(stream.peek() == '(') {
         stream.get();
         int genId;
@@ -156,8 +162,12 @@ void Tune::addLane(std::istream& stream, int srate) {
         str.setPolynote(polynote);
         str.setBpm(bpm);
         stream >> str;
+        hasNotes = true;
         stream >> expect('}');    
     }
+    if(!hasNotes)
+        throw parse_error(stream, std::string("No notes to play.\n Player format: player(generator_id){note1 note2 ... note_n}\nNote format: <") + (polynote? "time" : "") +" frequency length amplitude>");
+
     lanes.emplace_back(Lane(NotePlayer(gen), str));
 }
 

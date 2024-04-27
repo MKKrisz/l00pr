@@ -3,14 +3,20 @@
 
 #include <cmath>
 
+const std::vector<std::string> genNames = {"sine", "square", "triangle", "noise", "register"};
+
+
 Generator::Generator(std::istream& str) : AudioSource() {
-    if((str >> skipws).peek() != '('){ 
+    Interpolated<double> a[3] = {1, 1, 0.0f};
+    if((str >> skipws).peek() != '('){
+        m_phasemul = a[0];
+        m_gain = a[1];
+        m_phaseoffset = a[2];
         shouldBeDefault = true;
         return;
     }
     shouldBeDefault = false;
     str.get();
-    Interpolated<double> a[3] = {1, 1, 0.0f};
     for(int i = 0; i < 3; i++) {
         if((str >> skipws).peek() == ')') {
             shouldBeDefault = true;
@@ -35,8 +41,6 @@ void Generator::operator()(int noteId, double delta, double t, double, double ex
     accumulator += (getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * extmul);
 }
 
-const std::vector<std::string> genNames = {"sine", "square", "triangle", "noise", "register"};
-
 bool Generator::ValidName(std::string& str) {
     for(const std::string& g : genNames) {
         if(str == g) return true;
@@ -58,5 +62,9 @@ Generator* Generator::Make(std::string& name, std::istream& str, const int srate
     if(name == "triangle") return new TriangleGenerator(str);
     if(name == "noise")    return new NoiseGenerator(str);
     if(name == "register") return new Register(str, srate, flags);
-    throw parse_error(str, "No generator with name \"" + name + "\" exists");
+    std::string err = "No generator with name \"" + name + "\" exists.\n Available generator names:\n";
+    for(const std::string& s : genNames) {
+        err += s + "\n";
+    }
+    throw parse_error(str, err);
 }

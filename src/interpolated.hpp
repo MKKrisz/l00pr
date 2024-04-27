@@ -55,7 +55,7 @@ public:
 
     /// <summary> Constructor for single T values </summary>
     Interpolated(const T& data) : data(), itp(def_itp){
-        this->data.emplace_back(std::make_pair(0.0f, data));
+        this->data.emplace_back(std::make_pair(0.0, data));
     }
 
     /// <summary> Constructor for a datapoint </summary>

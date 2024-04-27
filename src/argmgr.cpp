@@ -62,7 +62,7 @@ void Arguments::Run() {
             len = std::numeric_limits<uint>::max();
         else 
             len++;
-        sleep(len - seekfwd);
+        sleep(len - seekfwd + 1);
         dev.stop();
         return;
     }

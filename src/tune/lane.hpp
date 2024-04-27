@@ -4,6 +4,8 @@
 #include "notestream.hpp"
 #include "../player/noteplayer.hpp"
 
+
+/// <summary> Rudimentary structure storing only a NotePlayer and a NoteStream </summary>
 struct Lane {
     NotePlayer player;
     NoteStream stream;

@@ -6,7 +6,10 @@
 #include "util.hpp"
 #include "interpolator.hpp"
 
-/// <summary> Class to parse frequency (and also piano key name) values into </summary>
+/// <summary>
+/// Class to parse frequency (and also piano key name) values into 
+/// Syntax: <just_a_float> or <A-G>[#, b, x]<octave>
+/// </summary>
 class Frequency {
     /// <summary> The string that got parsed when constructing this object </summary>
     std::string name = "";

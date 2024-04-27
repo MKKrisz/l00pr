@@ -3,7 +3,9 @@
 
 #include "generator.hpp"
 
+/// <summary> Funky generator that actually isn't one, it just stores other generators (and possibly their filter chain) </summary>
 class Register : public Generator {
+    /// <summary> The generators that this Register holds. </summary>
     std::vector<AudioSource*> generators;
 
     Register(std::vector<AudioSource*> gen);
