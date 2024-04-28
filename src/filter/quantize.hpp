@@ -6,13 +6,20 @@
 
 #include <iostream>
 
+/// <summary>
+/// Quantizes the signal
+/// Syntax: quantize(<bits>) {[src]}
 class QuantizeFilter : public Filter {
+
+    /// <summary> The number of bits to quantize by </summary>
     size_t bits;
 
 public:
+    // cctors
     QuantizeFilter(size_t bits, AudioSource* src = nullptr) : Filter(src), bits(bits) {}
     QuantizeFilter(const QuantizeFilter& f) : Filter(f), bits(f.bits) {}
 
+    // parser
     QuantizeFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
         str >> expect('(') >> bits >> expect(')') >> skipws;
         if(str.peek() == '{') {
@@ -22,6 +29,7 @@ public:
         }
     }
 
+    /// <summary> quantizes the floating-point sample by first turning it into PCM64 format, then bitshifting it, then turning it back into floating-point </summary>
     double filter(double sample, double, double, double) {
         unsigned long s_l = (unsigned long)((sample + 1)/ 2 * (double)std::numeric_limits<unsigned long>::max()) >> (64 - bits);
         return (double(s_l) / (std::pow(2, bits)-1) * 2) - 1;

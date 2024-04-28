@@ -6,12 +6,22 @@
 #include "../util.hpp"
 
 //TODO: allow sample-based delaying
+
+/// <summary> 
+/// Delays the signal
+/// Syntax: delay(<seconds>) {src}
+/// </summary>
 class DelayFilter : public Filter {
+    /// <summary> Rotating sample buffer </summary>
     std::vector<double> sbuf;
+
+    /// <summary> Current position in `sbuf` </summary>
     size_t bufId = 0;
 public:
+    // cctors
     DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0) {}
 
+    // parser
     DelayFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
         double t;
         str >> expect('(') >> t >> expect(')') >> skipws;
@@ -22,7 +32,10 @@ public:
         }
         sbuf = std::vector<double>(t*srate, 0);
     }
+
     DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId){}
+
+    /// <summary> stores `sample` at the current position then returns the next (oldest) sample in sbuf
     double filter(double sample, double, double, double) {
         sbuf[bufId++] = sample;
         bufId = bufId % sbuf.size();

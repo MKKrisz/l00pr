@@ -4,9 +4,16 @@
 #include "filter.hpp"
 #include "../util.hpp"
 
+/// <summary> 
+/// Simple gain filter. Multiplies the sample by some value.
+/// Syntax: gain(<amplitude>) {[src]}
+/// </summary>
 class GainFilter : public Filter {
+
+    /// <summary> The value to multiply by </summary>
     double gain;
 public:
+    // cctors
     GainFilter(double gain = 1, AudioSource* src = nullptr) : Filter(src), gain(gain) {}
 
     GainFilter(const GainFilter& f) : Filter(f), gain(f.gain) {}
@@ -19,6 +26,8 @@ public:
             str >> expect('}');
         }
     }
+
+    /// <summary> Multiplies the sample value by gain </summary>
     inline double filter(double sample, double, double, double) { return sample * gain; }
     AudioSource* copy() {return new GainFilter(*this); }
     inline GainFilter& operator=(const GainFilter&) = default;
