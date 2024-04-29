@@ -21,14 +21,16 @@ TriangleGenerator::TriangleGenerator(const TriangleGenerator& g)
     : Generator(g), m_peak(g.m_peak) {}
 
 TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), m_peak(0.5){
-    if(shouldBeDefault) return;
+    if(shouldBeDefault) { 
+        parse_lb(stream);
+        return;
+    }
     if((stream >> skipws).peek() != ')') {
         m_peak.Clear();
         stream >> m_peak;
     }
-    if((stream >> skipws).peek() != ')') 
-        throw parse_error(stream, "Excepted ')'");
-    stream.get();
+    stream >> expect(')');
+    parse_lb(stream);
 }
 
 AudioSource* TriangleGenerator::copy() {

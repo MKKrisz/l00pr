@@ -14,14 +14,16 @@ SquareGenerator::SquareGenerator(const SquareGenerator& g)
     : Generator(g), m_dutyCycle(g.m_dutyCycle) {}
 
 SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_dutyCycle(0.5) {
-    if(shouldBeDefault) return;
+    if(shouldBeDefault) { 
+        parse_lb(stream);
+        return;
+    }
     if((stream >> skipws).peek() != ')') {
         m_dutyCycle.Clear();
         stream >> m_dutyCycle;
     }
-    if((stream >> skipws).peek() != ')') 
-        throw parse_error(stream, "Excepted ')'");
-    stream.get();
+    stream >> expect(')');
+    parse_lb(stream);
 }
 
 AudioSource* SquareGenerator::copy() { 

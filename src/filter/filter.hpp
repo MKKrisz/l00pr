@@ -32,6 +32,11 @@ public:
         feedback = val;
     }
 
+    virtual std::optional<std::pair<double, double>> getLengthBounds() override {
+        if(src == nullptr) return {};
+        return src->getLengthBounds();
+    }
+
     /// <summary> Unused function, returns the base generator of a filter chain </summary>
     virtual AudioSource* getBase() override {
         return src == nullptr? nullptr : src->getBase();

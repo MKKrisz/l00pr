@@ -1,6 +1,9 @@
 #include "noteplayer.hpp"
 
 void NotePlayer::addNote(Note& note) {
+    if(m_src->getLengthBounds().has_value()) {
+        note.clampLength(m_src->getLengthBounds().value().first, m_src->getLengthBounds().value().second);
+    }
     m_notes.emplace_back(note);
     m_src->addPhase();
 }

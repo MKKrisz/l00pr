@@ -3,6 +3,10 @@
 
 #include <vector>
 #include <istream>
+#include <optional>
+
+#include "util.hpp"
+#include "exceptions/parse_error.hpp"
 
 /// <summary> Helper struct that specifies what kind of sources to generate when calling `AudioSource::Make()` </summary>
 struct MakeFlags {
@@ -30,9 +34,15 @@ protected:
     /// <summary> Accumulates generators' generated values for this sample before sending it through the filter chain </summary>
     double accumulator;
 
+    /// <summary> If set, specifies the minimum and maximum lengths a generator can output </summary>
+    std::optional<std::pair<double, double>> length_bounds;
+
+    /// <summary> Standard parser for length bounds </summary>
+    void parse_lb(std::istream& str);
+
     // Base constructors for subclasses.
-    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator() {}
-    AudioSource() : phases(), feedback(0), accumulator() {}
+    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(), length_bounds(src.length_bounds) {}
+    AudioSource() : phases(), feedback(0), accumulator(), length_bounds() {}
 public:
 
     /// <summary> Handles receiving feedback values. </summary>
@@ -58,6 +68,10 @@ public:
     /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
     virtual inline void removePhase(int id) {
         phases.erase(std::next(phases.begin(), id));
+    }
+
+    virtual inline std::optional<std::pair<double, double>> getLengthBounds() {
+        return length_bounds;
     }
 
     /// <summary> Returns this source's phases </summary>

@@ -249,7 +249,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
                 break;
             }
             else 
-                throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value");
+                throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value.\n Syntax for interpolated values can be: <value>; <timestamp>:<value> [ - <timestamp2>:<value2> - ... - <timestamp_n>:<value_n>]");
         }
         else {
             stream.get();

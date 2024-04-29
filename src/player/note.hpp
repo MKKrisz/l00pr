@@ -56,6 +56,11 @@ public:
     /// <remarks> A little more complicated than just "done > len", as that would chop off the end of the note... </remarks>
     virtual bool isComplete();
 
+    void clampLength(double min, double max) {
+        if(len < min) len = min;
+        if(len > max) len = max;
+    }
+
     // cctor
     Note(double l, Interpolated<Frequency> freq, Interpolated<double> amp);
 

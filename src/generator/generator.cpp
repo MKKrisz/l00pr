@@ -19,7 +19,6 @@ Generator::Generator(std::istream& str) : AudioSource() {
     str.get();
     for(int i = 0; i < 3; i++) {
         if((str >> skipws).peek() == ')') {
-            shouldBeDefault = true;
             break;
         }
         a[i].Clear();
