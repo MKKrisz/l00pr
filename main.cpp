@@ -1,6 +1,8 @@
 #include "src/argmgr.hpp"
+#include "src/pstate.hpp"
 #include <SDL2/SDL.h>
 #include <ctime>
+
 
 /// <summary>
 /// Entry point of the code. Standard parameters, nothing special
@@ -10,9 +12,12 @@ int main(int argc, const char** argv) {
     SDL_Init(SDL_INIT_AUDIO);
     srand(time(0));
 
+    ArgumentManager argmgr{args};
+    argmgr.Parse(argc, argv);
+    ifs = argmgr.getUnparsed();
+
     //Process and run arguments
-    Arguments args(argc, argv);
-    args.Run();
+    Run();
 
     // Exit SDL
     SDL_Quit();
