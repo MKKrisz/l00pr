@@ -56,7 +56,7 @@ void AudioDevice::fastForward(double t) {
     SDL_LockAudioDevice(devHandle);
     int srate = getSampleRate();
     for(int i = 0; i < t * srate; i++)
-        tunes[0].discardSample(srate);
+        tunes[0].getSample(srate, false);
     SDL_UnlockAudioDevice(devHandle);
 }
 
@@ -64,7 +64,7 @@ void AudioDevice::callback(void* userdata, uint8_t* stream, int bytelen) {
     int len = bytelen / 4;
     AudioDevice* dev = (AudioDevice*)userdata;
     for(int i = 0; i < len; i++) {
-        float sample = dev->tunes[0].getSample(dev->getSampleRate());
+        float sample = dev->tunes[0].getSample(dev->getSampleRate(), true);
         //std::cout << sample << std::endl;
         std::memcpy(&stream[4*i], &sample, 4);
     }
@@ -100,12 +100,15 @@ void put16(std::ostream& str, ushort n) {
     str.put(n >> 8);
 }
 
-void AudioDevice::render(std::ostream& stream) {
+void AudioDevice::render(std::ostream& stream, bool cursed) {
     stream << "RIFF";
     int size = stream.tellp();          //Position of "size" for later
     stream << "    WAVEfmt ";
     put32(stream, 16);                  //length of fmt chunk
-    put16(stream, 3);                   //PCM float
+    if(cursed)
+        put16(stream, 1);                   //PCM int
+    else
+        put16(stream, 3);                   //PCM float
     put16(stream, 1);                   //Mono
     put32(stream, spec.freq);           //Sample rate
     put32(stream, spec.freq * 4);       //Byte rate
@@ -116,7 +119,10 @@ void AudioDevice::render(std::ostream& stream) {
     stream << "    ";
     uint samples = 0;
     while(!tunes[0].isComplete()) {
-        put32(stream, std::bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
+        if(cursed)
+            put32(stream, (tunes[0].getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
+        else
+            put32(stream, std::bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
         samples++;
     }
     stream.seekp(size);
@@ -125,28 +131,4 @@ void AudioDevice::render(std::ostream& stream) {
     put32(stream, samples * 4);
     stream.flush();
 }
-void AudioDevice::renderCursed(std::ostream& stream) {
-    stream << "RIFF";
-    int size = stream.tellp();
-    stream << "    WAVEfmt ";
-    put32(stream, 16);
-    put16(stream, 1);                   //PCM int
-    put16(stream, 1);
-    put32(stream, spec.freq);
-    put32(stream, spec.freq * 4);
-    put16(stream, 2);
-    put16(stream, 32);
-    stream << "data";
-    int size2 = stream.tellp();
-    stream << "    ";
-    uint samples = 0;
-    while(!tunes[0].isComplete()) {
-        put32(stream, (tunes[0].getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
-        samples++;
-    }
-    stream.seekp(size);
-    put32(stream, samples * 4 + 36);
-    stream.seekp(size2);
-    put32(stream, samples * 4);
-    stream.flush();
-}
+

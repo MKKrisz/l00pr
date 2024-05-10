@@ -20,6 +20,7 @@ class Argument {
 public:
     Argument(char c, const std::string& str, const std::string& help, std::function<void(const Argument&)> fn, ArgumentOption argOpt = ALLOWS_ARG)
         : c(c), str(str), helpstr(help), argOpt(argOpt), fn(fn) {}
+
     Argument(const std::string& str, const std::string& help, std::function<void(const Argument&)> fn, ArgumentOption argOpt = ALLOWS_ARG) 
         : c(0), str(str), helpstr(help), argOpt(argOpt), fn(fn) {}
 

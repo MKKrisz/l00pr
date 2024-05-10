@@ -36,10 +36,7 @@ public:
     void fastForward(double t);
 
     /// <summary> Instead of playing, outputs the file in a .wav format onto 'str' </summary>
-    void render(std::ostream& str);
-
-    /// <summary> Uses the first version of the render function. <see cref='render'/> </summary>
-    void renderCursed(std::ostream& str);
+    void render(std::ostream& str, bool cursed);
 
     // Constructors
     AudioDevice(int srate = 48000, int bufsize = 4096);

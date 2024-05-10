@@ -37,6 +37,11 @@ protected:
     /// <summary> Internal data structure. </summary>
     std::vector<std::pair<double, T>> data;
 
+    double lowtresh = 0;
+    double hightresh = 0;
+    T* lowbuf = nullptr;
+    T* highbuf = nullptr;
+
     /// <summary> Interpolator function. </summary>
     std::function<T(T, T, double)> itp;
 
@@ -87,35 +92,47 @@ public:
     size_t Size() const {return data.size();}
 
     /// <summary> Returns the interpolated value at 't' </summary>
-    T Get(double t) const {
+    T Get(double t) {
         if(data.size() == 1) return data[0].second;
-        /*
-         * Funky optmization stuff that actually did not work. Left in because I may actually  make it work soon(tm)
-        if(low_buf == nullptr && high_buf == nullptr)
-            throw std::runtime_error("Something very bad happened");
-        if(low_buf == nullptr) return high_buf->second;
-        if(high_buf == nullptr) return low_buf->second;
-        if(low_buf->first <= t && high_buf->first > t) {
-            return itp(low_buf->second, high_buf->second, (t - low_buf->first) / (high_buf->first - low_buf->first));
+
+        if(lowbuf != nullptr && highbuf != nullptr && t > lowtresh && t < hightresh) {
+            return itp(*lowbuf, *highbuf, (t - lowtresh) / (hightresh - lowtresh));
         }
- */
+        if(lowbuf == nullptr && highbuf != nullptr && t < hightresh) {
+            return *highbuf;
+        }
+        if(lowbuf != nullptr && highbuf == nullptr && t > lowtresh) {
+            return *lowbuf;
+        }
+
         int id = getId(t);
         if(almostEQ(data[id].first, t)) return data[id].second;
-
+ 
         size_t aid, bid;
 
         if(data[id].first < t) { aid = id; bid = id + 1;}
         else { aid = id - 1; bid = id;}
         
         if(bid == 0) {
+            lowbuf = nullptr;
+            hightresh = data[bid].first;
+            highbuf = &(data[bid].second);
             return data[bid].second;
         }
         if(bid == data.size()) {
+            highbuf = nullptr;
+            lowtresh = data[aid].first;
+            lowbuf = &(data[aid].second);
             return data[aid].second;
         }
 
-        auto a = data[aid];
-        auto b = data[bid];
+        auto& a = data[aid];
+        lowtresh = a.first;
+        lowbuf = &(a.second);
+
+        auto& b = data[bid];
+        hightresh = b.first;
+        highbuf = &(b.second);
 
         return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
     }
@@ -162,7 +179,7 @@ public:
     }
 
     /// <summary> Operator to use this object as a functor. Calls Get() internally. </summary>
-    T operator()(double t) const {return Get(t);}
+    T operator()(double t) {return Get(t);}
 
     /// <summary> Returns a reference to the datapoint at index 'i' </summar/summaryy>
     std::pair<double,T>& operator[](size_t i) {return data[i];}

@@ -4,17 +4,7 @@
 
 
 std::istream& operator>>(std::istream& str, Frequency& f) {
-    str >> skipws;
-    std::stringstream ss {""};
-    if(!isdigit(str.peek())) {
-        ss << char(str.get());
-        if(isNoteMod(str.peek())) 
-            ss << char(str.get());
-    }
-    int n;
-    str >> n;
-    ss << std::to_string(n);
-    f = Frequency(ss);
+    f = Frequency(str);
     return str;
 }
 

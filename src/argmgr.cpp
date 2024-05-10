@@ -1,6 +1,6 @@
 #include "argmgr.hpp"
 
-void ArgumentManager::Parse(int argc, const char** argv) {
+void ArgumentManager::Parse(int argc, char** argv) {
     for(int i = 1; i < argc; i++) {
         std::string c_arg = argv[i];
         if(c_arg[0] != '-') {
@@ -19,7 +19,12 @@ void ArgumentManager::Parse(int argc, const char** argv) {
                         args[k].set();
                     }
                     else {
-                        if(c_arg.size() == j+1) args[k].setArg(argv[++i]);
+                        if(c_arg.size() == j+1) {
+                            if(args[k].getArgOpt() == REQUIRES_ARG) 
+                                args[k].setArg(argv[++i]);
+                            else if(argv[i+1][0] != '-') 
+                                args[k].setArg(argv[++i]);
+                        }
                         else args[k].setArg(&(argv[i][j+1]));
                         parsed = true;
                     }

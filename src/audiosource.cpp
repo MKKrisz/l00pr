@@ -3,10 +3,13 @@
 #include "generator/generator.hpp"
 #include "filter/filter.hpp"
 
+#include <iostream>
+
 void AudioSource::parse_lb(std::istream& str) {
     str >> skipws;
     if(str.peek() != '{') {
         length_bounds = {};
+        return;
     }
     str.get();
     str >> skipws;
@@ -27,18 +30,28 @@ const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
 AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
-    str >> skipws;
-    std::string buf;
-    char c;
-    size_t len = std::max(Filter::LongestName(), Generator::LongestName());
-    while(buf.size() < len && str.get(c)) {
-        buf += tolower(c);
-        if(flags.filters && Filter::ValidName(buf)) {
-            return Filter::Make(buf, str, srate);
+    int start = str.tellg();
+    std::string gen_except = ""; 
+    std::string filter_except = ""; 
+    if(flags.generators) {
+        try {
+            return Generator::Parse(str, srate, flags);
         }
-        if(flags.generators && Generator::ValidName(buf)) {
-            return Generator::Make(buf, str, srate, flags);
+        catch(std::exception* e) {
+            gen_except = e->what();
         }
     }
-    throw parse_error(str, "No source with name \"" + buf + "\" exists");
+    if(flags.filters) {
+        str.clear();
+        str.seekg(start);
+        try {
+            return Filter::Parse(str, srate, flags);
+        }
+        catch(std::exception* e) {
+            filter_except = e->what();;
+        }
+    }
+    str.clear();
+    str.seekg(start);
+    throw parse_error(str, gen_except + filter_except);
 }

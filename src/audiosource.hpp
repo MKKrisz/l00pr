@@ -7,6 +7,12 @@
 
 #include "util.hpp"
 #include "exceptions/parse_error.hpp"
+#include "string_convertible.hpp"
+#include "parseable_base.hpp"
+
+class AudioSource;
+
+
 
 /// <summary> Helper struct that specifies what kind of sources to generate when calling `AudioSource::Make()` </summary>
 struct MakeFlags {
@@ -21,8 +27,16 @@ struct MakeFlags {
     const static MakeFlags onlyGenerators;
 };
 
+struct AS_Metadata : public Metadata<AudioSource*, const int, const MakeFlags&>{
+public:
+    std::string syntax;
+    std::string desc;
+    AS_Metadata(const char* kw, std::function<AudioSource*(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
+        : Metadata(kw, func), syntax(syn), desc(desc) {};
+};
+
 /// <summary> Base class for filters and generators </summary>
-class AudioSource {
+class AudioSource : public StringConvertible {
 protected:
     
     /// <summary> Stores the current phases of generators </summary>
@@ -40,9 +54,16 @@ protected:
     /// <summary> Standard parser for length bounds </summary>
     void parse_lb(std::istream& str);
 
+    /// <summary> Returns (and then resets) the accumulator value </summary>
+    double getAccumulator() {
+        double ac = accumulator;
+        accumulator = 0;
+        return ac;
+    }
+
     // Base constructors for subclasses.
-    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(), length_bounds(src.length_bounds) {}
-    AudioSource() : phases(), feedback(0), accumulator(), length_bounds() {}
+    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(0), length_bounds(src.length_bounds) {}
+    AudioSource() : phases(), feedback(0), accumulator(0), length_bounds() {}
 public:
 
     /// <summary> Handles receiving feedback values. </summary>
@@ -55,8 +76,15 @@ public:
         feedback = val;
     }
 
+    virtual std::string ToString() { return "AudioSource"; }
+
     /// <summary> Returns the endpoint of the filter chain. Unused. </summary>
     virtual AudioSource* getBase() {return this;}
+
+    /// <summary> Forces a sample into the sample accumulator </summary>
+    virtual void addSample(double sample) {
+        accumulator += sample;
+    }
 
     /// <summary> Adds a phase value to this source </summary>
     /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
@@ -82,18 +110,14 @@ public:
 
     /// <summary> Sends accumulated sample values through the filter chain to be processed </summary>
     /// <remarks> For filters, this function should end up processing the samples </remarks> 
-    virtual double calc() {
-        double ret = accumulator + feedback;
-        accumulator = 0;
-        return ret;
-    }
+    virtual double calc() { return getAccumulator() + feedback; }
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
     virtual AudioSource* copy() = 0;
     
     /// <summary> Creates a sample and adds it to the accumulator </summary>
     /// <remarks> For filters, should just send the action deeper into the chain </remarks>
-    virtual void operator()(int noteId, double delta, double t, double extmul, double srate) = 0;
+    virtual void operator()(size_t noteId, double delta, double t, double extmul, double srate) = 0;
     
     /// <summary> Copy assignment operator </summary>
     AudioSource& operator=(const AudioSource&) = default;

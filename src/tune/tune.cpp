@@ -1,8 +1,16 @@
 #include "tune.hpp"
 #include "../exceptions/parse_error.hpp"
+#include "set_kwd.hpp"
 
 #include <iostream>
 #include <string>
+
+void Tune::Init() {
+    Set::Init();
+    AddMetadata(Tkwd_Metadata("set", Set::Parse));
+    AddMetadata(Tkwd_Metadata("generator", Tune::SetGen));
+    AddMetadata(Tkwd_Metadata("player", Tune::AddLane));
+}
 
 Tune::Tune() : lanes(), sources() {}
 
@@ -14,7 +22,7 @@ Tune::Tune(Lane& p) : lanes() {
     lanes.push_back(p);
 }
 
-Tune::Tune(const Tune& t) : lanes(t.lanes), sources(), bpm(t.bpm), srate(t.srate), polynote(t.polynote){
+Tune::Tune(const Tune& t) : lanes(t.lanes), sources(), bpm(t.bpm), srate(t.srate), polynote(t.polynote), globalFilter(t.globalFilter){
     for(AudioSource* s : t.sources) {
         sources.emplace_back(s->copy());
     }
@@ -30,91 +38,14 @@ Tune::Tune(T data) : lanes() {
 
 
 std::istream& operator>>(std::istream& stream, Tune& t) {
-    stream >> skipws;
-    while(stream.good()) {
-        std::string buf = "";
-        char c;
-        bool parsed = false;
-        while(stream.get(c) && buf.size() < std::string("generators").size()) { 
-            buf += tolower(c);
-            if(buf == "set") {
-                t.setEnv(stream);
-                parsed = true;
-                break;
-            }
-
-            if(buf == "generator") {
-                t.setGen(stream, t.getSampleRate());
-                parsed = true;
-                break;
-            }
-            if(buf == "player") {
-                t.addLane(stream, t.getSampleRate());
-                parsed = true;
-                break;
-            }
-        }
-        if(!parsed)
-            throw parse_error(stream, "Unparsable keyword \"" + buf + "\". Try these: set, generator, player");
-        buf.clear();
-        stream >> skipws;
+    while((stream >> skipws).good()) {
+        Tune::Parse(stream, &t);
     }
-    
-    for(int i = 0; i < t.getLaneCount(); i++) {
-        NoteStream& stream = t.getLane(i).stream;
-        for(size_t j = 0; j < stream.getSetterSize(); j++) {
-            SetterNote& note = stream.getSetterNote(j);
-            int id = note.getId();
-            if(note.getGen() != nullptr) continue;
-            if(id < -1 || id > t.getGenCount()) {
-                throw std::runtime_error(
-                        "Index out of range at setter note no. " 
-                        + std::to_string(j));
-            }
-            if(id != -1)
-                note.setGen(t.getGenerator(id));
-        }
-    }
-
     return stream;
 }
 
 
-// syntax: set bpm: 120    -- sets bpm to 120
-// syntax: set bpm         -- sets bpm to 60
-void Tune::setEnv(std::istream& stream) {
-    stream >> skipws;
-    std::string buf;
-    while(true) {
-        buf += tolower(stream.get());
-        if(buf == "bpm") {
-            if((stream >> skipws).peek() != ':') { 
-                bpm = 60; break;
-            }
-            stream.get();
-            stream >> bpm;
-            break;
-        }
-        if(buf == "samplerate") {
-            if((stream >> skipws).peek() != ':') { 
-                srate = 48000; break;
-            }
-            stream.get();
-            stream >> srate;
-            break;
-        }
-        if(buf == "nopoly") {
-            polynote = false;
-            break;
-        }
-        if(buf == "poly") {
-            polynote = true;
-            break;
-        }
-    }
-}
-
-void Tune::setGen(std::istream& stream, int srate) {
+void Tune::setGen(std::istream& stream) {
     bool multiple = false;
 
     if(stream.peek() == 's') {
@@ -139,11 +70,14 @@ void Tune::setGen(std::istream& stream, int srate) {
     }
     stream.get();
 }
+void Tune::SetGen(std::istream& str, Tune* t) {
+    t->setGen(str);
+}
 
-void Tune::addLane(std::istream& stream, int srate) {
+void Tune::addLane(std::istream& stream) {
     stream >> skipws;
     AudioSource* gen;
-    NoteStream str = NoteStream();
+    NoteStream str;
     bool hasNotes = false;
     if(stream.peek() == '(') {
         stream.get();
@@ -159,10 +93,8 @@ void Tune::addLane(std::istream& stream, int srate) {
     }
     if((stream >> skipws).peek() == '{') {
         stream.get();
-        str.setPolynote(polynote);
-        str.setBpm(bpm);
-        stream >> str;
-        hasNotes = true;
+        str = NoteStream(stream, sources, bpm, polynote, srate);
+        if(str.size() > 0) hasNotes = true;
         stream >> expect('}');    
     }
     if(!hasNotes)
@@ -170,52 +102,34 @@ void Tune::addLane(std::istream& stream, int srate) {
 
     lanes.emplace_back(Lane(NotePlayer(gen), str));
 }
+void Tune::AddLane(std::istream& str, Tune* t) {
+    t->addLane(str);
+}
 
-double Tune::getSample(double srate) {
+double Tune::getSample(double srate, bool print) {
     double sum = 0;
-    bool newNotes = false;
+    bool hasNewNotes = false;
     for(auto& l : lanes) {
-        std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
-        if(!newPNotes.empty()) 
-            newNotes = true;
-        std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
-        for(size_t j = 0; j < newSNotes.size(); j++) {
-            std::cout << "New Generator!!" <<std::endl;
-            l.player.addNote(newSNotes[j]);
-        }
-
-        for(size_t j = 0; j < newPNotes.size(); j++) {
-            std::cout << newPNotes[j] << "    ";
-            l.player.addNote(newPNotes[j]);
+        std::vector<Note*> newNotes = l.stream.GetStartingNotes(t);
+        if(print && !newNotes.empty()) 
+            hasNewNotes = true;
+        for(size_t i = 0; i < newNotes.size(); i++) {
+            if(print) std::cout << newNotes[i]->ToString() << "    ";
+            l.player.addNote(newNotes[i]);
         }
         sum += l.player.getSample(srate);
     }
-    if(newNotes) std::cout << std::endl;
-    t += 1/srate;
-    return sum;
-}
-
-double Tune::discardSample(double srate) {
-    double sum = 0;
-    for(auto& l : lanes) {
-        std::vector<Note> newPNotes = l.stream.GetStartingPlayableNotes(t);
-        std::vector<SetterNote> newSNotes = l.stream.GetStartingSetterNotes(t);
-        for(size_t j = 0; j < newSNotes.size(); j++) {
-            l.player.addNote(newSNotes[j]);
-        }
-        for(size_t j = 0; j < newPNotes.size(); j++) {
-            l.player.addNote(newPNotes[j]);
-        }
-        sum += l.player.getSample(srate);
+    if(print && hasNewNotes) std::cout << std::endl;
+    if(globalFilter != nullptr) {
+        globalFilter->addSample(sum);
     }
     t += 1/srate;
-    return sum;
+    return globalFilter == nullptr? sum : globalFilter->calc();
 }
 
-
-double Tune::getLen() const {
+double Tune::getLen() {
     double max = 0;
-    for(auto l : lanes) {
+    for(auto& l : lanes) {
         if(max < l.stream.getLen())
             max = l.stream.getLen();
     }

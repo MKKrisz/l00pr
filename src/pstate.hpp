@@ -3,17 +3,21 @@
 
 #include "arg.hpp"
 
-// Program states
-extern double seekfwd;
-extern bool opToFile;
-extern bool opCursed;
-extern std::string opFile;
-extern std::vector<std::string> ifs;
-extern std::vector<Argument> args;
+struct program_state {
+    double seekfwd;
+    bool opToFile;
+    bool opCursed;
+    std::string opFile;
+    std::vector<std::string> ifs;
+    std::vector<Argument> args; 
 
+};
+
+extern program_state pstate;
+
+void setSeek(const Argument& arg);
 void setOpToFile(const Argument& arg);
 void setCursed(const Argument&);
-void setSeek(const Argument& arg);
 void printHelp(const Argument&);
 void Run();
 

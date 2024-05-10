@@ -11,7 +11,7 @@ class ArgumentManager {
 
 public: 
     ArgumentManager(std::vector<Argument> args) : args(args), unparseable() {}
-    void Parse(int argc, const char** argv);
+    void Parse(int argc, char** argv);
     std::vector<std::string> getUnparsed() { return unparseable; }
     size_t getArgCount() { return args.size(); }
     Argument& operator[](size_t i) {

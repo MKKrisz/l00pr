@@ -33,7 +33,22 @@ public:
         std::stringstream ss(name);
         val = ::getFreq(ss);
     }
-    inline Frequency(std::stringstream& name) : name(name.str()), val(::getFreq(name)) {}
+    inline Frequency(std::istream& str) : name(), val() {
+        str >> skipws;
+
+        int start = str.tellg();
+        val = ::getFreq(str);
+
+        str.clear();
+        int end = str.tellg();
+
+        str.seekg(start);
+        std::string s = "";
+        char c;
+        while(str.tellg() != end && str.get(c)) {s += c;}
+
+        name = s;
+    }
     inline Frequency(double val) noexcept : name(""), val(val) {}
 
     // Operators to support interpolation

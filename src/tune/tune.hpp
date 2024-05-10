@@ -6,14 +6,24 @@
 #include "notestream.hpp"
 #include "lane.hpp"
 
+class Tune;
+
+class Tkwd_Metadata : public Metadata<void, Tune*> {
+public:
+    Tkwd_Metadata(const char* str, std::function<void(std::istream&, Tune*)> func) 
+        : Metadata(str, func) {}
+};
+
 /// <summary> Stores a piece of sound data to be played </summary>
-class Tune {
+class Tune : public Parseable<void, Tkwd_Metadata, Tune*>{
 
     /// <summary> Stores NotePlayer-NoteStream pairs
     std::vector<Lane> lanes;
 
     /// <summary> Sources specified using the "generator" keyword end up in this array </summary>
     std::vector<AudioSource*> sources;
+
+    AudioSource* globalFilter = nullptr;
 
     /// <summary> Beats per minute value, used to make calculating lengths and times a little easier </summary>
     double bpm = 60;
@@ -27,24 +37,33 @@ class Tune {
     /// <summary> A value indicating how much time has elapsed since the start of playing </summary>
     double t = 0;
 public:
+    static void Init();
 
-    /// <summary> Parses an environment variable </summary>
-    void setEnv(std::istream& stream);
+    inline void setBpm(double bpm) { this->bpm = bpm; }
 
     /// <summary> Parses the generator keyword </summary>
-    void setGen(std::istream& stream, int srate = 44100);
+    void setGen(std::istream& stream);
+    static void SetGen(std::istream&, Tune*);
 
     /// <summary> Parses the player keyword </summary>
-    void addLane(std::istream& stream, int srate = 44100);
+    void addLane(std::istream& stream);
+    static void AddLane(std::istream& stream, Tune*);
 
     /// <summary> Returns the sample rate value
+    inline void setSampleRate(int sr) {srate = sr;}
     inline int getSampleRate() { return srate; }
 
+    inline void setPoly(bool val) {polynote = val;}
+    inline void setGlobalFilter(AudioSource* src) {
+        delete globalFilter;
+        globalFilter = src->copy();
+    }
+
     /// <summary> Gets the time it takes to play the tune </summary>
-    double getLen() const;
+    double getLen();
 
     /// <summary> Checks if the elapsed time since start is greater than the time required to play the tunee </summary>
-    inline bool isComplete() const { return t > getLen();}
+    inline bool isComplete() { return t > getLen();}
 
     /// <summary> Gets the number of lanes </summary>
     inline double getLaneCount() const { return lanes.size(); }
@@ -77,10 +96,7 @@ public:
     Tune(T data);
     
     /// <summary> Calculates the next sample value </summary>
-    double getSample(double srate);
-
-    /// <summary> Calculates the next sample value but without writing anything to the standard output </summary>
-    double discardSample(double srate);
+    double getSample(double srate, bool print = true);
 
     // dtor
     ~Tune();

@@ -17,6 +17,8 @@ double getFreq(std::istream& stream) {
     int note;
     stream >> buf;
     
+    if(buf == 'H') 
+        throw parse_error(stream, "Try using B in place of H. (H becomes B; B becomes Bb)");
     if(buf < 'A' || buf > 'G')
         throw parse_error(stream, "Couldn't interpret stream as a note or float");
 
