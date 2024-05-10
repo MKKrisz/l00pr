@@ -6,8 +6,10 @@
 #include "../interpolated.hpp"
 #include "../util.hpp"
 #include "../range.hpp"
+#include "../freq.hpp"
 #include "note.hpp"
 #include "../tune/notestream.hpp"
+#include "../tune/loop.hpp"
 
 //Note to my favourite desser: I'm going to leave these design notes in, just for fun...
 
@@ -32,7 +34,7 @@
 /// Syntax: random(<frequencies> <full_length> <lengths> <amplitudes>) 
 /// or random(<length>){<note1> <note2> ... <note_n>}
 /// </summary>
-class RandomNote {
+class RandomNote : public Note{
     /// <summary> The frequencies the object can choose from </summary>
     Range<Interpolated<Frequency>> frequencies;
     //TODO: implement note-based frequency interpolation
@@ -56,17 +58,30 @@ class RandomNote {
 
     /// <summary> The bpm value to interpret note lengths with. </summary> 
     double bpm;
-
 public:
 
     /// <summary> Returns the "length" of this sequence </summary>
-    double getLen() {return len;}
+    double GetLen() override {return len;}
 
     // cctor
-    RandomNote(std::istream&, double);
+    RandomNote(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
 
     /// <summary> Generates the actual note sequence that gets played</summary>
-    std::vector<std::pair<double, Note>> Serialize(double start);
+    std::vector<std::pair<double, Note*>> Serialize(double start);
+
+    void AddToPlayer(NotePlayer& p) override {
+        //TODO: Check leaks
+        std::vector<std::pair<double, Note*>> notes = Serialize(0);
+        NoteStream str{};
+        for(const auto& n : notes) {
+            str.Add(n);
+        }
+        p.addNote(Loop(str, 1).copy());
+    }
+    void AddSample(NotePlayer& p, size_t id, int srate) override {}
+    bool IsComplete() override {return true;}
+    Note* copy() override { return new RandomNote(*this); }
+    std::string ToString() override { return "RandomSequence"; }
 };
 
 #endif

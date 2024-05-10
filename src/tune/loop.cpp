@@ -1,49 +1,37 @@
 #include "loop.hpp"
 
 Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {} 
+Loop::Loop(const Loop& l) 
+    : NoteStream(l), repAmount(l.repAmount), len(l.len), t(l.t), reps(l.reps), id(l.id) {}
 
-Loop::Loop(std::istream& str, double bpm, bool poly) {
+Loop::Loop(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
     setBpm(bpm); setPolynote(poly);
     if((str >> skipws).peek() == '(') {
         str.get();
         str >> repAmount;
-        if((str >> skipws).peek() != ')') {
-            throw parse_error(str, "Expected ')'");
-        }
-        str.get();
+        str >> expect(')');
     }
-    if((str >> skipws).peek() != '{') 
-        throw parse_error(str, "Expected '{'");
-    str.get();
-    str >> *this;
-    if((str >> skipws).peek() != '}') 
-        throw parse_error(str, "Expected '}'");
-    str.get();
+    str >> expect('{');
+    NoteStream nstr = NoteStream(str, sources, bpm, poly, srate);
+    *this = Loop(nstr, repAmount);
+    str >> expect('}');
 }
 
-std::vector<Note> Loop::getStartingPlayableNotes(double t) {
-    if(playable.empty()) return {};
-    if(repAmount != -1 && t > getLen()*repAmount) return {};
-    t = fmod(t, getLen());
-    std::vector<Note> ret;
-    auto i = playable.begin();
-    for( ; i != playable.end() && i->first <= t; i++) {
-        ret.emplace_back(i->second);
+void Loop::AddSample(NotePlayer& p, size_t, int) {
+    if(repAmount >= 0 && IsComplete()) 
+        return;
+
+    for( ; id < notes.size(); id++) {
+        if(notes[id].first > t) 
+            break;
+
+        p.addNote(notes[id].second->copy());
     }
-    playable.erase(playable.begin(), i);
-    return ret;
+    t += 1.0/srate;
+    if(t > len) {
+        t = fmod(t, len);
+        reps++;
+        id = 0;
+    }
 }
 
-std::vector<SetterNote> Loop::getStartingSetterNotes(double t) {
-    if(setter.empty()) return {};
-    if(repAmount != -1 && t > getLen()*repAmount) return {};
-    t = fmod(t, getLen());
-    std::vector<SetterNote> ret;
-    auto i = setter.begin();
-    for( ; i != setter.end() && i->first <= t; i++) {
-        ret.emplace_back(i->second);
-    }
-    setter.erase(setter.begin(), i);
-    return ret;
-
-}

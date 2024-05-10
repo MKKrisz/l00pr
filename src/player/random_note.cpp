@@ -1,7 +1,8 @@
 #include "random_note.hpp"
+#include "playablenote.hpp"
 #include "../exceptions/parse_error.hpp"
 
-RandomNote::RandomNote(std::istream& str, double bpm = 60) : 
+RandomNote::RandomNote(std::istream& str, const std::vector<AudioSource*>& srcs, double bpm, bool poly, int srate) : 
     frequencies(), lengths(), notes(), bpm(bpm) {
     //random|( (A4, C5, E5))
     notes.setBpm(bpm);
@@ -42,7 +43,7 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
         else {
             if((str >> skipws).peek() != '{')
                 throw parse_error(str, "No notes specified for random note sequence to choose from");
-            str >> notes;
+            notes = NoteStream(str, srcs, bpm, poly, srate);
             if((str >> skipws).peek() != '}')
                 throw parse_error(str, "Expected '}'");
             str.get();
@@ -50,15 +51,15 @@ RandomNote::RandomNote(std::istream& str, double bpm = 60) :
     }
 }
 
-std::vector<std::pair<double, Note>> RandomNote::Serialize(double start) {
-    std::vector<std::pair<double, Note>> ret = {};
+std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) {
+    std::vector<std::pair<double, Note*>> ret = {};
     double t = 0;
     if(noteBased) {
         while(t < len) {
-            size_t id = rand() % notes.getPlayableSize();
-            Note n = notes.getPlayableNote(id);
-            double len = n.getLen();
-            ret.emplace_back(start + t, n);
+            size_t id = rand() % notes.size();
+            Note* n = notes.getNote(id);
+            double len = n->GetLen();
+            ret.emplace_back(start + t, n->copy());
             t += len;
         }
     }
@@ -71,7 +72,7 @@ std::vector<std::pair<double, Note>> RandomNote::Serialize(double start) {
             r = double(rand())/RAND_MAX;
             Interpolated<double> ampl = amplitudes.get(r);
 
-            ret.emplace_back(t + start, Note(length, freq, ampl));
+            ret.emplace_back(t + start, PlayableNote(length, freq, ampl).copy());
             t += length;
         }
     }
