@@ -1,22 +1,25 @@
 #include "noteplayer.hpp"
+#include "note.hpp"
 
-void NotePlayer::addNote(Note& note) {
-    if(m_src->getLengthBounds().has_value()) {
-        note.clampLength(m_src->getLengthBounds().value().first, m_src->getLengthBounds().value().second);
-    }
+void NotePlayer::addNote(Note* note) {
+    note->AddToPlayer(*this);
     m_notes.emplace_back(note);
     m_src->addPhase();
 }
-void NotePlayer::addNote(SetterNote& note) {
-    std::vector phases = m_src->getPhases();
+
+void NotePlayer::setSrc(AudioSource* src) {
+    std::vector<double> phases = m_src->getPhases();
     delete m_src;
-    if(note.getGen() == nullptr) {
+    if(src == nullptr)
         m_src = def_src->copy();
-        m_src->setPhases(phases);
-        return;
-    }
-    m_src = note.getGen()->copy();
+    else
+        m_src = src->copy();
     m_src->setPhases(phases);
+
+    //hack to fix mismatch of phases
+    for(size_t i = m_src->getPhases().size(); i < m_notes.size(); i++) {
+        m_src->addPhase();
+    }
 }
 
 NotePlayer::NotePlayer(AudioSource* src) : m_notes(), m_src(src->copy()), def_src(src->copy()){}
@@ -31,17 +34,14 @@ NotePlayer::~NotePlayer() {
 
 
 float NotePlayer::getSample(double srate) {
-    for(auto it = m_notes.begin(); it != m_notes.end(); std::advance(it, 1)) {
-        if(it->isComplete()) {
-            m_src->removePhase(std::distance(m_notes.begin(), it));
-            it = m_notes.erase(it);
-            std::advance(it, -1);
+    for(size_t i = 0; i < m_notes.size(); i++) {
+        if(m_notes[i]->IsComplete()) {
+            m_src->removePhase(i);
+            delete m_notes[i];
+            m_notes.erase(m_notes.begin() + int(i));
             continue;
         }
-        double t = it->getTime();
-        AudioSource& src = *m_src;
-
-        src(std::distance(m_notes.begin(), it), it->getDelta(srate), t, srate, it->getAmplitude());
+        m_notes[i]->AddSample(*this, i, srate);
     }
     return m_src->calc();
 }

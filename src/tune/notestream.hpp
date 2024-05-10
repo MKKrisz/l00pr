@@ -2,7 +2,6 @@
 #define L00PR_NOTESTREAM
 
 #include "../player/note.hpp"
-#include "../player/setnote.hpp"
 #include "../util.hpp"
 
 class Loop;
@@ -12,18 +11,10 @@ class RandomNote;
 class NoteStream {
 protected:
     /// Returns the place where t should be in playable
-    inline int getId(double t) { return bSearch(playable, t); }
-    inline int getSetterId(double t) { return bSearch(setter, t); }
-    inline int getLoopId(double t) { return bSearch(loops, t); }
+    inline int getId(double t) { return bSearch(notes, t); }
 
-    /// Thre Data
-    /// Design decisions:
-    ///     This needs to be performant. That can be easily achieved by placing
-    ///     the notes close to eachother. This way of implementing achieves that. (citation needed)
-    ///     On the other hand this would be way more pleasing if 
-    std::vector<std::pair<double, Note>> playable;
-    std::vector<std::pair<double, SetterNote>> setter;
-    std::vector<std::pair<double, NoteStream>> loops;
+    /// The Data
+    std::vector<std::pair<double, Note*>> notes;
 
     /// <summary> Beats per minute calue, used for parsing (so you don't need to count the seconds) </summary>
     double bpm = 60;
@@ -53,69 +44,61 @@ public:
 
     /// <summary> Caluclates how many seconds it takes to play the stream </summary>
     inline double getLen() {
-        if(!loops.empty()) return std::numeric_limits<double>::infinity();
-        if(playable.empty()) return 0;
+        //if(!loops.empty()) return std::numeric_limits<double>::infinity();
+        if(notes.empty()) return 0;
         if (len < 0) {
-            std::pair<double, Note> last = playable[playable.size()-1];
+            std::pair<double, Note*> last = notes[notes.size()-1];
             lastNoteTs = last.first;
-            len = last.first + last.second.getLen();
+            len = last.first + last.second->GetLen();
         }
         return len;
     }
 
-    /// <summary> Gets the size of the internal data structure for storing regular notes</summary>
-    inline size_t getPlayableSize() { return playable.size(); }
-    /// <summary> Gets the size of the internal data structure for storing setter notes</summary>
-    inline size_t getSetterSize() { return setter.size(); }
-
-    /// <summary> Returns a reference to the setter note at index `id` </summary>
-    inline SetterNote& getSetterNote(size_t id) {
-        if(id >= setter.size())
-            throw std::out_of_range("NoteStream.setter");
-        return setter[id].second;
-    }
+    inline size_t size() {return notes.size();}
 
     /// <summary> Returns a reference to the regular playable note at index `id` </summary>
-    inline Note& getPlayableNote(size_t id) {
-        if(id >= playable.size())
+    inline Note* getNote(size_t id) {
+        if(id >= notes.size())
             throw std::out_of_range("NoteStream.playable");
-        return playable[id].second;
+        return notes[id].second;
     }
 
     /// constructors
-    inline NoteStream() : playable(), setter(), loops() {}
-    inline NoteStream(Note n);
-    inline NoteStream(double t, Note n);
-    inline NoteStream(std::pair<double, Note> playable);
+    inline NoteStream() : notes() {}
+    inline NoteStream(Note* n);
+    inline NoteStream(double t, Note* n);
+    inline NoteStream(std::pair<double, Note*> note);
     NoteStream(const NoteStream& s);
+    NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate);
 
     /// <summary> Adds a regular note to the structure at the specified timestamp </summary>
-    void Add(std::pair<double, Note> p) { ordered_add(playable, p); }
-
-    /// <summary> Adds a setter note to the structure at the specified time </summary>
-    void Add(std::pair<double, SetterNote> p) { ordered_add(setter, p); }
-
-    /// <summary> Adds a loop to the structure by either expanding it out or storing it's underlying stream </summary>
-    void Add(std::pair<double, Loop> p);
-
-    /// <summary> Adds a random note sequence by expanding it out </summary>
-    void Add(std::pair<double, RandomNote> p);
+    void Add(std::pair<double, Note*> p) { ordered_add(notes, p); }
 
     /// <summary> Returns all notes that start before t and have not been started yet </summary>
-    virtual std::vector<Note> GetStartingPlayableNotes(double t);
-    /// <summary> Returns all notes that start before t and have not been started yet </summary>
-    virtual std::vector<SetterNote> GetStartingSetterNotes(double t);
+    virtual std::vector<Note*> GetStartingNotes(double t);
 
     NoteStream& operator=(const NoteStream& s){
         if(&s == this) return *this;
-        playable = s.playable;
-        setter = s.setter;
-        loops = s.loops;
+        for(size_t i = 0; i < notes.size(); i++) {
+            delete notes[i].second;
+        }
+        len = s.len;
+        lastNoteTs = s.lastNoteTs;
+        srate = s.srate;
+        bpm = s.bpm;
+        polynote = s.polynote;
+        for(size_t i = 0; i < s.notes.size(); i++) {
+            notes.emplace_back(std::make_pair(s.notes[i].first, s.notes[i].second->copy()));
+        }
         return *this;
+    }
+
+    ~NoteStream() {
+        for(auto& n : notes) {
+            delete n.second;
+        }
     }
 };
 
-/// Parser
-std::istream& operator>>(std::istream& stream, NoteStream& ns);
 
 #endif
