@@ -28,3 +28,6 @@ AudioSource* SineGenerator::copy() {
     return new SineGenerator(*this);
 }
 
+AudioSource* SineGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
+    return new SineGenerator(stream);
+}

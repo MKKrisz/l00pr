@@ -21,8 +21,12 @@ public:
     TriangleGenerator(std::istream& stream);
     TriangleGenerator(const TriangleGenerator&);
 
-    double getSample(double phase, double t);
-    AudioSource* copy();
+    double getSample(double phase, double t) override;
+    AudioSource* copy() override;
+    std::string ToString() override { return "Triangle"; }
+
+
+    static AudioSource* Create(std::istream& str, const int, const MakeFlags&);
 };
 
 #endif

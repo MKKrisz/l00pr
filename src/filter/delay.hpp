@@ -36,12 +36,15 @@ public:
     DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId){}
 
     /// <summary> stores `sample` at the current position then returns the next (oldest) sample in sbuf
-    double filter(double sample, double, double, double) {
+    double filter(double sample, double, double, double) override {
         sbuf[bufId++] = sample;
         bufId = bufId % sbuf.size();
         return sbuf[bufId];
     }
-    AudioSource* copy() {return new DelayFilter(*this); }
+    AudioSource* copy() override {return new DelayFilter(*this); }
+
+    std::string ToString() override { return Filter::ToString() + "Delay(" + std::to_string(sbuf.size()) + ")"; }
+
     DelayFilter& operator=(const DelayFilter& f) {
         if(this == &f) return *this;
         Filter::operator=(f);
@@ -49,7 +52,12 @@ public:
         bufId = f.bufId;
         return *this;
     };
+    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return new DelayFilter(str, srate, flags);
+    }
 };
+
+
 
 #endif
 

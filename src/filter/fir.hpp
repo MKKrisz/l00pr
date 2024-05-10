@@ -55,10 +55,13 @@ public:
 class PassFilter : public FIR {
 public:
     PassFilter(std::vector<double> dp, AudioSource* src = nullptr);  
-    PassFilter(const Interpolated<double>& dp, int srate, AudioSource* src = nullptr, size_t scount = 200);
+    PassFilter(Interpolated<double>& dp, int srate, AudioSource* src = nullptr, size_t scount = 200);
     PassFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all);
-    //AudioSource* copy() {return new PassFilter(*this);}
+    PassFilter(const PassFilter& f) = default;
+    AudioSource* copy() {return new PassFilter(*this);}
     PassFilter& operator=(const PassFilter&);
+    std::string ToString() {return Filter::ToString() + "Pass"; }
+    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags);
 };
 
 #endif

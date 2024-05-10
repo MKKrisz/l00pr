@@ -6,5 +6,6 @@
 #include "gain.hpp"
 #include "feedback.hpp"
 #include "quantize.hpp"
+#include "splitter.hpp"
 
 #endif

@@ -2,41 +2,27 @@
 #include "../exceptions/parse_error.hpp"
 #include "builtin.hpp"
 
+void Filter::Init() {
+    AddMetadata(AS_Metadata("delay", DelayFilter::Create, "pass(<freq_resp_curve> [samples]) [{src}]", "Arbitrary pass filter (freq_resp_curve: Interpolated<double>)"));
+    AddMetadata(AS_Metadata("feedback", Feedback::Create, "feedback(<depth> [fb_filter]) [{src}]", "Sends back signals in the chain by `depth`(uint) after being processed by `fb_filter`(Filterchain)"));
+    AddMetadata(AS_Metadata("pass", PassFilter::Create, "pass(<freq_resp_curve> [samples]) [{src}]", "Arbitrary pass filter (freq_resp_curve: Interpolated<double>)"));
+    AddMetadata(AS_Metadata("gain", GainFilter::Create, "gain(<amount>) [{src}]", "Multiplies the samples coming from src by `amount`(double)"));
+    AddMetadata(AS_Metadata("quantize", QuantizeFilter::Create, "quantize(<bits>) [{src}]", "Quantizes the signal coming from `src` to be `bits`(uint)"));
+    AddMetadata(AS_Metadata("split", Splitter::Create, "split([f_1] [f_2] ... [f_n]) [{src}]", "Splits the signal into different paths, then combines them. (f_k: Filterchain)"));
+}
 
-const std::vector<std::string> filterNames = {"pass", "delay", "gain", "feedback", "quantize"};
-
-void Filter::operator()(int noteId, double delta, double t, double srate, double extmul) {
+void Filter::operator()(size_t noteId, double delta, double t, double srate, double extmul) {
     (*src)(noteId, delta, t, srate, extmul);
 }
 
 double Filter::calc() {
-    return filter(src->calc(), 0, 0, 0);
+    return filter(src == nullptr? getAccumulator() + feedback : src->calc(), 0, 0, 0) + (src == nullptr ? 0 : feedback);
 }
 
-bool Filter::ValidName(const std::string& name) {
-    for(const std::string& fn : filterNames) {
-        if(name == fn) return true;
+std::string Filter::getFormattedMetadata() {
+    std::string ret = "";
+    for(const AS_Metadata& f : meta) {
+        ret += f.keyword + "\t" + (f.keyword.size() < 8? "\t" : "") + f.syntax + "\t" + f.desc + "\n";
     }
-    return false;
-}
-
-size_t Filter::LongestName() {
-    size_t l = 0;
-    for(const std::string& name : filterNames) {
-        if(name.size() > l) l = name.size();
-    }
-    return l;
-}
-
-Filter* Filter::Make(std::string& name, std::istream& str, const int srate, const MakeFlags& flags) {
-    if(name == "pass")     return new PassFilter(str, srate, flags); 
-    if(name == "delay")    return new DelayFilter(str, srate, flags); 
-    if(name == "gain")     return new GainFilter(str, srate, flags);
-    if(name == "feedback") return new Feedback(str, srate, flags);
-    if(name == "quantize") return new QuantizeFilter(str, srate, flags);
-    std::string err = "No filter with name \"" + name + "\" exists.\n Available filter names:\n";
-    for(const std::string& s : filterNames) {
-        err += s + "\n";
-    }
-    throw parse_error(str, err);
+    return ret;
 }

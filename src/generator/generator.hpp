@@ -5,7 +5,7 @@
 #include "../interpolated.hpp"
 
 /// <summary> AudioSource that actually generates samples </summary>
-class Generator : public AudioSource {
+class Generator : public AudioSource, public Parseable<AudioSource*, AS_Metadata, const int, const MakeFlags&> {
 protected:
     /// <summary> The frequency multiplier that should be applied </summary>
     Interpolated<double> m_phasemul;
@@ -28,26 +28,21 @@ protected:
     /// <summary> Value that indicates that there will be no new arguments to this generator </summary>
     bool shouldBeDefault;
 public: 
-
+    static void Init();
+    
     /// <summary> Gets a sample of this generator </summary>
     /// <param name="phase"> A value going from 0 to 1 </param>
     /// <param name="t"> A timestamp so that the member values of type Interpolated<double> can be applied properly </param>
     virtual double getSample(double phase, double t) = 0;
 
     /// <summary> Generates the sample from this generator with all the modifiers applied, then adds that to the accumulator </summary>
-    void operator()(int noteId, double delta, double t, double srate, double extmul);
+    void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
 
     virtual ~Generator() {}
 
-    /// <summary> Checks if `str` is a valid geneator name </summary>
-    static bool ValidName(std::string& str);
+    virtual std::string ToString() override { return "Generator"; }
 
-    /// <summary> Returns the length of the longest generator name </summary>
-    static size_t LongestName();
-
-    /// <summary> Makes a generator of type `name` </summary>
-    /// <exception cref="parse_error">When no generator of type `name` exist </exception>
-    static Generator* Make(std::string& name, std::istream& str, const int, const MakeFlags& = MakeFlags::all);
+    static std::string getFormattedMetadata();
 };
 
 #endif

@@ -35,19 +35,34 @@ public:
         if(str.peek() != ')') {
             fbFilter = (Filter*)AudioSource::Make(str, srate, MakeFlags::onlyFilters);
         }
-        str >> expect(')') >> expect('{');
-        src = AudioSource::Make(str, srate, flags);
-        str >> expect('}');
+        str >> expect(')') >> skipws;
+        if(str.peek() == '{') {
+            str.get();
+            src = AudioSource::Make(str, srate, flags);
+            str >> expect('}');
+        }
     }
 
     /// <summary> Sends back the sample modified by `fbFilter` `depth` filters deep, then returns the original, unmodified sample </summary>
-    double filter(double sample, double delta, double t, double srate) {
-        double fbs = fbFilter == nullptr? sample : fbFilter->filter(sample, delta, t, srate);
+    double filter(double sample, double, double, double) {
+        double fbs = sample; 
+        if(fbFilter != nullptr) {
+            fbFilter->addSample(sample);
+            fbs = fbFilter->calc();
+        }
+        //fbFilter == nullptr? sample : fbFilter->filter(sample, delta, t, srate);
         src->recvFeedback(fbs, depth);
         return sample;
     }
+    
+    std::string ToString() { return Filter::ToString() + "Feedback"; }
 
     AudioSource* copy() { return new Feedback(*this); }
+    ~Feedback() { delete fbFilter; }
+
+    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return new Feedback(str, srate, flags);
+    }
 };
 
 #endif

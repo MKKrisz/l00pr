@@ -3,7 +3,7 @@
 
 Register::Register(std::vector<AudioSource*> gen) : generators(gen) {}
 
-void Register::operator()(int noteId, double d, double t, double srate, double extmul) {
+void Register::operator()(size_t noteId, double d, double t, double srate, double extmul) {
     for(AudioSource* g : generators) {
         (*g)(noteId, d * m_phasemul(t), t, srate, extmul);
     }
@@ -50,4 +50,9 @@ AudioSource* Register::copy() {
         gs.emplace_back(g->copy());
     }
     return new Register(gs);
+}
+
+
+AudioSource* Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    return new Register(str, srate, flags);
 }

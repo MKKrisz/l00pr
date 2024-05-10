@@ -37,3 +37,6 @@ AudioSource* TriangleGenerator::copy() {
     return new TriangleGenerator(*this);
 }
 
+AudioSource* TriangleGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+    return new TriangleGenerator(str);
+}

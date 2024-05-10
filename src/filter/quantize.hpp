@@ -36,6 +36,10 @@ public:
     }
 
     AudioSource* copy() {return new QuantizeFilter(*this);}
+    std::string ToString() { return Filter::ToString() + "q" + std::to_string(bits); }
+    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return new QuantizeFilter(str, srate, flags);
+    } 
 };
 
 #endif

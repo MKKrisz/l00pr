@@ -12,6 +12,7 @@ public:
     NoGenerator();
     double getSample(double, double);
     AudioSource* copy();
+    std::string ToString() { return "Dummy"; }
 };
 
 #endif

@@ -18,7 +18,11 @@ public:
 
     double getSample(double, double t) { return double(rand())/RAND_MAX * m_gain(t);}
     Generator* copy() { return new NoiseGenerator(*this); }
+    std::string ToString() override { return "Noise"; }
+
+    static AudioSource* Create(std::istream& str, const int, const MakeFlags&);
 };
+
 
 #endif
 

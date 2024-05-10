@@ -15,8 +15,13 @@ public:
     SineGenerator(const SineGenerator& g);
 
     SineGenerator(std::istream& stream);
-    double getSample(double, double);
-    AudioSource* copy();
+    double getSample(double, double) override;
+    AudioSource* copy() override;
+    std::string ToString() override { return "Sine"; }
+
+
+    static AudioSource* Create(std::istream& stream, const int, const MakeFlags&);
 };
+
 
 #endif

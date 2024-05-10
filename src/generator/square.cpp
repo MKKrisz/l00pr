@@ -29,3 +29,7 @@ SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_du
 AudioSource* SquareGenerator::copy() { 
     return new SquareGenerator(*this);
 }
+
+AudioSource* SquareGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+    return new SquareGenerator(str);
+}

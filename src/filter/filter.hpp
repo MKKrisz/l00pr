@@ -8,7 +8,7 @@
 /// General syntax: filter_name(<arguments>) {[src]}
 /// The value `src` is another AudioSource. Usually `src` is not strictly as some filters make use of so-called generatorless filter chain (ex.: feedback filters)
 /// </summary>
-class Filter : public AudioSource {
+class Filter : public AudioSource, public Parseable<AudioSource*, AS_Metadata, const int, const MakeFlags&> {
 protected:
 
     /// <summary> The filter receives its' samples from here (in most cases...) </summary>
@@ -22,6 +22,7 @@ protected:
     }
     Filter(const Filter& f) : AudioSource(f), src(f.src == nullptr? nullptr : (f.src)->copy()) {}
 public:
+    static void Init();
 
     /// <summary> Function for  handling feedback samples </summary>
     virtual void recvFeedback(double val, size_t depth) override {
@@ -35,6 +36,14 @@ public:
     virtual std::optional<std::pair<double, double>> getLengthBounds() override {
         if(src == nullptr) return {};
         return src->getLengthBounds();
+    }
+
+    virtual void addSample(double sample) override {
+        if(src != nullptr) {
+            src->addSample(sample);
+            return;
+        }
+        AudioSource::addSample(sample);
     }
 
     /// <summary> Unused function, returns the base generator of a filter chain </summary>
@@ -56,7 +65,7 @@ public:
     virtual double calc() override;
 
     /// <summary> Propagates the call down to the base generator </summary>
-    virtual void operator()(int noteId, double delta, double t, double srate, double extmul) override;
+    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
     
     // dtor
     inline virtual ~Filter() { delete src; }
@@ -69,16 +78,9 @@ public:
         return *this;
     }
 
-    /// <summary> Checks if `name` is  a valid Filter name </summary>
-    static bool ValidName(const std::string& name);
+    virtual std::string ToString() override {return src->ToString() + " -> "; }
 
-    // I want this to be constexpr, but it cannot be constexpr
-    /// <summary> Returns the length of the longest filter name</summary>
-    static size_t LongestName();
-
-    /// <summary> Creates a filter of type `name` </summary>
-    /// <returns> A pointer to the created filter </returns>
-    static Filter* Make(std::string& name, std::istream& str, const int srate = 44100, const MakeFlags& = MakeFlags::all);
+    static std::string getFormattedMetadata();
 };
 
 #endif

@@ -3,8 +3,13 @@
 
 #include <cmath>
 
-const std::vector<std::string> genNames = {"sine", "square", "triangle", "noise", "register"};
-
+void Generator::Init() {
+    AddMetadata(AS_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", ""));
+    AddMetadata(AS_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", ""));
+    AddMetadata(AS_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", ""));
+    AddMetadata(AS_Metadata("noise", NoiseGenerator::Create, "noise([freq_multiplier] [amplitude] [phase_offset])", "Only `amplitude` does anything"));
+    AddMetadata(AS_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
+}
 
 Generator::Generator(std::istream& str) : AudioSource() {
     Interpolated<double> a[3] = {1, 1, 0.0f};
@@ -34,36 +39,21 @@ Generator::Generator(std::istream& str) : AudioSource() {
 
 }
 
-void Generator::operator()(int noteId, double delta, double t, double, double extmul) {
+void Generator::operator()(size_t noteId, double delta, double t, double, double extmul) {
+#ifdef DEBUG
+    if(noteId >= phases.size)
+        throw std::out_of_range("Generator phases");
+#endif
+    if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
     double& phase = phases[noteId];
     phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
     accumulator += (getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * extmul);
 }
 
-bool Generator::ValidName(std::string& str) {
-    for(const std::string& g : genNames) {
-        if(str == g) return true;
+std::string Generator::getFormattedMetadata() {
+    std::string ret = "";
+    for(const AS_Metadata& f : meta) {
+        ret += f.keyword + "\t" + (f.keyword.size() < 8? "\t" : "") + f.syntax + "\t" + f.desc + "\n";
     }
-    return false;
-}
-
-size_t Generator::LongestName() {
-    size_t l = 0;
-    for(const std::string& gn : genNames) {
-        if(l < gn.size()) l = gn.size();
-    }
-    return l;
-}
-
-Generator* Generator::Make(std::string& name, std::istream& str, const int srate, const MakeFlags& flags) {
-    if(name == "sine")     return new SineGenerator(str);
-    if(name == "square")   return new SquareGenerator(str);
-    if(name == "triangle") return new TriangleGenerator(str);
-    if(name == "noise")    return new NoiseGenerator(str);
-    if(name == "register") return new Register(str, srate, flags);
-    std::string err = "No generator with name \"" + name + "\" exists.\n Available generator names:\n";
-    for(const std::string& s : genNames) {
-        err += s + "\n";
-    }
-    throw parse_error(str, err);
+    return ret;
 }

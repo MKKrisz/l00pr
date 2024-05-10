@@ -27,7 +27,7 @@ PassFilter::PassFilter(std::vector<double> dp, AudioSource* src) : FIR(src) {
     sbuf = std::vector<double>(kern.size(), 0);
 }
 
-PassFilter::PassFilter(const Interpolated<double>& dp, int srate, AudioSource* src, size_t scount) : FIR(src) {
+PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, size_t scount) : FIR(src) {
     for(size_t i = 0; i < scount; i++) {
         double sum = 0;
         for(size_t j = 0; j < scount; j++) {
@@ -65,5 +65,10 @@ PassFilter& PassFilter::operator=(const PassFilter& f) {
     if(this == &f) return *this;
     FIR::operator=(f);
     return *this;
+}
+
+
+AudioSource* PassFilter::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    return new PassFilter(str, srate, flags);
 }
 

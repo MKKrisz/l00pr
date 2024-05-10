@@ -4,4 +4,5 @@ target_sources(${PROJECT_NAME} PUBLIC builtin.hpp
                                       delay.hpp
                                       gain.hpp
                                       feedback.hpp
-                                      quantize.hpp)
+                                      quantize.hpp
+                                      splitter.hpp)
