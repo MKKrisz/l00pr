@@ -64,7 +64,7 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
                     SetterNote n = SetterNote(str, srate);
                     int id = n.getId();
                     if(n.getGen() != nullptr) continue;
-                    if(id < -1 || id > srcs.size())
+                    if((unsigned)id > srcs.size())
                         throw std::runtime_error(
                                 "Index out of range at setter note");
                     if(id != -1)

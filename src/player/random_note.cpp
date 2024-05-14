@@ -36,13 +36,12 @@ RandomNote::RandomNote(std::istream& str, const std::vector<AudioSource*>& srcs,
                 amplitudes = {};
                 str >> amplitudes >> skipws;
             }
-            if((str >> skipws).peek() != ')')
-                throw parse_error(str, "Expected ')'");
-            str.get();
+            str >> expect(')');
         }
         else {
             if((str >> skipws).peek() != '{')
                 throw parse_error(str, "No notes specified for random note sequence to choose from");
+            str.get();
             notes = NoteStream(str, srcs, bpm, poly, srate);
             if((str >> skipws).peek() != '}')
                 throw parse_error(str, "Expected '}'");

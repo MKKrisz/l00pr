@@ -49,6 +49,16 @@ public:
         return (t + reps*len) > repAmount * len;
     }
     Note* copy() override {return new Loop(*this);}
+    Loop& operator=(const Loop& l) {
+        if(this == &l) return *this;
+        NoteStream::operator=(l);
+        repAmount = l.repAmount;
+        len = l.len;
+        t = l.t;
+        reps = l.reps;
+        id = l.id;
+        return *this;
+    };
 
     std::string ToString() override {
         std::string str = "\n" + (repAmount < 0? "inf" : std::to_string(repAmount)) +"*[\n";

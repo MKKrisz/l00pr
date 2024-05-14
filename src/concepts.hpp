@@ -4,7 +4,7 @@
 #include <concepts>
 
 /// <summary> 
-/// Any type that can be multiplied, divided by, added to, subtracted from a float
+/// Any type that can be multiplied, divided by, added to, and have a double subtracted from it
 /// </summary>
 template <typename T>
 concept Arithmetic = requires(T a, double b) {

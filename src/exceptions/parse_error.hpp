@@ -7,7 +7,7 @@
 /// <summary> Exception to throw when parsing error occurs. Also calculates stream position. </summary>
 class parse_error : public std::exception {
     /// <summary> The error string </summary>
-    /// <remarks> No thats not a typo </remarks>
+    /// <remarks> No, that's not a typo </remarks>
     std::string ehat;
 public:
 

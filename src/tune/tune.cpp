@@ -22,7 +22,7 @@ Tune::Tune(Lane& p) : lanes() {
     lanes.push_back(p);
 }
 
-Tune::Tune(const Tune& t) : lanes(t.lanes), sources(), bpm(t.bpm), srate(t.srate), polynote(t.polynote), globalFilter(t.globalFilter){
+Tune::Tune(const Tune& t) : lanes(t.lanes), sources(), globalFilter(t.globalFilter), bpm(t.bpm), srate(t.srate), polynote(t.polynote) {
     for(AudioSource* s : t.sources) {
         sources.emplace_back(s->copy());
     }
@@ -76,7 +76,7 @@ void Tune::SetGen(std::istream& str, Tune* t) {
 
 void Tune::addLane(std::istream& stream) {
     stream >> skipws;
-    AudioSource* gen;
+    AudioSource* gen = sources[0];
     NoteStream str;
     bool hasNotes = false;
     if(stream.peek() == '(') {

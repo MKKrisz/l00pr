@@ -63,6 +63,7 @@ public:
     inline Frequency operator/(double f) const { return Frequency(val / f); }
 };
 
+//TODO: other operators for double (op) freq
 inline Frequency operator*(double f, Frequency& fr) { return Frequency(fr.getFreq() * f); }
 
 /// <summary> Parses a frequency value from 'str'. </summary>

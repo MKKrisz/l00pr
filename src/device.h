@@ -15,7 +15,7 @@ class AudioDevice {
     /// <summary> The music the device is playing. </summary>
     std::vector<Tune> tunes;
     
-    /// <summary> A flag representing wether the device is currently playing or not </summary>
+    /// <summary> A flag representing whether the device is currently playing or not </summary>
     bool running;
 
     /// <summary> Sets the specification to use </summary>

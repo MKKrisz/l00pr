@@ -11,7 +11,7 @@ class RandomNote;
 class NoteStream {
 protected:
     /// Returns the place where t should be in playable
-    inline int getId(double t) { return bSearch(notes, t); }
+    inline size_t getId(double t) { return bSearch(notes, t); }
 
     /// The Data
     std::vector<std::pair<double, Note*>> notes;

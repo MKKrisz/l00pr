@@ -5,8 +5,8 @@ target_sources(${PROJECT_NAME} PUBLIC audiosource.hpp audiosource.cpp
                                concepts.hpp
                                device.h device.cpp
                                interpolated.hpp
-                               freq.hpp freq.cpp
-                               range.hpp
+                               freq.hpp freq.cpp freq_test.cpp
+                               range.hpp range_test.cpp
                                util.hpp util.cpp util_test.cpp
                                argmgr.hpp argmgr.cpp
                                pstate.hpp pstate.cpp

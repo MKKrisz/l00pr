@@ -3,6 +3,7 @@
 
 #include "arg.hpp"
 
+// FIXME is a singleton
 struct program_state {
     double seekfwd;
     bool opToFile;

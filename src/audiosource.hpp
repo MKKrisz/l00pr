@@ -88,25 +88,25 @@ public:
 
     /// <summary> Adds a phase value to this source </summary>
     /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
-    virtual inline void addPhase() {
+    virtual void addPhase() {
         phases.emplace_back(0);
     }
 
     /// <summary> Removes the phase value at index `id` from this source </summary>
     /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
-    virtual inline void removePhase(int id) {
+    virtual void removePhase(int id) {
         phases.erase(std::next(phases.begin(), id));
     }
 
-    virtual inline std::optional<std::pair<double, double>> getLengthBounds() {
+    virtual std::optional<std::pair<double, double>> getLengthBounds() {
         return length_bounds;
     }
 
     /// <summary> Returns this source's phases </summary>
-    inline std::vector<double> getPhases() { return phases; }
+    std::vector<double> getPhases() { return phases; }
 
     /// <summary> Sets this source's phase values to `p` </summary>
-    inline void setPhases(std::vector<double>& p) { phases = p;}
+    void setPhases(std::vector<double>& p) { phases = p;}
 
     /// <summary> Sends accumulated sample values through the filter chain to be processed </summary>
     /// <remarks> For filters, this function should end up processing the samples </remarks> 
@@ -122,7 +122,7 @@ public:
     /// <summary> Copy assignment operator </summary>
     AudioSource& operator=(const AudioSource&) = default;
 
-    virtual ~AudioSource() {};
+    virtual ~AudioSource() { /* nothing */ };
 
     /// <summary> Parser function for AudioSources </summary>
     /// <returns> A heap-allocated AudioSource value </summary>

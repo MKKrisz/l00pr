@@ -78,7 +78,7 @@ public:
         }
         p.addNote(Loop(str, 1).copy());
     }
-    void AddSample(NotePlayer& p, size_t id, int srate) override {}
+    void AddSample(NotePlayer&, size_t, int) override {}
     bool IsComplete() override {return true;}
     Note* copy() override { return new RandomNote(*this); }
     std::string ToString() override { return "RandomSequence"; }

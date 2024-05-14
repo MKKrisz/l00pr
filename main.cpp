@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     Filter::Init();
     Tune::Init();
 
-#ifdef CPORTA
+#ifdef JPORTA
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 #endif

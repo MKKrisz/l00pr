@@ -90,6 +90,7 @@ AudioDevice& AudioDevice::operator=(const AudioDevice& dev) {
 }
 
 void put32(std::ostream& str, uint n) {
+    // TODO mi van ha a számítógéped olyan mint a wav
     str.put(n << 24 >> 24);
     str.put(n >> 8 << 24 >> 24);
     str.put(n >> 16 << 24 >> 24);

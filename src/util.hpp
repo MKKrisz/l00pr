@@ -63,8 +63,8 @@ template <std::ranges::range U, std::floating_point F, typename T = std::ranges:
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
 size_t bSearch(U data, F t) {
     if(data.size() == 0) return 0;
-    size_t min = 0;
-    size_t max = data.size()-1;
+    int min = 0;
+    int max = data.size()-1;
     size_t mid = (min + max)/2;
     while(min<=max && !almostEQ(data[mid].first, t)) {
         if(data[mid].first < t)
@@ -84,8 +84,7 @@ void ordered_add(U& data, std::pair<F, T> p) {
         data.emplace_back(p);
         return;
     }
-    size_t id = bSearch(data, p.first);
-    if(data[id].first < p.first) id++;
+    size_t id = bSearch(data, p.first) + 1;
     if(id == data.size())
         data.emplace_back(p);
     else

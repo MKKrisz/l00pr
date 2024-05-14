@@ -182,5 +182,23 @@ TEST(UtilTest, bSearch_EmptyArr) {
 }
 TEST(UtilTest, bSearch_filled_arr) {
     std::vector<std::pair<double, double>> vec = {{1, 2}, {2, 5}, {3, 7}, {5, 9}};
+    EXPECT_EQ(bSearch(vec, -20.0), 0);
+    EXPECT_EQ(bSearch(vec, 1.0), 0);
+    EXPECT_EQ(bSearch(vec, 1.5), 0);    // Gets incremented in ordered_add
+    EXPECT_EQ(bSearch(vec, 2.0), 1);
     EXPECT_EQ(bSearch(vec, 3.0), 2);
+    EXPECT_EQ(bSearch(vec, 3.5), 2);    // Gets incremented in ordered_add
+    EXPECT_EQ(bSearch(vec, 5.0), 3);
+    EXPECT_EQ(bSearch(vec, 200.0), 3);
+}
+
+TEST(UtilTest, binary_insert) {
+    std::vector<std::pair<double, double>> vec = {{1, 2}, {2, 5}, {3, 7}, {5, 9}};
+    std::pair<double, double> p = {2.1, 7};
+    EXPECT_FLOAT_EQ(vec[1].first, 2);
+    EXPECT_EQ(vec[2].first, 3);
+    ordered_add(vec, p);
+    EXPECT_FLOAT_EQ(vec[1].first, 2);
+    EXPECT_FLOAT_EQ(vec[2].first, 2.1);
+    EXPECT_FLOAT_EQ(vec[3].first, 3);
 }

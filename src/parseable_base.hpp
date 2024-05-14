@@ -19,7 +19,7 @@ protected:
 public:
     std::string keyword;
     std::function<T(std::istream&, Args...)> create_func;
-    std::string ToString() { return keyword; }
+    virtual std::string ToString() { return keyword; }
 };
 
 ///<summary> Base class for all classes that 
@@ -65,6 +65,7 @@ public:
         for(size_t i = 0; i < meta.size(); i++) {
             str += meta[i].ToString() + "\n";
         }
+        return str;
     }
 };
 

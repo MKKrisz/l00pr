@@ -37,11 +37,16 @@ public:
 
     /// <summary> Returns 
     inline T get(double val) {
+        if(data.empty())
+            throw std::out_of_range("Empty Range");
         if(val < 0 || val > 1) 
             throw std::out_of_range("Range float-based getter");
         if(fixValue) {
             return data[size_t(val*data.size())];
         }
+        if(data.size() < 2)
+            throw std::out_of_range("Insufficent size of Range");
+
         if constexpr (is_interpolated<T>::value) {
             return linearInterpolator(data[0][0].second, data[1][0].second, val);
         }
@@ -58,7 +63,7 @@ public:
     }
     template <std::ranges::range U> 
         requires std::same_as<std::ranges::range_value_t<U>, T>
-    Range(U& p) : data() {
+    Range(const U& p) : data() {
         for(auto i = p.begin(); i != p.end(); i++) {
             data.emplace_back(*i);
         }

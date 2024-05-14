@@ -38,11 +38,11 @@ void Set::SampleRate(std::istream& str, Tune* t) {
     t->setSampleRate(val);
 }
 
-void Set::Polynote(std::istream& str, Tune* t) {
+void Set::Polynote(std::istream&, Tune* t) {
     t->setPoly(true);
 }
 
-void Set::NoPolynote(std::istream& str, Tune* t) {
+void Set::NoPolynote(std::istream&, Tune* t) {
     t->setPoly(false);
 }
 
