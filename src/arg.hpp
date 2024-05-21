@@ -4,6 +4,8 @@
 #include <string>
 #include <functional>
 
+class Program;
+
 enum ArgumentOption{
     FORBIDS_ARG, ALLOWS_ARG, REQUIRES_ARG
 };
@@ -16,12 +18,24 @@ class Argument {
 
     bool is_set = false;
     std::string arg = "";
-    std::function<void(const Argument&)> fn;
+    std::function<void(Program * const, const Argument&)> fn;
 public:
-    Argument(char c, const std::string& str, const std::string& help, std::function<void(const Argument&)> fn, ArgumentOption argOpt = ALLOWS_ARG)
+    
+    static std::vector<Argument> getDefault();
+
+    Argument(char c, 
+             const std::string& str, 
+             const std::string& help, 
+             std::function<void(Program * const, const Argument&)> fn, 
+             ArgumentOption argOpt = ALLOWS_ARG
+        ) 
         : c(c), str(str), helpstr(help), argOpt(argOpt), fn(fn) {}
 
-    Argument(const std::string& str, const std::string& help, std::function<void(const Argument&)> fn, ArgumentOption argOpt = ALLOWS_ARG) 
+    Argument(const std::string& str, 
+             const std::string& help, 
+             std::function<void(Program * const, const Argument&)> fn, 
+             ArgumentOption argOpt = ALLOWS_ARG
+        ) 
         : c(0), str(str), helpstr(help), argOpt(argOpt), fn(fn) {}
 
     char getChar() const { return c; }
@@ -39,7 +53,7 @@ public:
         arg = str;
     }
     const std::string& getArg() const { return arg; }
-    void setup() { if(is_set) fn(*this); }
+    void setup(Program * const p) const { if(is_set) fn(p, *this); }
 };
 
 #endif
