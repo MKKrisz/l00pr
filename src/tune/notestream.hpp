@@ -56,7 +56,7 @@ public:
 
     inline size_t size() {return notes.size();}
 
-    /// <summary> Returns a reference to the regular playable note at index `id` </summary>
+    /// <summary> Returns a reference to the note at index `id` </summary>
     inline Note* getNote(size_t id) {
         if(id >= notes.size())
             throw std::out_of_range("NoteStream.playable");
@@ -71,7 +71,7 @@ public:
     NoteStream(const NoteStream& s);
     NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate);
 
-    /// <summary> Adds a regular note to the structure at the specified timestamp </summary>
+    /// <summary> Adds a note to the structure at the specified timestamp </summary>
     void Add(std::pair<double, Note*> p) { ordered_add(notes, p); }
 
     /// <summary> Returns all notes that start before t and have not been started yet </summary>
