@@ -14,50 +14,43 @@ typedef unsigned int uint;
 #include "tune/tune.hpp"
 #include "device.h"
 
-program_state pstate = {
-    0,
-    false,
-    false,
-    "",
-    {},
-    {
-        {'h', "help", "Prints this message", printHelp, FORBIDS_ARG},
-        {'s', "seek-forward", "Seeks forward 't' seconds", setSeek, REQUIRES_ARG},
-        {'o', "output", "Instead of playing, the program will export the tune to 'f' in a wav format", setOpToFile, REQUIRES_ARG},
-        {'c', "cursed", "Reverts to using the first working version of the wav exporter", setCursed, FORBIDS_ARG},
-    }
-};
-
-
-void setOpToFile(const Argument& arg) {
-    pstate.opToFile = true;
-    pstate.opFile = arg.getArg();
+void Program::setOpToFile(Program* const p, const Argument& arg) {
+    p->opToFile = true;
+    p->opFile = arg.getArg();
 }
 
-void setCursed(const Argument&) { pstate.opCursed = true; }
-void setSeek(const Argument& arg) { pstate.seekfwd = stof(arg.getArg()); }
+void Program::setCursed(Program* const p, const Argument&) { 
+    p->opCursed = true; 
+}
 
+void Program::setSeek(Program* const p, const Argument& arg) { 
+    p->seekfwd = stof(arg.getArg()); 
+}
 
-void printHelp(const Argument&) {
+void Program::printHelp(Program* const p, const Argument&) {
     std::cout << "USAGE: l00pr [arguments] <files>" << std::endl;
-    for(auto arg : pstate.args) {
+    for(auto arg : p->args) {
         std::cout << '-' << arg.getChar() << "    " << "--" << arg.getStr() << "\t" << (arg.getStr().size() > 8 ?"" : "\t") << arg.getHelp() << std::endl;
     }
 }
 
-void Run() {
-    if(pstate.ifs.empty()) {
+void Program::remainOpen(Program* const p, const Argument& arg) {
+    p->stayopen = stoi(arg.getArg());
+}
+
+void Program::run() {
+    if(ifs.empty()) {
         std::cout << "No input files provided!" << std::endl;
         return;
     }
     Tune tune;
-    for(size_t i = 0; i < pstate.ifs.size(); i++) {
-        std::fstream file(pstate.ifs[i]);
+    for(size_t i = 0; i < ifs.size(); i++) {
+        std::fstream file(ifs[i]);
         try {
             file >> tune;
         }
         catch(std::exception& e) {
-            std::cout << "Exception while parsing \"" << pstate.ifs[i] << '"' << std::endl << e.what() << std::endl;
+            std::cout << "Exception while parsing \"" << ifs[i] << '"' << std::endl << e.what() << std::endl;
             return;
         }
         file.close();
@@ -65,8 +58,8 @@ void Run() {
     AudioDevice dev{tune.getSampleRate()};
     dev.addTune(tune);
 
-    if(!pstate.opToFile) {
-        dev.fastForward(pstate.seekfwd);
+    if(!opToFile) {
+        dev.fastForward(seekfwd);
         dev.start();
         uint len = tune.getLen();
         if(len == std::numeric_limits<double>::infinity())
@@ -77,11 +70,16 @@ void Run() {
 #endif
         else 
             len++;
-        sleep(len - pstate.seekfwd);
+
+        //TODO: use a loop that keeps the program awake
+        sleep(len - seekfwd + stayopen);
         dev.stop();
-        return;
     }
-    std::ofstream file(pstate.opFile);
-    dev.render(file, pstate.opCursed);
-    file.close();
+    else {
+        std::ofstream file(opFile);
+        if(!file.good())
+            throw std::runtime_error("Could not open file: " + opFile + " for writing!");
+        dev.render(file, opCursed);
+        file.close();
+    }
 }

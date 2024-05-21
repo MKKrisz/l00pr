@@ -4,22 +4,26 @@
 #include "arg.hpp"
 
 // FIXME is a singleton
-struct program_state {
-    double seekfwd;
-    bool opToFile;
-    bool opCursed;
-    std::string opFile;
-    std::vector<std::string> ifs;
-    std::vector<Argument> args; 
+// Not anymore, I guess??
+struct Program {
+    // TODO: make hard-coded things into plugins instead
+    double seekfwd = 0;
+    int stayopen = 1;
+    bool opToFile = false;
+    bool opCursed = false;
+    std::string opFile = "";
+    std::vector<std::string> ifs = {};
+    std::vector<Argument> args = {};
 
+    Program() {/*nothing*/}
+    Program(std::vector<Argument> a) : args(a) {}
+
+    static void setSeek(Program* const, const Argument& arg);
+    static void setOpToFile(Program* const, const Argument& arg);
+    static void setCursed(Program* const, const Argument&);
+    static void printHelp(Program* const, const Argument&);
+    static void remainOpen(Program* const, const Argument&);
+    void run();
 };
-
-extern program_state pstate;
-
-void setSeek(const Argument& arg);
-void setOpToFile(const Argument& arg);
-void setCursed(const Argument&);
-void printHelp(const Argument&);
-void Run();
 
 #endif
