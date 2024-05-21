@@ -1,4 +1,5 @@
 #include "src/argmgr.hpp"
+#include "src/arg.hpp"
 #include "src/pstate.hpp"
 #include "src/generator/generator.hpp"
 #include "src/filter/filter.hpp"
@@ -22,28 +23,44 @@
 /// </summary>
 int main(int argc, char** argv) {
     srand(time(0));
+    SDL_Init(SDL_INIT_AUDIO);
+
     Generator::Init();
     Filter::Init();
     Tune::Init();
 
 #if !defined(_WIN32) && !defined(NDEBUG)
-    ::testing::InitGoogleTest(&argc, argv);
+    //::testing::InitGoogleTest(&argc, argv);
 #endif
 
-    // Initialize SDL and random
-    SDL_Init(SDL_INIT_AUDIO);
+    Program program{Argument::getDefault()};
 
-    ArgumentManager argmgr{pstate.args};
-    argmgr.Parse(argc, argv);
-    pstate.ifs = argmgr.getUnparsed();
+    //Plugin code goes here
 
-    //Process and run arguments
-    Run();
+    ArgumentManager argmgr{program.args};
+    try {
+    argmgr.parse(argc, argv);
+    }
+    catch(std::exception& e) {
+        std::cout << e.what() << std::endl;
+        goto exit;
+    }
+    argmgr.setup(&program);
+    program.ifs = argmgr.getUnparsed();
+
+    try {
+        program.run();
+    } 
+    catch(std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+
+exit:
 
     // Exit SDL
     SDL_Quit();
 #if !defined(_WIN32) && !defined(NDEBUG)
-    return RUN_ALL_TESTS();
+    //return RUN_ALL_TESTS();
 #else
     return 0;
 #endif

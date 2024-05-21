@@ -8,6 +8,7 @@ target_sources(${PROJECT_NAME} PUBLIC audiosource.hpp audiosource.cpp audiosourc
                                freq.hpp freq.cpp freq_test.cpp
                                range.hpp range_test.cpp
                                util.hpp util.cpp util_test.cpp
+                               arg.hpp arg.cpp
                                argmgr.hpp argmgr.cpp
                                pstate.hpp pstate.cpp
                                string_convertible.hpp
