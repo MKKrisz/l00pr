@@ -44,5 +44,7 @@ int main(int argc, char** argv) {
     SDL_Quit();
 #if !defined(_WIN32) && !defined(NDEBUG)
     return RUN_ALL_TESTS();
+#else
+    return 0;
 #endif
 }

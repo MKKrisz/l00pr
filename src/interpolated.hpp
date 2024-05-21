@@ -8,12 +8,16 @@
 #include <cmath>
 #include <functional>
 #include <istream>
+#include <optional>
 
 #include "concepts.hpp"
 #include "exceptions/parse_error.hpp"
 #include "interpolator.hpp"
 #include "util.hpp"
 
+#ifdef _WIN32
+#define M_PI 3.141592653589793238
+#endif
 
 template<Arithmetic T>
 class Interpolated;

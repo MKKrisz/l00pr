@@ -2,6 +2,10 @@
 
 #include <cmath>
 
+#ifdef _WIN32
+#define M_PI 3.141592653589793238
+#endif
+
 SineGenerator::SineGenerator(Interpolated<double> phasemul,
         Interpolated<double> amplitude, 
         Interpolated<double> offset) : Generator(phasemul, amplitude, offset){}

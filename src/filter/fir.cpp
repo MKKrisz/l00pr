@@ -3,6 +3,10 @@
 
 #include "fir.hpp"
 
+#ifdef _WIN32
+#define M_PI 3.141592653589793238
+#endif
+
 double FIR::filter(double sample, double, double, double) {
     sbuf[bufId++] = sample;
     bufId = bufId % sbuf.size();
