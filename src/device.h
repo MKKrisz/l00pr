@@ -1,7 +1,12 @@
 #ifndef L00PR_AUDIO_DEVICE
 #define L00PR_AUDIO_DEVICE
 
+#ifdef _WIN32
+#include "SDL.h"
+#else
 #include <SDL2/SDL.h>
+#endif
+
 #include "tune/tune.hpp"
 
 /// <summary> Device to manage SDL audio and play your funky tunes. </summary>

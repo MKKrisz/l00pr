@@ -1,6 +1,14 @@
 #include <iostream>
 #include <fstream>
-#include <thread>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <cstdint>
+#define sleep(x) Sleep(1000 * (x))
+typedef unsigned int uint;
+#else
+#include <unistd.h>
+#endif
 
 #include "pstate.hpp"
 #include "tune/tune.hpp"
@@ -61,8 +69,12 @@ void Run() {
         dev.fastForward(pstate.seekfwd);
         dev.start();
         uint len = tune.getLen();
-        if(len == std::numeric_limits<double>::infinity()) 
+        if(len == std::numeric_limits<double>::infinity())
+#ifdef _WIN32
+            len = UINT_MAX;
+#else
             len = std::numeric_limits<uint>::max();
+#endif
         else 
             len++;
         sleep(len - pstate.seekfwd);

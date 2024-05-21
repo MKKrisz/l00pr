@@ -3,10 +3,17 @@
 #include "src/generator/generator.hpp"
 #include "src/filter/filter.hpp"
 #include "src/tune/tune.hpp"
+
+#ifdef _WIN32
+#include "SDL.h"
+#else
 #include <SDL2/SDL.h>
-#ifndef NDEBUG
+#endif
+
+#if !defined(_WIN32) && !defined(NDEBUG)
 #include <gtest/gtest.h>
 #endif
+
 #include <ctime>
 
 
@@ -19,7 +26,7 @@ int main(int argc, char** argv) {
     Filter::Init();
     Tune::Init();
 
-#ifndef NDEBUG
+#if !defined(_WIN32) && !defined(NDEBUG)
     ::testing::InitGoogleTest(&argc, argv);
 #endif
 
@@ -35,7 +42,7 @@ int main(int argc, char** argv) {
 
     // Exit SDL
     SDL_Quit();
-#ifndef NDEBUG
+#if !defined(_WIN32) && !defined(NDEBUG)
     return RUN_ALL_TESTS();
 #endif
 }

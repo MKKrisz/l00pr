@@ -4,6 +4,31 @@
 #include <iostream> // for debug
 #include <cstring>  // for memcpy
 
+#ifdef _WIN32
+typedef unsigned int uint;
+typedef unsigned short ushort;
+
+//For some reason msvc does not know what bit_cast is
+template<class To, class From>
+std::enable_if_t<
+    sizeof(To) == sizeof(From) &&
+    std::is_trivially_copyable_v<From>&&
+    std::is_trivially_copyable_v<To>,
+    To>
+    // constexpr support needs compiler magic
+    bit_cast(const From& src) noexcept
+{
+    static_assert(std::is_trivially_constructible_v<To>,
+        "This implementation additionally requires "
+        "destination type to be trivially constructible");
+
+    To dst;
+    std::memcpy(&dst, &src, sizeof(To));
+    return dst;
+}
+
+#endif
+
 void AudioDevice::setSampleRate(int sr) {
     SDL_CloseAudioDevice(this->devHandle);
     *this = AudioDevice(sr, spec.samples);
@@ -123,7 +148,11 @@ void AudioDevice::render(std::ostream& stream, bool cursed) {
         if(cursed)
             put32(stream, (tunes[0].getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
         else
+#ifdef _WIN32
+            put32(stream, bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
+#else
             put32(stream, std::bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
+#endif
         samples++;
     }
     stream.seekp(size);
