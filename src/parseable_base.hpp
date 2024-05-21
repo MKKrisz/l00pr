@@ -29,6 +29,7 @@ protected:
     static std::vector<Metadata_type> meta;
 public:
     static void AddMetadata(const Metadata_type& m) { meta.emplace_back(m); }
+    static void ClearMetadata() {meta.clear();}
 
     static size_t GetKeywordCount() {return meta.size(); }
 
