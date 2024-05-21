@@ -33,6 +33,7 @@ public:
     std::string desc;
     AS_Metadata(const char* kw, std::function<AudioSource*(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
+    std::string ToString() override;
 };
 
 /// <summary> Base class for filters and generators </summary>
@@ -117,7 +118,7 @@ public:
     
     /// <summary> Creates a sample and adds it to the accumulator </summary>
     /// <remarks> For filters, should just send the action deeper into the chain </remarks>
-    virtual void operator()(size_t noteId, double delta, double t, double extmul, double srate) = 0;
+    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) = 0;
     
     /// <summary> Copy assignment operator </summary>
     AudioSource& operator=(const AudioSource&) = default;

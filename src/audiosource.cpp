@@ -5,6 +5,16 @@
 
 #include <iostream>
 
+std::string AS_Metadata::ToString() {
+    std::string ret = keyword;
+    size_t maxKwdLen = std::max(Generator::GetLongestKeywordMeta().keyword.size(), Filter::GetLongestKeywordMeta().keyword.size());
+    for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {
+        ret += '\t';
+    }
+    ret += (maxKwdLen == keyword.size()?"":"\tSyntax: ") + syntax + "\t" + desc;
+    return ret;
+}
+
 void AudioSource::parse_lb(std::istream& str) {
     str >> skipws;
     if(str.peek() != '{') {
