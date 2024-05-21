@@ -78,7 +78,7 @@ public:
     /// </summary>
     template <std::ranges::range U> 
         requires std::same_as<std::ranges::range_value_t<U>, std::pair<double, T>>
-    Interpolated(U& data) : data(), itp(linearInterpolator<T>) {
+    Interpolated(const U& data) : data(), itp(linearInterpolator<T>) {
         for(auto it = data.begin(); it != data.end(); std::advance(it, 1)) {
             this->data.emplace_back(*it);
         }
@@ -143,13 +143,8 @@ public:
     }
 
     /// <see cref="Set(double t, const T& data)"/>
-    void Set(std::pair<float, T> p) {
-        int id = getId(p.first);
-        if(almostEQ(data[id].first, p.first)) {
-            data[id].second = p.second;
-            return;
-        }
-        data.insert(id, p);
+    void Set(std::pair<double, T> p) {
+        ordered_add(data, p);
     };
 
     /// <summary> Removes all datapoints </summary>
@@ -220,22 +215,7 @@ protected:
     /// Returns the index of the keyframe with timestamp "t"
     /// In case of failure the frame timestamp of data[id] will differ from t.
     /// </summary>
-    int getId(double t) const {
-        if(data.size() == 0) return 0;
-        int min = 0;
-        int max = data.size()-1;
-        int mid = (min + max)/2;
-        while(min<=max && !almostEQ(data[mid].first, t)) {
-            if(data[mid].first < t)
-                min = mid+1;
-            else
-                max = mid-1;
-            mid = (min + max)/2;
-        }
-        if(min<=max) return mid;
-        //if(data[mid].first < t) return mid+1;
-        return mid;
-    }
+    size_t getId(double t) const { return bSearch(data, t); }
 
 public:
     /// <summary> Returns the datapoint at 't' if it exists or an empty std::optional if it doesn't </summary>
@@ -244,7 +224,7 @@ public:
         if(almostEQ(ret.first, t)) return ret;
         return std::optional<std::pair<float, T>>();
     }
-    };
+};
 
 /// <summary> Parser for Interpolated values. Syntax can be: <value>; <time1>: <data1> - <time2>:<data2> - ... - <time_n>:<data_n> </summary>
 /// <remarks> Does not clear 'p' </remarks>
@@ -262,21 +242,23 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
             if(i == 0)  {
                 stream.clear();
                 stream.seekg(start) >> val;
+                if(!stream.good()) {
+                    throw parse_error(stream, "Invalid value");
+                }
                 p.data.emplace_back(std::make_pair(0, val));
                 break;
             }
             else 
                 throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value.\n Syntax for interpolated values can be: <value>; <timestamp>:<value> [ - <timestamp2>:<value2> - ... - <timestamp_n>:<value_n>]");
         }
-        else {
-            stream.get();
-            stream >> val;
-            p.data.emplace_back(std::make_pair(t, val));
-        }
+        stream.get();
+        stream >> val;
+        p.data.emplace_back(std::make_pair(t, val));
+
         if((stream >> skipws).peek() != '-') break;
         i++;
         stream.get();
-        if((stream >> skipws).peek() == '-') break;
+        //if((stream >> skipws).peek() == '-') break;
     }
     p.sort();
     return stream;
