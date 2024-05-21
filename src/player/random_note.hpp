@@ -11,7 +11,7 @@
 #include "../tune/notestream.hpp"
 #include "../tune/loop.hpp"
 
-//Note to my favourite desser: I'm going to leave these design notes in, just for fun...
+//Note to my favourite dessert: I'm going to leave these design notes in, just for fun...
 
 //How to characterise random note sequences?
 //1, We need to know the sequence's length

@@ -53,7 +53,7 @@ public:
     /// <summary> Gets the current frequency value </summary>
     double getFreq();
     
-    /// <summary> Checks wether the note is completed </summary>
+    /// <summary> Checks whether the note is completed </summary>
     /// <remarks> A little more complicated than just "done > len", as that would chop off the end of the note... </remarks>
     bool IsComplete() override;
 
