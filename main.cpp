@@ -4,7 +4,9 @@
 #include "src/filter/filter.hpp"
 #include "src/tune/tune.hpp"
 #include <SDL2/SDL.h>
+#ifndef NDEBUG
 #include <gtest/gtest.h>
+#endif
 #include <ctime>
 
 
@@ -17,9 +19,8 @@ int main(int argc, char** argv) {
     Filter::Init();
     Tune::Init();
 
-#ifdef JPORTA
+#ifndef NDEBUG
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 #endif
 
     // Initialize SDL and random
@@ -34,4 +35,7 @@ int main(int argc, char** argv) {
 
     // Exit SDL
     SDL_Quit();
+#ifndef NDEBUG
+    return RUN_ALL_TESTS();
+#endif
 }
