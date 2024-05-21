@@ -2,6 +2,7 @@
 #define L00PR_TUNE
 
 #include "../audiosource.hpp"
+#include "../filter/filter.hpp"
 #include "../player/noteplayer.hpp"
 #include "notestream.hpp"
 #include "lane.hpp"
@@ -23,7 +24,7 @@ class Tune : public Parseable<void, Tkwd_Metadata, Tune*>{
     /// <summary> Sources specified using the "generator" keyword end up in this array </summary>
     std::vector<AudioSource*> sources;
 
-    AudioSource* globalFilter = nullptr;
+    Filter* globalFilter = nullptr;
 
     /// <summary> Beats per minute value, used to make calculating lengths and times a little easier </summary>
     double bpm = 60;
@@ -54,7 +55,7 @@ public:
     inline int getSampleRate() { return srate; }
 
     inline void setPoly(bool val) {polynote = val;}
-    inline void setGlobalFilter(AudioSource* src) {
+    inline void setGlobalFilter(Filter* src) {
         delete globalFilter;
         globalFilter = src->copy();
     }

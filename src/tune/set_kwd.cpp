@@ -8,8 +8,8 @@ void Set::Init() {
     AddMetadata(Set_Metadata("srate", Set::SampleRate));
     AddMetadata(Set_Metadata("poly", Set::Polynote));
     AddMetadata(Set_Metadata("polynote", Set::Polynote));
-    AddMetadata(Set_Metadata("nopoly", Set::Polynote));
-    AddMetadata(Set_Metadata("nopolynote", Set::Polynote));
+    AddMetadata(Set_Metadata("nopoly", Set::NoPolynote));
+    AddMetadata(Set_Metadata("nopolynote", Set::NoPolynote));
     AddMetadata(Set_Metadata("globalfilter", Set::GlobalFilter));
     AddMetadata(Set_Metadata("gfilter", Set::GlobalFilter));
 
@@ -52,5 +52,5 @@ void Set::GlobalFilter(std::istream& str, Tune* t) {
         return;
     }
     str.get();
-    t->setGlobalFilter(AudioSource::Make(str, t->getSampleRate(), MakeFlags::onlyFilters));
+    t->setGlobalFilter(dynamic_cast<Filter*>(AudioSource::Make(str, t->getSampleRate(), MakeFlags::onlyFilters)));
 }
