@@ -41,7 +41,7 @@ public:
         bufId = bufId % sbuf.size();
         return sbuf[bufId];
     }
-    AudioSource* copy() override {return new DelayFilter(*this); }
+    DelayFilter* copy() override {return new DelayFilter(*this); }
 
     std::string ToString() override { return Filter::ToString() + "Delay(" + std::to_string(sbuf.size()) + ")"; }
 
@@ -52,7 +52,7 @@ public:
         bufId = f.bufId;
         return *this;
     };
-    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    static DelayFilter* Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return new DelayFilter(str, srate, flags);
     }
 };

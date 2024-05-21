@@ -33,10 +33,10 @@ TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), 
     parse_lb(stream);
 }
 
-AudioSource* TriangleGenerator::copy() {
+TriangleGenerator* TriangleGenerator::copy() {
     return new TriangleGenerator(*this);
 }
 
-AudioSource* TriangleGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+TriangleGenerator* TriangleGenerator::Create(std::istream& str, const int, const MakeFlags&) {
     return new TriangleGenerator(str);
 }

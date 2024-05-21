@@ -68,7 +68,7 @@ PassFilter& PassFilter::operator=(const PassFilter& f) {
 }
 
 
-AudioSource* PassFilter::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+PassFilter* PassFilter::Create(std::istream& str, const int srate, const MakeFlags& flags) {
     return new PassFilter(str, srate, flags);
 }
 

@@ -44,7 +44,7 @@ Register::Register(std::istream& stream, const int srate, const MakeFlags& flags
     stream.get();
 }
 
-AudioSource* Register::copy() {
+Register* Register::copy() {
     std::vector<AudioSource*> gs;
     for(AudioSource* g : generators) {
         gs.emplace_back(g->copy());
@@ -53,6 +53,6 @@ AudioSource* Register::copy() {
 }
 
 
-AudioSource* Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+Register* Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
     return new Register(str, srate, flags);
 }

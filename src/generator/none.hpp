@@ -11,7 +11,7 @@ class NoGenerator : public Generator {
 public: 
     NoGenerator();
     double getSample(double, double);
-    AudioSource* copy();
+    NoGenerator* copy();
     std::string ToString() { return "Dummy"; }
 };
 

@@ -33,7 +33,7 @@ public:
     Feedback(std::istream& str, int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), fbFilter(nullptr) {
         str >> expect('(') >> depth >> skipws;
         if(str.peek() != ')') {
-            fbFilter = (Filter*)AudioSource::Make(str, srate, MakeFlags::onlyFilters);
+            fbFilter = dynamic_cast<Filter*>(AudioSource::Make(str, srate, MakeFlags::onlyFilters));
         }
         str >> expect(')') >> skipws;
         if(str.peek() == '{') {
@@ -57,10 +57,10 @@ public:
     
     std::string ToString() { return Filter::ToString() + "Feedback"; }
 
-    AudioSource* copy() { return new Feedback(*this); }
+    Feedback* copy() { return new Feedback(*this); }
     ~Feedback() { delete fbFilter; }
 
-    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    static Feedback* Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return new Feedback(str, srate, flags);
     }
 };

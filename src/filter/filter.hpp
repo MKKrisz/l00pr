@@ -69,6 +69,7 @@ public:
     
     // dtor
     inline virtual ~Filter() { delete src; }
+    virtual Filter* copy() override = 0;
 
     // copy assignment operator
     Filter& operator=(const Filter& f) {

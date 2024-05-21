@@ -17,7 +17,7 @@ public:
     void removePhase(int id);
     inline double getSample(double, double) {return 0;}
     Register(std::istream& stream, const int, const MakeFlags& = MakeFlags::all);
-    AudioSource* copy();
+    Register* copy();
     std::string ToString() { 
         std::string str = "Register: {";
         for(size_t i = 0; i < generators.size(); i++) str += (i > 0 ? " " : "") + generators[i]->ToString();
@@ -27,7 +27,7 @@ public:
     ~Register();
 
 
-    static AudioSource* Create(std::istream& str, const int srate, const MakeFlags& flags);
+    static Register* Create(std::istream& str, const int srate, const MakeFlags& flags);
 };
 
 

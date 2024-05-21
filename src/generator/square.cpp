@@ -26,10 +26,10 @@ SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_du
     parse_lb(stream);
 }
 
-AudioSource* SquareGenerator::copy() { 
+SquareGenerator* SquareGenerator::copy() { 
     return new SquareGenerator(*this);
 }
 
-AudioSource* SquareGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+SquareGenerator* SquareGenerator::Create(std::istream& str, const int, const MakeFlags&) {
     return new SquareGenerator(str);
 }

@@ -22,11 +22,11 @@ public:
     TriangleGenerator(const TriangleGenerator&);
 
     double getSample(double phase, double t) override;
-    AudioSource* copy() override;
+    TriangleGenerator* copy() override;
     std::string ToString() override { return "Triangle"; }
 
 
-    static AudioSource* Create(std::istream& str, const int, const MakeFlags&);
+    static TriangleGenerator* Create(std::istream& str, const int, const MakeFlags&);
 };
 
 #endif

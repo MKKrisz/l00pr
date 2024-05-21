@@ -11,6 +11,6 @@ NoiseGenerator::NoiseGenerator(std::istream& stream) : Generator(stream){
     parse_lb(stream);
 }
 
-AudioSource* NoiseGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+NoiseGenerator* NoiseGenerator::Create(std::istream& str, const int, const MakeFlags&) {
     return new NoiseGenerator(str);
 }
