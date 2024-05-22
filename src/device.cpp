@@ -155,6 +155,7 @@ void AudioDevice::render(std::ostream& stream, bool cursed) {
 #endif
         samples++;
     }
+    stream.flush();
     stream.seekp(size);
     put32(stream, samples * 4 + 36);
     stream.seekp(size2);

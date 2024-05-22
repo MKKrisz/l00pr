@@ -62,6 +62,7 @@ public:
 
     /// <summary> Gets the time it takes to play the tune </summary>
     double getLen();
+    bool noteIsPlaying();
 
     /// <summary> Checks if the elapsed time since start is greater than the time required to play the tunee </summary>
     inline bool isComplete() { return t > getLen();}

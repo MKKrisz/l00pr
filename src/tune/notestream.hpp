@@ -43,17 +43,7 @@ public:
     inline int getSampleRate() const { return srate; }
 
     /// <summary> Caluclates how many seconds it takes to play the stream </summary>
-    inline double getLen() {
-        //if(!loops.empty()) return std::numeric_limits<double>::infinity();
-        if(notes.empty()) return 0;
-        if (len < 0) {
-            std::pair<double, Note*> last = notes[notes.size()-1];
-            lastNoteTs = last.first;
-            len = last.first + last.second->GetLen();
-        }
-        return len;
-    }
-
+    double getLen();
     inline size_t size() {return notes.size();}
 
     /// <summary> Returns a reference to the note at index `id` </summary>

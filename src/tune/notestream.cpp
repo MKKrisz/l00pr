@@ -35,6 +35,27 @@ std::vector<Note*> NoteStream::GetStartingNotes(double t) {
     return ret;
 }
 
+double NoteStream::getLen() {
+        //if(!loops.empty()) return std::numeric_limits<double>::infinity();
+        //if(notes.empty()) return 0;
+        if (len < 0) {
+            //std::pair<double, Note*> last = notes[notes.size()-1];
+            //lastNoteTs = last.first;
+            //len = last.first + last.second->GetLen();
+            double max = 0;
+            double maxTs = 0;
+            for(size_t i = 0; i < notes.size(); i++) {
+                if(maxTs < notes[i].first) 
+                    maxTs = notes[i].first;
+                if(max < notes[i].first + notes[i].second->GetLen())
+                    max = notes[i].first + notes[i].second->GetLen();
+            }
+            len = max;
+            lastNoteTs = maxTs;
+        }
+        return len;
+    }
+
 NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate)
     : bpm(bpm), polynote(polynote), srate(srate) {
     double sumlen = 0;
