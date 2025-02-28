@@ -37,6 +37,8 @@ class Tune : public Parseable<void, Tkwd_Metadata, Tune*>{
 
     /// <summary> A value indicating how much time has elapsed since the start of playing </summary>
     double t = 0;
+
+    AudioSource* getSourceByName(std::string name);
 public:
     static void Init();
 

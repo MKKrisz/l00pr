@@ -2,7 +2,7 @@
 #define L00PR_AUDIOSOURCE_H
 
 #include <vector>
-#include <istream>
+#include <iostream>
 #include <optional>
 
 #include "util.hpp"
@@ -66,6 +66,7 @@ protected:
     AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(0), length_bounds(src.length_bounds) {}
     AudioSource() : phases(), feedback(0), accumulator(0), length_bounds() {}
 public:
+    std::string name;
 
     /// <summary> Handles receiving feedback values. </summary>
     /// <remarks> 

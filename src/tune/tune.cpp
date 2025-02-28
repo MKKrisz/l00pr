@@ -74,6 +74,15 @@ void Tune::SetGen(std::istream& str, Tune* t) {
     t->setGen(str);
 }
 
+AudioSource* Tune::getSourceByName(std::string name) {
+    for(AudioSource* src : sources) {
+        if(src->name == name) {
+            return src;
+        }
+    }
+    return nullptr;
+}
+
 void Tune::addLane(std::istream& stream) {
     stream >> skipws;
     AudioSource* gen = sources[0];
@@ -87,8 +96,18 @@ void Tune::addLane(std::istream& stream) {
             stream >> genId;
             gen = sources[genId];
         }
-        else
-            gen = AudioSource::Make(stream, srate);
+        else {
+            std::string name;
+            char c;
+            while((c = stream.peek()) != ')' && !isspace(c)) {
+                stream.get();
+                name += c;
+            }
+            gen = getSourceByName(name);
+            if(gen == nullptr) {
+                throw parse_error(stream, "No audiosource named \"" + name + "\".");
+            }
+        }
         stream >> expect(')');
     }
     if((stream >> skipws).peek() == '{') {

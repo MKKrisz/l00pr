@@ -42,10 +42,24 @@ const MakeFlags MakeFlags::onlyGenerators = {false, true};
 AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     int start = str.tellg();
     std::string gen_except = ""; 
-    std::string filter_except = ""; 
+    std::string filter_except = "";
+    std::string name = "";
+
+    if((str >> skipws).peek() == ':') {
+        str.get();
+        char c;
+        while(str.get(c) && c != ':') {
+            if(isspace(c)) throw parse_error(str, "Named generator names don't allow for whitespaces");
+            name += c;
+        }
+        str >> skipws;
+        start = str.tellg();
+    }
     if(flags.generators) {
         try {
-            return Generator::Parse(str, srate, flags);
+            AudioSource* ret = Generator::Parse(str, srate, flags);
+            ret->name = name;
+            return ret;
         }
         catch(std::exception* e) {
             gen_except = e->what();
@@ -55,7 +69,9 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
         str.clear();
         str.seekg(start);
         try {
-            return Filter::Parse(str, srate, flags);
+            AudioSource* ret = Filter::Parse(str, srate, flags);
+            ret->name = name;
+            return ret;
         }
         catch(std::exception* e) {
             filter_except = e->what();;
