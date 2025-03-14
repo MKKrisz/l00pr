@@ -57,9 +57,9 @@ void Program::run() {
     }
     AudioDevice dev{tune.getSampleRate()};
     dev.addTune(tune);
+    dev.fastForward(seekfwd);
 
     if(!opToFile) {
-        dev.fastForward(seekfwd);
         dev.start();
         uint len = tune.getLen();
         if(len == std::numeric_limits<double>::infinity())
