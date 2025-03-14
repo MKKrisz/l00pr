@@ -9,6 +9,7 @@ void Generator::Init() {
     AddMetadata(AS_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", ""));
     AddMetadata(AS_Metadata("noise", NoiseGenerator::Create, "noise([freq_multiplier] [amplitude] [phase_offset])", "Only `amplitude` does anything"));
     AddMetadata(AS_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
+    AddMetadata(AS_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "WIP")); //TODO: proper description
 }
 
 Generator::Generator(std::istream& str) : AudioSource() {

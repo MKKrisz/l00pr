@@ -5,4 +5,5 @@
                                 square.hpp square.cpp
                                 triangle.hpp triangle.cpp
                                 register.hpp register.cpp
-                                noise.hpp noise.cpp)
+                                noise.hpp noise.cpp
+                                sampled.hpp sampled.cpp)

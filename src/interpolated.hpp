@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <functional>
-#include <istream>
+#include <iostream>
 #include <optional>
 
 #include "concepts.hpp"
@@ -60,7 +60,7 @@ public:
     Interpolated() : data(), itp(def_itp) {}
 
     /// <summary> Copy constructor. </summary>
-    Interpolated(const Interpolated& ip) : data(ip.data), itp(ip.itp){}
+    Interpolated(const Interpolated& ip) : data(ip.data), itp(ip.itp) {}
 
     /// <summary> Constructor for single T values </summary>
     Interpolated(const T& data) : data(), itp(def_itp){
@@ -108,10 +108,10 @@ public:
         if(lowbuf != nullptr && highbuf == nullptr && t > lowtresh) {
             return *lowbuf;
         }
-
+        
         int id = getId(t);
         if(almostEQ(data[id].first, t)) return data[id].second;
- 
+
         size_t aid, bid;
 
         if(data[id].first < t) { aid = id; bid = id + 1;}
@@ -140,7 +140,7 @@ public:
 
         return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
     }
-   
+
     /// <summary> Modifies datapoint at 't' if exsists, adds a new datapoint otherwise </summary>
     void Set(double t, const T& data) {
         Set(std::make_pair(t, data));

@@ -10,5 +10,6 @@
 #include "triangle.hpp"
 #include "register.hpp"
 #include "noise.hpp"
+#include "sampled.hpp"
 
 #endif

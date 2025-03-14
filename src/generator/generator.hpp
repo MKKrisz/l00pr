@@ -36,7 +36,7 @@ public:
     virtual double getSample(double phase, double t) = 0;
 
     /// <summary> Generates the sample from this generator with all the modifiers applied, then adds that to the accumulator </summary>
-    void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
+    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
 
     virtual ~Generator() {}
 
