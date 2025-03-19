@@ -91,7 +91,7 @@ public:
     /// <summary> Adds a phase value to this source </summary>
     /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
     virtual void addPhase() {
-        phases.emplace_back(0);
+        phases.emplace_back(0.0);
     }
 
     /// <summary> Removes the phase value at index `id` from this source </summary>

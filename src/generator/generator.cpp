@@ -47,8 +47,8 @@ void Generator::operator()(size_t noteId, double delta, double t, double, double
 #endif
     if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
     double& phase = phases[noteId];
-    phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
     accumulator += (getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * extmul);
+    phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
 }
 
 std::string Generator::getFormattedMetadata() {
