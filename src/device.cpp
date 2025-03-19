@@ -90,12 +90,14 @@ void AudioDevice::callback(void* userdata, uint8_t* stream, int bytelen) {
     AudioDevice* dev = (AudioDevice*)userdata;
     for(int i = 0; i < len; i++) {
         float sample = dev->tunes[0].getSample(dev->getSampleRate(), true);
+        if(dev->cursed) {sample += (sample < 0 ? 1 : -1);}
         //std::cout << sample << std::endl;
         std::memcpy(&stream[4*i], &sample, 4);
     }
 }
 
-void AudioDevice::start() {
+void AudioDevice::start(bool cursed) {
+    this->cursed = cursed;
     SDL_PauseAudioDevice(devHandle, 0);
 }
 void AudioDevice::stop() {

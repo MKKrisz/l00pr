@@ -22,6 +22,7 @@ class AudioDevice {
     
     /// <summary> A flag representing whether the device is currently playing or not </summary>
     bool running;
+    bool cursed = false;
 
     /// <summary> Sets the specification to use </summary>
     void setSpec(const SDL_AudioSpec& spec);
@@ -61,7 +62,7 @@ public:
     static void callback(void* userdata, uint8_t* stream, int len);
 
     /// <summary> Starts playing </summary>
-    void start();
+    void start(bool cursed = false);
     /// <summary> Stops playing </summary>
     void stop();
 

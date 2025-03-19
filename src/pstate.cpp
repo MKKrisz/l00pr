@@ -60,7 +60,7 @@ void Program::run() {
     dev.fastForward(seekfwd);
 
     if(!opToFile) {
-        dev.start();
+        dev.start(opCursed);
         uint len = tune.getLen();
         if(len == std::numeric_limits<double>::infinity())
 #ifdef _WIN32
