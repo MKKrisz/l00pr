@@ -120,7 +120,7 @@ void SampledGenerator::parse_file(const std::string& filename) {
     for(int i = 0; i < 4; i++) {header[i] = file.get();}
 
     while(strncmp(header, "data", 4)) {
-        unsigned int size;
+        unsigned int size = 0;
         read32(file, &size);
         file.seekp(size, std::ios_base::seekdir::_S_cur);
         for(int i = 0; i < 4; i++) {header[i] = file.get();}
@@ -152,4 +152,5 @@ void SampledGenerator::parse_file(const std::string& filename) {
         this->samples.emplace_back(fpsample);
         if(i != 0 && i % sample_rate == 0) std::cout << (i/(float)samples*100) << '%' << std::endl;
     }
+    std::cout << "done" << std::endl;
 }

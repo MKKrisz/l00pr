@@ -9,6 +9,11 @@ class SampledGenerator : public Generator {
     double timestep;
 
     void parse_file(const std::string& filename);
+
+    size_t mod(int a, int b) {
+        return (a % b) + (a < 0 ? b : 0);
+    }
+
 public:
     SampledGenerator(std::string sampleFile,
                   Interpolated<double> phase = 1.0f,
@@ -33,8 +38,8 @@ public:
 #endif
         if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
         double& phase = phases[noteId];
-        phases[noteId] = phase + delta * m_phasemul(t);
-        accumulator += (samples[size_t(fmod((phase + m_phaseoffset(t))/timestep, (double)samples.size()))] * m_gain(t) * extmul);
+        accumulator += (samples[mod(int((phase + m_phaseoffset(t))/timestep), samples.size())] * m_gain(t) * extmul);
+        phase += delta * m_phasemul(t);
     }
 };
 
