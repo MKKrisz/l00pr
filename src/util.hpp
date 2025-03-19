@@ -35,7 +35,7 @@ inline T lerp(T a, T b, float t) {
 }
 
 inline bool isNote(char c) {
-    return isdigit(c) || (c >= 'A' && c <= 'G');
+    return isdigit(c) || (c >= 'A' && c <= 'G') || c == '-';
 }
 inline bool isNoteMod(char c) {
     return (c == '#' || c == 'x' || c == 'b');

@@ -7,7 +7,7 @@
 
 double getFreq(std::istream& stream) {
     //skips whitespace then checks if next char is a number
-    if(isdigit((stream >> skipws).peek())) {
+    if(isdigit((stream >> skipws).peek()) || stream.peek() == '-') {
         double ret;
         stream >> ret;
         return ret;
