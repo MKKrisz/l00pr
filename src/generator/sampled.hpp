@@ -34,7 +34,7 @@ public:
         if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
         double& phase = phases[noteId];
         phases[noteId] = phase + delta * m_phasemul(t);
-        accumulator += (samples[size_t((phase + m_phaseoffset(t))/timestep)%samples.size()] * m_gain(t) * extmul);
+        accumulator += (samples[size_t(fmod((phase + m_phaseoffset(t))/timestep, (double)samples.size()))] * m_gain(t) * extmul);
     }
 };
 

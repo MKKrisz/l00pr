@@ -1,5 +1,6 @@
 #include "sampled.hpp"
 
+#include <cstring>
 #include <fstream>
 
 SampledGenerator::SampledGenerator(std::string filename, 
@@ -96,7 +97,7 @@ void SampledGenerator::parse_file(const std::string& filename) {
     unsigned int channels = 0;
     read16(file, &channels);
 
-    if(channels != 1) throw std::runtime_error("WAV files with more than 1 channels are unsupported");
+    //if(channels != 1) throw std::runtime_error("WAV files with more than 1 channels are unsupported");
 
     unsigned int sample_rate = 0;
     read32(file, &sample_rate);
@@ -115,27 +116,40 @@ void SampledGenerator::parse_file(const std::string& filename) {
     if(bps_from_file != bps_calculated) throw std::runtime_error("Bps wrong? calculated:" + std::to_string(bps_calculated) + " file:" + std::to_string(bps_from_file));
     unsigned int bps = bps_from_file;
 
-    if(file.get() != 'd' || file.get() != 'a' || file.get() != 't' || file.get() != 'a') {
-        throw std::runtime_error("data tag wrong");
+    char header[4] = {};
+    for(int i = 0; i < 4; i++) {header[i] = file.get();}
+
+    while(strncmp(header, "data", 4)) {
+        unsigned int size;
+        read32(file, &size);
+        file.seekp(size, std::ios_base::seekdir::_S_cur);
+        for(int i = 0; i < 4; i++) {header[i] = file.get();}
     }
     
     unsigned int data_size = 0;
     read32(file, &data_size);
     size_t samples = data_size/block_alignment;
 
-    unsigned int val_max = 0xffffffff >> (1-bps);
+    unsigned int val_max = fp ? 1 : 0xffffffff >> (32 - bps + (bps > 8? 1 : 0));
     this->samples.reserve(samples);
+    const double mid_point = (bps > 8 ? 0.0 : 0.5);;
 
     for(size_t i = 0; i < samples; i++) {
-        unsigned int sample = 0;
-        read(file, (BPS)bps, &sample);
-        if(!fp && bps > 8 && sample >> (bps-1)) { sample = (0xffffffff << bps) | sample;}
-
         double fpsample = 0;
-        if(fp) fpsample = std::bit_cast<float>(sample);
-        else fpsample = (0.5f-((int)sample /2.0f / (float)val_max));
+        for(size_t j = 0; j < channels; j++) {
+            unsigned int sample = 0;
+            read(file, (BPS)bps, &sample);
+            if(!fp && bps > 8 &&bps < 32 && (sample >> (bps-1))) { sample = (0xffffffff << bps) | sample;}
+
+            double fpch = 0;
+            
+            if(fp) fpch = std::bit_cast<float>(sample);
+            else fpch = (((int)sample / (float)val_max) - mid_point);
+            fpsample += fpch/channels;
+        }
+
 
         this->samples.emplace_back(fpsample);
-        if(i % 10000 == 0) std::cout << (i/(float)samples*100) << '%' << std::endl;
+        if(i != 0 && i % sample_rate == 0) std::cout << (i/(float)samples*100) << '%' << std::endl;
     }
 }
