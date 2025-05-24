@@ -129,6 +129,7 @@ public:
     /// <summary> Parser function for AudioSources </summary>
     /// <returns> A heap-allocated AudioSource value </summary>
     static AudioSource* Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
+    static std::string getFormattedMetadata();
 };
 
 #endif

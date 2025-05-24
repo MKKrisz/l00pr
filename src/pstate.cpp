@@ -13,6 +13,7 @@ typedef unsigned int uint;
 #include "pstate.hpp"
 #include "tune/tune.hpp"
 #include "device.h"
+#include "audiosource.hpp"
 
 void Program::setOpToFile(Program* const p, const Argument& arg) {
     p->opToFile = true;
@@ -30,12 +31,16 @@ void Program::setSeek(Program* const p, const Argument& arg) {
 void Program::printHelp(Program* const p, const Argument&) {
     std::cout << "USAGE: l00pr [arguments] <files>" << std::endl;
     for(auto arg : p->args) {
-        std::cout << '-' << arg.getChar() << "    " << "--" << arg.getStr() << "\t" << (arg.getStr().size() > 8 ?"" : "\t") << arg.getHelp() << std::endl;
+        std::cout << (arg.getChar() == 0 ? "" : "-") << arg.getChar() << (arg.getChar() == 0 ? "      ":"    ") << "--" << arg.getStr() << "\t" << (arg.getStr().size() > 8 ?"" : "\t") << arg.getHelp() << std::endl;
     }
 }
 
 void Program::remainOpen(Program* const p, const Argument& arg) {
     p->stayopen = stoi(arg.getArg());
+}
+
+void Program::listSources(Program* const p, const Argument&) {
+    std::cout << AudioSource::getFormattedMetadata();
 }
 
 void Program::run() {
