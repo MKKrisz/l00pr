@@ -13,6 +13,8 @@ public:
     double getSample(double, double);
     NoGenerator* copy();
     std::string ToString() { return "Dummy"; }
+
+    static NoGenerator* Create(std::istream& str, const int, const MakeFlags&);
 };
 
 #endif
