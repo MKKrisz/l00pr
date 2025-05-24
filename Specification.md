@@ -40,6 +40,7 @@ A `set` statement sets file-wise arguments.
 
 - bpm: sets the beats-per-minute value. default: 60
 - \[no\]poly: sets wether playing multiple notes at the same time is allowed. Drastically alters the file format if enabled/disabled. A value cannot be provided for this keyword. (Later referenced as 'polynote')
+- globalfilter: a chain of filters every played sound will go through. Useful for adding reverb to everything.
 
 \newpage
 
@@ -49,16 +50,18 @@ A `generator` statement defines one or multiple generators for use by the note p
 
 ##### Syntax
 
-- `generator [type]([type arguments])`
-- `generator[s] { [type 1]([type arguments]) [type 2]([type arguments 2]) ... }`
+- `generator [:label:]<type>([type arguments])`
+- `generator[s] { [:label 1:][type 1]([type arguments]) [:label 2:][type 2]([type arguments 2]) ... }`
 
 Note: In both cases, if no type argument is provided, the parenthesis is not required.
 
-Note 2: The second definition can span multiple lines. Example:
+Note 2: There is no mechanism ensuring the uniqueness of the labels (yet). When a label is not unique, references to it will only refer to the first one defined under that name.
+
+Note 3: The second definition can span multiple lines. Example:
 ```
 generators {
     sine(2 0.3)
-    triangle
+    :tri: triangle
     square
     ...
 }
@@ -68,10 +71,16 @@ generators {
 
 Most generators have no required parameters and a few optional arguments. Most of the parameters are keyframe-able
 
+Every generator can have a minimum and maximum playing length defined with the following syntax: `{[minimum]-[maximum]}`
+
+These boundaries are only applied when playing the notes starts, as a consequence it won't affect loop length calculations or when note in nopoly mode starts.
+
+- none
 - sine: `[frequency] [amplitude] [phase offset]`
 - square: `[frequency] [amplitude] [phase offset] [duty cycle]`
 - triangle: `[frequency] [amplitude] [phase offset] [peak]`
 - register: `[frequency] [amplitude] [phase offset]` This generator is special, by itself it does nothing. You must define multiple generators within its definition in a similar way to how you define multiple generators at once. Complete syntax: `register([arguments]) { [generator 1] [generator 2] ... }`
+- noise: `[frequency] [amplitude] [phase offset]` The frequency and phase offset parameters do nothing here.
 
 #### Player
 
@@ -81,7 +90,7 @@ A `player` statement defines a generator and a list of notes for that generator 
 
 `player (<generator-id>) { [note1] [note2] ... }`
 
-- generator-id: a 0-based index of the generator to be used, or a new generator definition.
+- generator-id: a 0-based index of the generator to be used, ~or a new generator definition~ (not supported for now; instead:) or a generator label.
 - note: A valid note definition
 
 \newpage
@@ -94,6 +103,9 @@ Notes are what players play.
 
 - If polynotes are enabled:  `<timestamp [parameters]>`
 - if polynotes are disabled: `<[parameters]>`
+
+If polynotes are enabled, you can write `a` or `after` in place of the timestamp to make the note play after the previos one, just like when polynotes are disabled.
+Similarly, you can write `w` or `with` to make the note play at the same time as the previous one.
 
 ##### Note parameters
 
