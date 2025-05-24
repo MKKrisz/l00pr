@@ -42,8 +42,9 @@ public:
     double GetLen() override {
         if(repAmount < 0) 
             return std::numeric_limits<double>::infinity();
-        return getLen() * repAmount;
+        return NoteStream::getLen() * repAmount;
     }
+    double getLen() { return GetLen(); }
     bool IsComplete() override {
         if(repAmount < 0) return false;
         return (t + reps*len) > repAmount * len;

@@ -59,6 +59,7 @@ double NoteStream::getLen() {
 NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate)
     : bpm(bpm), polynote(polynote), srate(srate) {
     double sumlen = 0;
+    double prev_len = 0;
     str >> skipws;
     while(str.peek() == '<') {
         str.get();
@@ -66,8 +67,20 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
         double ts = sumlen;
         double len = 0;
         if(polynote) {
-            str >> ts;
-            ts *= 60/bpm;
+            std::string timestamp_word = "";
+            str >> timestamp_word;
+            if(timestamp_word == "a" || timestamp_word == "after") {
+                
+            } else if(timestamp_word == "w" || timestamp_word == "with") {
+                ts -= prev_len;
+            } else { 
+                try {
+                    ts = std::stod(timestamp_word);
+                    ts *= 60/bpm;
+                } catch(std::invalid_argument& err) {
+                    throw parse_error(str, "Timestamp could not be parsed! Accepted keywords: a(fter), w(ith) or a number");
+                }
+            }
         }
         if(isNote((str >> skipws).peek())) {
             PlayableNote n = PlayableNote(str, bpm);
@@ -98,7 +111,7 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
                 if(buf == "loop") {
                     Loop l = Loop(str, srcs, bpm, polynote, srate);
                     Add(std::make_pair(ts, l.copy()));
-                    len = l.getLen();
+                    len = l.GetLen();
                     parsed = true;
                     break;
                 }
@@ -115,7 +128,11 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
 
         }
         str >> expect('>') >> skipws;
-        if(!polynote)
+        if(!polynote) {
             sumlen += len;
+        } else {
+            sumlen = ts + len;
+        }
+        prev_len = len;
     }
 }
