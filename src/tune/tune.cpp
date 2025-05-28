@@ -139,9 +139,10 @@ double Tune::getSample(double srate, bool print) {
         sum += l.player.getSample(srate);
     }
     if(print && hasNewNotes) std::cout << std::endl;
-    if(globalFilter != nullptr) {
-        globalFilter->addSample(sum);
-    }
+
+    //if(globalFilter != nullptr) {         // this should never happen
+    globalFilter->addSample(sum);
+    //}
     t += 1/srate;
     return globalFilter == nullptr? sum : globalFilter->calc();
 }

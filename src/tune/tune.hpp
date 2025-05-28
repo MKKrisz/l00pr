@@ -3,6 +3,7 @@
 
 #include "../audiosource.hpp"
 #include "../filter/filter.hpp"
+#include "../filter/dummy.hpp"
 #include "../player/noteplayer.hpp"
 #include "notestream.hpp"
 #include "lane.hpp"
@@ -24,7 +25,7 @@ class Tune : public Parseable<void, Tkwd_Metadata, Tune*>{
     /// <summary> Sources specified using the "generator" keyword end up in this array </summary>
     std::vector<AudioSource*> sources;
 
-    Filter* globalFilter = nullptr;
+    Filter* globalFilter = new DummyFilter();
 
     /// <summary> Beats per minute value, used to make calculating lengths and times a little easier </summary>
     double bpm = 60;
@@ -59,7 +60,7 @@ public:
     inline void setPoly(bool val) {polynote = val;}
     inline void setGlobalFilter(Filter* src) {
         delete globalFilter;
-        globalFilter = src->copy();
+        globalFilter = (src == nullptr ? new DummyFilter() : src->copy());
     }
 
     /// <summary> Gets the time it takes to play the tune </summary>
