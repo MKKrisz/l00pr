@@ -13,7 +13,8 @@ typedef unsigned int uint;
 #include "pstate.hpp"
 #include "tune/tune.hpp"
 #include "device.h"
-#include "audiosource.hpp"
+#include "generator/generator.hpp"
+#include "filter/filter.hpp"
 
 void Program::setOpToFile(Program* const p, const Argument& arg) {
     p->opToFile = true;
@@ -40,7 +41,14 @@ void Program::remainOpen(Program* const p, const Argument& arg) {
 }
 
 void Program::listSources(Program* const p, const Argument&) {
-    std::cout << AudioSource::getFormattedMetadata();
+    std::cout << "Generators:" << std::endl << Generator::getFormattedMetadata()
+        << std::endl << "Filters:" << std::endl << Filter::getFormattedMetadata();
+}
+void Program::listGenerators(Program* const p, const Argument&) {
+    std::cout << Generator::getFormattedMetadata();
+}
+void Program::listFilters(Program* const p, const Argument&) {
+    std::cout << Filter::getFormattedMetadata();
 }
 
 void Program::run() {

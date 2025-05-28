@@ -23,6 +23,8 @@ struct Program {
     static void setCursed(Program* const, const Argument&);
     static void printHelp(Program* const, const Argument&);
     static void remainOpen(Program* const, const Argument&);
+    static void listGenerators(Program* const, const Argument&);
+    static void listFilters(Program* const, const Argument&);
     static void listSources(Program* const, const Argument&);
     void run();
 };

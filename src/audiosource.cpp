@@ -81,6 +81,3 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
     str.seekg(start);
     throw parse_error(str, gen_except + filter_except);
 }
-std::string AudioSource::getFormattedMetadata() {
-    return Generator::getFormattedMetadata();
-}

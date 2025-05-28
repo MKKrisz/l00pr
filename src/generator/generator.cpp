@@ -3,14 +3,24 @@
 
 #include <cmath>
 
+std::string Gen_Metadata::ToString() {
+    std::string ret = keyword;
+    size_t maxKwdLen = Generator::GetLongestKeywordMeta().keyword.size();
+    for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {
+        ret += '\t';
+    }
+    ret += (maxKwdLen == keyword.size()?"":"\tSyntax: ") + syntax + "\t" + desc;
+    return ret;
+}
+
 void Generator::Init() {
-    AddMetadata(AS_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", ""));
-    AddMetadata(AS_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", ""));
-    AddMetadata(AS_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", ""));
-    AddMetadata(AS_Metadata("noise", NoiseGenerator::Create, "noise([freq_multiplier] [amplitude] [phase_offset])", "Only `amplitude` does anything"));
-    AddMetadata(AS_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
-    AddMetadata(AS_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "WIP")); //TODO: proper description
-    AddMetadata(AS_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
+    AddMetadata(Gen_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", ""));
+    AddMetadata(Gen_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", ""));
+    AddMetadata(Gen_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", ""));
+    AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([freq_multiplier] [amplitude] [phase_offset])", "Only `amplitude` does anything"));
+    AddMetadata(Gen_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
+    AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "WIP")); //TODO: proper description
+    AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
 }
 
 Generator::Generator(std::istream& str) : AudioSource() {
@@ -54,7 +64,7 @@ void Generator::operator()(size_t noteId, double delta, double t, double, double
 
 std::string Generator::getFormattedMetadata() {
     std::string ret = "";
-    for(const AS_Metadata& f : meta) {
+    for(const Gen_Metadata& f : meta) {
         ret += f.keyword + "\t" + (f.keyword.size() < 8? "\t" : "") + f.syntax + "\t" + f.desc + "\n";
     }
     return ret;

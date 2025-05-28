@@ -3,12 +3,21 @@
 
 #include "../audiosource.hpp"
 
+struct Filter_Metadata : public Metadata<AudioSource*, const int, const MakeFlags&>{
+public:
+    std::string syntax;
+    std::string desc;
+    Filter_Metadata(const char* kw, std::function<AudioSource*(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
+        : Metadata(kw, func), syntax(syn), desc(desc) {};
+    std::string ToString() override;
+};
+
 /// <summary> 
 /// Modifies "incoming" audio samples 
 /// General syntax: filter_name(<arguments>) {[src]}
 /// The value `src` is another AudioSource. Usually `src` is not strictly as some filters make use of so-called generatorless filter chain (ex.: feedback filters)
 /// </summary>
-class Filter : public AudioSource, public Parseable<AudioSource*, AS_Metadata, const int, const MakeFlags&> {
+class Filter : public AudioSource, public Parseable<AudioSource*, Filter_Metadata, const int, const MakeFlags&> {
 protected:
 
     /// <summary> The filter receives its' samples from here (in most cases...) </summary>
