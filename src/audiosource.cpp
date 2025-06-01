@@ -27,6 +27,7 @@ void AudioSource::parse_lb(std::istream& str) {
     if(str.peek() != '-') 
         str >> min >> expect('-');
     else str.get();
+    str >> skipws;
     if(str.peek() != '}')
         str >> max >> expect('}');
     else str.get();
@@ -40,7 +41,7 @@ const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
 AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
-    int start = str.tellg();
+    auto start = str.tellg();
     std::string gen_except = ""; 
     std::string filter_except = "";
     std::string name = "";
@@ -56,13 +57,15 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
         start = str.tellg();
     }
     if(flags.generators) {
+        str.clear();
+        str.seekg(start);
         try {
             AudioSource* ret = Generator::Parse(str, srate, flags);
             ret->name = name;
             return ret;
         }
-        catch(std::exception* e) {
-            gen_except = e->what();
+        catch(const std::exception& e) {
+            gen_except = e.what();
         }
     }
     if(flags.filters) {
@@ -73,11 +76,21 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
             ret->name = name;
             return ret;
         }
-        catch(std::exception* e) {
-            filter_except = e->what();;
+        catch(const std::exception& e) {
+            filter_except = e.what();
         }
     }
     str.clear();
     str.seekg(start);
-    throw parse_error(str, gen_except + filter_except);
+    throw std::runtime_error(gen_except + '\n' + filter_except);
+}
+
+
+AudioSource* AudioSource::getByName(const std::vector<AudioSource*>& sources, const std::string& name) {
+    for(AudioSource* src : sources) {
+        if(src->name == name) {
+            return src;
+        }
+    }
+    throw std::out_of_range("No audiosource with label " + name);
 }
