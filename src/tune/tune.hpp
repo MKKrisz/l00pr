@@ -67,7 +67,7 @@ public:
     double getLen();
     bool noteIsPlaying();
 
-    /// <summary> Checks if the elapsed time since start is greater than the time required to play the tunee </summary>
+    /// <summary> Checks if the elapsed time since start is greater than the time required to play the tune </summary>
     inline bool isComplete() { return t > getLen();}
 
     /// <summary> Gets the number of lanes </summary>

@@ -75,12 +75,11 @@ void Tune::SetGen(std::istream& str, Tune* t) {
 }
 
 AudioSource* Tune::getSourceByName(std::string name) {
-    for(AudioSource* src : sources) {
-        if(src->name == name) {
-            return src;
-        }
+    try {
+        return AudioSource::getByName(sources, name);
+    } catch(const std::out_of_range& ) {
+        return nullptr;
     }
-    return nullptr;
 }
 
 void Tune::addLane(std::istream& stream) {
@@ -95,20 +94,16 @@ void Tune::addLane(std::istream& stream) {
         if(isdigit(stream.peek())) {
             stream >> genId;
             gen = sources[genId];
+            stream >> expect(')');
         }
         else {
             std::string name;
-            char c;
-            while((c = stream.peek()) != ')' && !isspace(c)) {
-                stream.get();
-                name += c;
-            }
+            std::getline(stream, name, ')');
             gen = getSourceByName(name);
             if(gen == nullptr) {
                 throw parse_error(stream, "No audiosource named \"" + name + "\".");
             }
         }
-        stream >> expect(')');
     }
     if((stream >> skipws).peek() == '{') {
         stream.get();
@@ -143,8 +138,8 @@ double Tune::getSample(double srate, bool print) {
     //if(globalFilter != nullptr) {         // this should never happen
     globalFilter->addSample(sum);
     //}
-    t += 1/srate;
-    return globalFilter == nullptr? sum : globalFilter->calc();
+    t += 1.0f/srate;
+    return globalFilter->calc();
 }
 
 double Tune::getLen() {
