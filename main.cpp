@@ -28,10 +28,7 @@ int main(int argc, char** argv) {
     Generator::Init();
     Filter::Init();
     Tune::Init();
-
-#if !defined(_WIN32) && !defined(NDEBUG)
-    //::testing::InitGoogleTest(&argc, argv);
-#endif
+    Note::Init();
 
     Program program{Argument::getDefault()};
 
@@ -39,7 +36,7 @@ int main(int argc, char** argv) {
 
     ArgumentManager argmgr{program.args};
     try {
-    argmgr.parse(argc, argv);
+        argmgr.parse(argc, argv);
     }
     catch(std::exception& e) {
         std::cout << e.what() << std::endl;
