@@ -84,6 +84,8 @@ public:
     PlayableNote(std::istream& str, double bpm);
 
     Note* copy() override {return new PlayableNote(*this);}
+
+    static PlayableNote* Create(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
 };
 
 /// <summary> Writes the string representation of `n` onto `str` </summary>

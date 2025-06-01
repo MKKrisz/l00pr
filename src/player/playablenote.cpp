@@ -47,6 +47,9 @@ PlayableNote::PlayableNote(std::istream& stream, double bpm) : len(0), freq(), a
         stream >> ampl;
     }
 }
+PlayableNote* PlayableNote::Create(std::istream& str, const std::vector<AudioSource*>&, double bpm, bool, int) {
+    return new PlayableNote(str, bpm);
+}
 
 std::ostream& operator<<(std::ostream& str, PlayableNote& n) {
     return str << n.ToString(); 

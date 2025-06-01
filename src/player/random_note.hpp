@@ -82,6 +82,10 @@ public:
     bool IsComplete() override {return true;}
     Note* copy() override { return new RandomNote(*this); }
     std::string ToString() override { return "RandomSequence"; }
+
+    static RandomNote* Create(std::istream& src, const std::vector<AudioSource*>& gens, double bpm, bool poly, int srate) {
+        return new RandomNote(src, gens, bpm, poly, srate);
+    }
 };
 
 #endif
