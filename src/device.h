@@ -18,7 +18,7 @@ class AudioDevice {
     SDL_AudioDeviceID devHandle = 0;
 
     /// <summary> The music the device is playing. </summary>
-    std::vector<Tune> tunes;
+    std::vector<Tune*> tunes;
     
     /// <summary> A flag representing whether the device is currently playing or not </summary>
     bool running;
@@ -34,7 +34,7 @@ public:
     int getSampleRate();
 
     /// <summary> Adds a tune to the list of currently playing tunes <see cref='tunes'/> </summary>
-    void addTune(const Tune& t);
+    void addTune(Tune& t);
     //TODO: do this.
     //Tune getTune();
 

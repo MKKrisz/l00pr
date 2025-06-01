@@ -11,6 +11,6 @@ NoiseGenerator::NoiseGenerator(std::istream& stream) : Generator(stream){
     parse_lb(stream);
 }
 
-NoiseGenerator* NoiseGenerator::Create(std::istream& str, const int, const MakeFlags&) {
-    return new NoiseGenerator(str);
+std::unique_ptr<NoiseGenerator> NoiseGenerator::Create(std::istream& str, const int, const MakeFlags&) {
+    return std::make_unique<NoiseGenerator>(str);
 }

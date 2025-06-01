@@ -40,7 +40,11 @@ const MakeFlags MakeFlags::all = {true, true};
 const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
-AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
+std::unique_ptr<AudioSource> AudioSource::MakeGenerator(std::istream& str, const int srate) {
+    
+}
+
+std::unique_ptr<AudioSource> AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     auto start = str.tellg();
     std::string gen_except = ""; 
     std::string filter_except = "";
@@ -60,7 +64,7 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
         str.clear();
         str.seekg(start);
         try {
-            AudioSource* ret = Generator::Parse(str, srate, flags);
+            auto ret = Generator::Parse(str, srate, flags);
             ret->name = name;
             return ret;
         }
@@ -72,7 +76,7 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
         str.clear();
         str.seekg(start);
         try {
-            AudioSource* ret = Filter::Parse(str, srate, flags);
+            auto ret = Filter::Parse(str, srate, flags);
             ret->name = name;
             return ret;
         }
@@ -90,6 +94,15 @@ AudioSource* AudioSource::getByName(const std::vector<AudioSource*>& sources, co
     for(AudioSource* src : sources) {
         if(src->name == name) {
             return src;
+        }
+    }
+    throw std::out_of_range("No audiosource with label " + name);
+}
+
+AudioSource* AudioSource::getByName(const std::vector<std::unique_ptr<AudioSource>>& sources, const std::string& name) {
+    for(const auto& src : sources) {
+        if(src->name == name) {
+            return src.get();
         }
     }
     throw std::out_of_range("No audiosource with label " + name);

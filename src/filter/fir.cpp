@@ -46,7 +46,7 @@ PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, si
 
 PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
     Interpolated<double> dp;
-    AudioSource* src = nullptr;
+    std::unique_ptr<AudioSource> src = nullptr;
     str >> expect('(') >> dp;
     str >> skipws;
     size_t scount = 200;
@@ -58,11 +58,10 @@ PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
     str >> expect(')') >> skipws;
     if(str.peek() == '{') {
         str.get();
-        src = AudioSource::Make(str, srate, flags);
+        src = std::move(AudioSource::Make(str, srate, flags));
         str >> expect('}');
     }
-    *this = PassFilter(dp, srate, src, scount);
-    delete src;
+    *this = PassFilter(dp, srate, src.get(), scount);
 }
 
 PassFilter& PassFilter::operator=(const PassFilter& f) {
@@ -72,7 +71,7 @@ PassFilter& PassFilter::operator=(const PassFilter& f) {
 }
 
 
-PassFilter* PassFilter::Create(std::istream& str, const int srate, const MakeFlags& flags) {
-    return new PassFilter(str, srate, flags);
+std::unique_ptr<PassFilter> PassFilter::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    return std::make_unique<PassFilter>(str, srate, flags);
 }
 

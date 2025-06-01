@@ -1,6 +1,7 @@
 #ifndef L00PR_AUDIOSOURCE_H
 #define L00PR_AUDIOSOURCE_H
 
+#include <memory>
 #include <vector>
 #include <iostream>
 #include <optional>
@@ -115,7 +116,7 @@ public:
     virtual double calc() { return getAccumulator() + feedback; }
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
-    virtual AudioSource* copy() = 0;
+    virtual std::unique_ptr<AudioSource> copy() = 0;
     
     /// <summary> Creates a sample and adds it to the accumulator </summary>
     /// <remarks> For filters, should just send the action deeper into the chain </remarks>
@@ -128,9 +129,12 @@ public:
 
     /// <summary> Parser function for AudioSources </summary>
     /// <returns> A heap-allocated AudioSource value </summary>
-    static AudioSource* Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
+    static std::unique_ptr<AudioSource> Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
+    static std::unique_ptr<AudioSource> MakeGenerator(std::istream&, const int = 44100);
+    static std::unique_ptr<AudioSource> MakeFilter(std::istream&, const int = 44100);
 
     static AudioSource* getByName(const std::vector<AudioSource*>&, const std::string&);
+    static AudioSource* getByName(const std::vector<std::unique_ptr<AudioSource>>&, const std::string&);
 };
 
 #endif

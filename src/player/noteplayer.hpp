@@ -15,7 +15,7 @@ class NotePlayer {
     std::vector<Note*> m_notes;
 
     /// <summary> The current source </summary>
-    AudioSource* m_src;
+    std::unique_ptr<AudioSource> m_src;
 
     /// <summary> The default generator this player was created with </summary>
     AudioSource* def_src;
@@ -32,7 +32,7 @@ public:
     NotePlayer(const NotePlayer& player);
 
     // dtor
-    ~NotePlayer();
+    ~NotePlayer() {}
 
     /// <summary> Returns the current sample value, and sets itself up for the next sample generation.</summary>
     float getSample(double srate = 48000);

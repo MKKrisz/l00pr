@@ -15,10 +15,10 @@ public:
         }
     }
     inline double filter(double sample, double, double, double) { return sample; }
-    DummyFilter* copy() {return new DummyFilter(*this); }
+    std::unique_ptr<AudioSource> copy() {return std::make_unique<DummyFilter>(*this); }
     inline DummyFilter& operator=(const DummyFilter&) = default;
     std::string ToString() {return Filter::ToString() + "Dummy";}
-    static DummyFilter* Create(std::istream& str, const int srate, const MakeFlags& flags) {
-        return new DummyFilter(str, srate, flags);
+    static std::unique_ptr<DummyFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return std::make_unique<DummyFilter>(str, srate, flags);
     }
 };

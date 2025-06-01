@@ -4,17 +4,17 @@
 #include "../audiosource.hpp"
 #include "../interpolated.hpp"
 
-struct Gen_Metadata : public Metadata<AudioSource*, const int, const MakeFlags&>{
+struct Gen_Metadata : public Metadata<std::unique_ptr<AudioSource>, const int, const MakeFlags&>{
 public:
     std::string syntax;
     std::string desc;
-    Gen_Metadata(const char* kw, std::function<AudioSource*(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
+    Gen_Metadata(const char* kw, std::function<std::unique_ptr<AudioSource>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
     std::string ToString() override;
 };
 
 /// <summary> AudioSource that actually generates samples </summary>
-class Generator : public AudioSource, public Parseable<AudioSource*, Gen_Metadata, const int, const MakeFlags&> {
+class Generator : public AudioSource, public Parseable<std::unique_ptr<AudioSource>, Gen_Metadata, const int, const MakeFlags&> {
 protected:
     /// <summary> The frequency multiplier that should be applied </summary>
     Interpolated<double> m_phasemul;

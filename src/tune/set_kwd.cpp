@@ -18,39 +18,39 @@ void Set::Init() {
 void Set::Bpm(std::istream& str, Tune* t) {
     if((str >> skipws).peek() != ':') {
         //TODO: Make the def. value changeable
-        t->setBpm(60);
+        t->bpm(60);
         return;
     }
     double val;
     str.get();
     str >> val;
-    t->setBpm(val);
+    t->bpm(val);
 }
 
 void Set::SampleRate(std::istream& str, Tune* t) {
     if((str >> skipws).peek() != ':') { 
-        t->setSampleRate(48000);
+        t->samplerate(48000);
         return;
     }
     str.get();
     int val;
     str >> val; 
-    t->setSampleRate(val);
+    t->samplerate(val);
 }
 
 void Set::Polynote(std::istream&, Tune* t) {
-    t->setPoly(true);
+    t->polynote(true);
 }
 
 void Set::NoPolynote(std::istream&, Tune* t) {
-    t->setPoly(false);
+    t->polynote(false);
 }
 
 void Set::GlobalFilter(std::istream& str, Tune* t) {
     if((str>>skipws).peek() != ':') {
-        t->setGlobalFilter(nullptr);
+        t->globalFilter(nullptr);
         return;
     }
     str.get();
-    t->setGlobalFilter(dynamic_cast<Filter*>(AudioSource::Make(str, t->getSampleRate(), MakeFlags::onlyFilters)));
+    t->globalFilter((std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, t->samplerate(), MakeFlags::onlyFilters)));
 }

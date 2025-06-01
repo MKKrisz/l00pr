@@ -33,7 +33,7 @@ public:
     /// <summary> Adds `sample` to the rotating buffer, then executes the convolution operation </summary>
     double filter(double sample, double delta, double t, double srate);
     
-    FIR* copy() {return new FIR(*this); }
+    std::unique_ptr<AudioSource> copy() {return std::make_unique<FIR>(*this); }
 
     // copy assignment operator
     FIR& operator=(const FIR& f) {
@@ -58,10 +58,10 @@ public:
     PassFilter(Interpolated<double>& dp, int srate, AudioSource* src = nullptr, size_t scount = 200);
     PassFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all);
     PassFilter(const PassFilter& f) = default;
-    PassFilter* copy() {return new PassFilter(*this);}
+    std::unique_ptr<AudioSource> copy() {return std::make_unique<PassFilter>(*this);}
     PassFilter& operator=(const PassFilter&);
     std::string ToString() {return Filter::ToString() + "Pass"; }
-    static PassFilter* Create(std::istream& str, const int srate, const MakeFlags& flags);
+    static std::unique_ptr<PassFilter> Create(std::istream& str, const int srate, const MakeFlags& flags);
 };
 
 #endif

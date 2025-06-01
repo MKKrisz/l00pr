@@ -36,8 +36,8 @@ void AudioDevice::setSampleRate(int sr) {
 
 int AudioDevice::getSampleRate() { return spec.freq; }
 
-void AudioDevice::addTune(const Tune& t) {
-    tunes.emplace_back(t);
+void AudioDevice::addTune(Tune& t) {
+    tunes.emplace_back(&t);
 }
 
 //Tune* AudioDevice::getTune() { return tune; }
@@ -81,7 +81,7 @@ void AudioDevice::fastForward(double t) {
     SDL_LockAudioDevice(devHandle);
     int srate = getSampleRate();
     for(int i = 0; i < t * srate; i++)
-        tunes[0].getSample(srate, false);
+        tunes[0]->getSample(srate, false);
     SDL_UnlockAudioDevice(devHandle);
 }
 
@@ -89,7 +89,7 @@ void AudioDevice::callback(void* userdata, uint8_t* stream, int bytelen) {
     int len = bytelen / 4;
     AudioDevice* dev = (AudioDevice*)userdata;
     for(int i = 0; i < len; i++) {
-        float sample = dev->tunes[0].getSample(dev->getSampleRate(), true);
+        float sample = dev->tunes[0]->getSample(dev->getSampleRate(), true);
         if(dev->cursed) {sample += (sample < 0 ? 1 : -1);}
         //std::cout << sample << std::endl;
         std::memcpy(&stream[4*i], &sample, 4);
@@ -146,14 +146,14 @@ void AudioDevice::render(std::ostream& stream, bool cursed) {
     int size2 = stream.tellp();         //Position of chunk size for later
     stream << "    ";
     uint samples = 0;
-    while(!tunes[0].isComplete()) {
+    while(!tunes[0]->isComplete()) {
         if(cursed)
-            put32(stream, (tunes[0].getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
+            put32(stream, (tunes[0]->getSample(spec.freq) + 1) / 2 * std::numeric_limits<uint>::max());
         else
 #ifdef _WIN32
             put32(stream, bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
 #else
-            put32(stream, std::bit_cast<uint>(float(tunes[0].getSample(spec.freq))));
+            put32(stream, std::bit_cast<uint>(float(tunes[0]->getSample(spec.freq))));
 #endif
         samples++;
     }

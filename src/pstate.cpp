@@ -68,7 +68,7 @@ void Program::run() {
         }
         file.close();
     }
-    AudioDevice dev{tune.getSampleRate()};
+    AudioDevice dev{tune.samplerate()};
     dev.addTune(tune);
     dev.fastForward(seekfwd);
 

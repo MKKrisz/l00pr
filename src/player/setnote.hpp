@@ -40,7 +40,7 @@ public:
     inline void setGen(AudioSource* gen) { this->gen = gen; }
 
     inline void AddToPlayer(NotePlayer& p) override{
-        p.setSrc(getGen()->copy());
+        p.setSrc(getGen());
     }
     
     inline bool IsComplete() override { return true; }

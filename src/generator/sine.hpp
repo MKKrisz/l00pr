@@ -16,11 +16,11 @@ public:
 
     SineGenerator(std::istream& stream);
     double getSample(double, double) override;
-    SineGenerator* copy() override;
+    std::unique_ptr<AudioSource> copy() override;
     std::string ToString() override { return "Sine"; }
 
 
-    static SineGenerator* Create(std::istream& stream, const int, const MakeFlags&);
+    static std::unique_ptr<SineGenerator> Create(std::istream& stream, const int, const MakeFlags&);
 };
 
 

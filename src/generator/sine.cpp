@@ -28,10 +28,10 @@ SineGenerator::SineGenerator(std::istream& stream) : Generator(stream) {
     parse_lb(stream);
 }
 
-SineGenerator* SineGenerator::copy() { 
-    return new SineGenerator(*this);
+std::unique_ptr<AudioSource> SineGenerator::copy() { 
+    return std::make_unique<SineGenerator>(*this);
 }
 
-SineGenerator* SineGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
-    return new SineGenerator(stream);
+std::unique_ptr<SineGenerator> SineGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
+    return std::make_unique<SineGenerator>(stream);
 }

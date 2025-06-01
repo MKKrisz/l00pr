@@ -11,10 +11,10 @@ class NoGenerator : public Generator {
 public: 
     NoGenerator();
     double getSample(double, double);
-    NoGenerator* copy();
+    std::unique_ptr<AudioSource> copy();
     std::string ToString() { return "Dummy"; }
 
-    static NoGenerator* Create(std::istream& str, const int, const MakeFlags&);
+    static std::unique_ptr<NoGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };
 
 #endif

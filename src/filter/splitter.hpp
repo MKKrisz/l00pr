@@ -5,17 +5,17 @@
 
 //TODO: this
 class Splitter : public Filter {
-    std::vector<Filter*> paths;
+    std::vector<std::unique_ptr<Filter>> paths;
 public:
     Splitter(const Splitter& f) : Filter(f) {
-        for(Filter* path : f.paths) {
-            paths.emplace_back((Filter*)path->copy());
+        for(auto& path : f.paths) {
+            paths.emplace_back((std::unique_ptr<Filter>&&)std::move(path->copy()));
         }
     }
     Splitter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), paths() {
         str >> expect('(');
         while((str >> skipws).peek() != ')') {
-            paths.emplace_back(dynamic_cast<Filter*>(AudioSource::Make(str, srate, MakeFlags::onlyFilters)));
+            paths.emplace_back((std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, srate, MakeFlags::onlyFilters)));
         }
         str.get();
         if((str >> skipws).peek() == '{') {
@@ -27,22 +27,18 @@ public:
     
     virtual double filter(double sample, double, double, double) {
         double sum = 0;
-        for(Filter* path : paths) {
+        for(auto& path : paths) {
             path->addSample(sample);
             sum += path->calc();
         }
         return sum;
     }
 
-    Splitter* copy() { return new Splitter(*this); }
-    ~Splitter() {
-        for(Filter* f : paths)
-            delete f;
-    }
+    std::unique_ptr<AudioSource> copy() { return std::make_unique<Splitter>(*this); }
 
     std::string ToString() { return Filter::ToString() + "BlackBox(TM)"; }
-    static Splitter* Create(std::istream& str, const int srate, const MakeFlags& flags) {
-        return new Splitter(str, srate, flags);
+    static std::unique_ptr<Splitter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return std::make_unique<Splitter>(str, srate, flags);
     }
 };
 

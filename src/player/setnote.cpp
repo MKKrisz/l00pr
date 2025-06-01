@@ -9,7 +9,7 @@ SetterNote::SetterNote(std::istream& str, const std::vector<AudioSource*>& gens,
     if(isdigit(str.peek())) {
         int id;
         str >> id;
-        gen = gens[id]->copy();
+        gen = gens[id];
     }
     else {
         std::string name = "";

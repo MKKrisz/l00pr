@@ -24,11 +24,11 @@ public:
 
     double getSample(double, double) override;
 
-    SampledGenerator* copy() override { return new SampledGenerator(*this); }
+    std::unique_ptr<AudioSource> copy() override { return std::make_unique<SampledGenerator>(*this); }
     std::string ToString() override { return "Samples from " + filename; }
 
-    static SampledGenerator* Create(std::istream& stream, const int, const MakeFlags&) {
-        return new SampledGenerator(stream);
+    static std::unique_ptr<SampledGenerator> Create(std::istream& stream, const int, const MakeFlags&) {
+        return std::make_unique<SampledGenerator>(stream);
     }
     
     void operator()(size_t noteId, double delta, double t, double srate, double extmul) override {
