@@ -74,18 +74,17 @@ void Program::run() {
 
     if(!opToFile) {
         dev.start(opCursed);
-        uint len = tune.getLen();
-        if(len == std::numeric_limits<double>::infinity())
+        double len = tune.getLen() - seekfwd + stayopen + 1;
+        uint u_len = len;
+        if(len == std::numeric_limits<double>::infinity()) {
 #ifdef _WIN32
-            len = UINT_MAX;
+            u_len = UINT_MAX;
 #else
-            len = std::numeric_limits<uint>::max();
+            u_len = std::numeric_limits<uint>::max();
 #endif
-        else 
-            len++;
+        }
 
-        //TODO: use a loop that keeps the program awake
-        sleep(len - seekfwd + stayopen);
+        sleep(u_len);
         dev.stop();
     }
     else {
