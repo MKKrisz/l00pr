@@ -241,7 +241,7 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
         double t;
         T val;
         //if(!isalpha((stream >> skipws).peek())) break;
-        stream >> t;
+        stream >> skipws >> t;
         if((stream >> skipws).peek() != ':') {
             if(i == 0)  {
                 stream.clear();
@@ -256,12 +256,13 @@ std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
                 throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value.\n Syntax for interpolated values can be: <value>; <timestamp>:<value> [ - <timestamp2>:<value2> - ... - <timestamp_n>:<value_n>]");
         }
         stream.get();
-        stream >> val;
+        stream >> skipws >> val;
         p.data.emplace_back(std::make_pair(t, val));
 
         if((stream >> skipws).peek() != '-') break;
         i++;
         stream.get();
+        stream >> skipws;
         //if((stream >> skipws).peek() == '-') break;
     }
     p.sort();
