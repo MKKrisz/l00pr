@@ -14,7 +14,7 @@
 /// DO NOT and I repeat DO NOT TRY TO EXPORT A TUNE WITH AN INFINITE LOOP!!!
 /// (in the future, there will be a failsafe for that, currently there is none...)
 /// </remarks>
-class Loop : public NoteStream, Note {
+class Loop : public NoteStream, public Note {
     /// <summary> The amount the loop needs to repeat </summary>
     double repAmount = -1;
     double len = 0;
@@ -68,6 +68,10 @@ public:
         }
         str += "]\n";
         return str;
+    }
+
+    static Loop* Create(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
+        return new Loop(str, sources, bpm, poly, srate);
     }
 };
 
