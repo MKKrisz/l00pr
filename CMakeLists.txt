@@ -26,7 +26,7 @@ FetchContent_MakeAvailable(googletest)
 
 find_package(SDL2 REQUIRED)
 
-enable_testing()
+#enable_testing()
 
 add_executable(${PROJECT_NAME} main.cpp)
 #add_library(libl00pr STATIC l00pr.hpp
@@ -57,7 +57,8 @@ add_executable(${PROJECT_NAME} main.cpp)
 add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME} SDL2::SDL2 GTest::gtest GTest::gtest_main)
+#target_link_libraries(${PROJECT_NAME} SDL2::SDL2)
 
 
-include(GoogleTest)
-gtest_discover_tests(${PROJECT_NAME})
+#include(GoogleTest)
+#gtest_discover_tests(${PROJECT_NAME})
