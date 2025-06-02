@@ -12,7 +12,7 @@ typedef unsigned int uint;
 
 #include "pstate.hpp"
 #include "tune/tune.hpp"
-#include "device.h"
+#include "device/builtin.hpp"
 #include "generator/generator.hpp"
 #include "filter/filter.hpp"
 
@@ -68,30 +68,31 @@ void Program::run() {
         }
         file.close();
     }
-    AudioDevice dev{tune.samplerate()};
-    dev.addTune(tune);
-    dev.fastForward(seekfwd);
+    std::unique_ptr<Device> dev = nullptr;
 
-    if(!opToFile) {
-        dev.start(opCursed);
-        double len = tune.getLen() - seekfwd + stayopen + 1;
-        uint u_len = len;
-        if(len == std::numeric_limits<double>::infinity()) {
+    if(opToFile) { 
+        dev = std::make_unique<RenderDevice>(opFile, tune.samplerate()); 
+    } 
+    else { 
+        dev = std::make_unique<AudioDevice>(tune.samplerate()); 
+    }
+
+    dev->addTune(tune);
+    dev->setCursed(opCursed);
+    dev->fastForward(seekfwd);
+
+    dev->start();
+    if(!dev->isRunning()) {return;}     // Don't wait if device is not realtime
+    double len = tune.getLen() - seekfwd + stayopen + 1;
+    uint u_len = len;
+    if(len == std::numeric_limits<double>::infinity()) {
 #ifdef _WIN32
-            u_len = UINT_MAX;
+        u_len = UINT_MAX;
 #else
-            u_len = std::numeric_limits<uint>::max();
+        u_len = std::numeric_limits<uint>::max();
 #endif
-        }
+    }
 
-        sleep(u_len);
-        dev.stop();
-    }
-    else {
-        std::ofstream file(opFile);
-        if(!file.good())
-            throw std::runtime_error("Could not open file: " + opFile + " for writing!");
-        dev.render(file, opCursed);
-        file.close();
-    }
+    sleep(u_len);
+    dev->stop();
 }
