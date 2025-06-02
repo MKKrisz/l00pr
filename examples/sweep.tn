@@ -1,0 +1,11 @@
+set samplerate: 96000
+
+generators{
+    delay(0.2) {gain(0.5) { pass(0: 1 - 2500: 0 256) {sine(1 0.5)} }}
+    triangle(1 0:0 - 0.10:0.2)
+}
+
+player(1) {
+    <0 18500 15>
+    <21 0 0.001>
+}

@@ -1,0 +1,93 @@
+set bpm:77
+
+set globalfilter: gain(0.5) {split (
+        gain(0.25) {feedback(1 gain(0.773) {delay(0.06748)}) {gain(1.01)}}
+        gain(0.25) {feedback(1 gain(0.802) {delay(0.06404)}) {gain(0.99)}}
+        gain(0.25) {feedback(1 gain(0.753) {delay(0.08212)}) {gain(0.972)}}
+        gain(0.25) {feedback(1 gain(0.733) {delay(0.09004)}) {gain(0.98)}}
+        gain(0.25) {feedback(1 gain(0.524) {delay(0.07321)}) {gain(0.99)}}
+        gain(0.25) {feedback(1 gain(0.832) {delay(0.0134)}) {gain(1.021)}}
+    )
+}
+
+generators {
+    :silence: none
+
+    :basic_sine: sine(1 0.3)
+
+    :simple_pipe: gain(0.2) { register {
+        triangle(1 0:0 - 0.01:1 0 0.5)
+        triangle(2 0:0 - 0.01:0.5 0 0.14)
+        triangle(4 0:0 - 0.01:0.3 0 0.4)
+        sine(1 0:0 - 0.01:1)
+        sine(2 0:0 - 0.01:0.5)
+        #sine(3 0.2)
+        #sine(4 0.25)
+        #sine(5 0.19)
+        #sine(6 0.15)
+        #sine(8 0.12)
+        #sine(10 0.1)
+        #sine(12 0.085)
+        #sine(14 0.07)
+        #sine(16 0.063)
+        #sine(18 0.06)
+        #sine(20 0.05)
+        #sine(22 0.045)
+        noise(1 0.07)
+    }}
+
+    :pedalwerk: gain(0.7) { register {
+        sine(0.48 0:0 - 0.01:0.3 0.03)
+        sine(0.99 0:0 - 0.01:0.4 0.01)
+        sine(2 0:0 - 0.01:0.1)
+        sine(4 0:0 - 0.01:0.07)
+        triangle(0.25 0:0 - 0.01:0.3 0 0.02)
+        triangle(1.01 0:0 - 0.01:0.9 0.021)
+        triangle(0.507 0:0 - 0.01:0.85 0 0.48)
+        noise(1 0:0 - 0.05:0.2 - 0.1:0.1)
+    }}
+}
+
+player(simple_pipe) {
+    <0 C#5 2 0.96:1 - 1:0>
+    <2 C#5 1 0.96:1 - 1:0>
+    <3 E5  1 0.96:1 - 1:0>
+    <4 D#5 0.0625>
+    <4.125 C#5 0.125>
+    <4.25 D#5 0.125>
+    <4.375 C#5 0.125>
+    <4.5 D#5 0.25>
+    <4.75 C#5 0.25>
+    <5 D#5 0.25>
+    <5.25 E5 0.25>
+    <5.5 F#5 0.25>
+    <5.75 E5 0.25>
+    <6 D#5 0.25>
+    <6.25 C#5 0.25>
+    <6.5 D#5 0.25>
+    <6.75 E5 0.25>
+    <7 A4 0.25>
+    <7.25 G#4 0.25>
+    <7.5 G#4 0.25>
+    <7.75 G#4 0.25>
+    <8 A4 0.25>
+    <8.25 G#4 0.25>
+}
+
+player(simple_pipe) {
+    <0 G#4 2>
+    <7.5 E4 0.25>
+    <8 E4 0.25>
+}
+
+player(simple_pipe) {
+    <0 E4  2>
+    <7.5 C#4 0.25>
+    <7.75 D#4 0.25>
+    <8 E4 0.25>
+    <8.25 C#4 0.25>
+}
+
+player(pedalwerk) {
+    <0 C#2 2>
+}
