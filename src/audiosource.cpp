@@ -40,10 +40,6 @@ const MakeFlags MakeFlags::all = {true, true};
 const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
-std::unique_ptr<AudioSource> AudioSource::MakeGenerator(std::istream& str, const int srate) {
-    
-}
-
 std::unique_ptr<AudioSource> AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     auto start = str.tellg();
     std::string gen_except = ""; 

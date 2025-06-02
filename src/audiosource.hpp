@@ -130,8 +130,6 @@ public:
     /// <summary> Parser function for AudioSources </summary>
     /// <returns> A heap-allocated AudioSource value </summary>
     static std::unique_ptr<AudioSource> Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
-    static std::unique_ptr<AudioSource> MakeGenerator(std::istream&, const int = 44100);
-    static std::unique_ptr<AudioSource> MakeFilter(std::istream&, const int = 44100);
 
     static AudioSource* getByName(const std::vector<AudioSource*>&, const std::string&);
     static AudioSource* getByName(const std::vector<std::unique_ptr<AudioSource>>&, const std::string&);
