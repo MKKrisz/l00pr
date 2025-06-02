@@ -83,7 +83,7 @@ public:
     Tune(T data);
     
     /// <summary> Calculates the next sample value </summary>
-    double getSample(double srate, bool print = true);
+    [[nodiscard]] double getSample(double srate, bool print = true) ;
 
     // dtor
     ~Tune() {}
