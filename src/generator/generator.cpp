@@ -21,6 +21,7 @@ void Generator::Init() {
     AddMetadata(Gen_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
     AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "WIP")); //TODO: proper description
     AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
+    AddMetadata(Gen_Metadata("constant", ConstantGenerator::Create, "constant([value])", "Returns a constant float"));
 }
 
 Generator::Generator(std::istream& str) : AudioSource() {

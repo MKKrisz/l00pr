@@ -1,4 +1,4 @@
- target_sources(${PROJECT_NAME} PUBLIC generator.hpp generator.cpp
+target_sources(${PROJECT_NAME} PUBLIC generator.hpp generator.cpp
                                 builtin.hpp
                                 none.hpp none.cpp
                                 sine.hpp sine.cpp
@@ -6,4 +6,6 @@
                                 triangle.hpp triangle.cpp
                                 register.hpp register.cpp
                                 noise.hpp noise.cpp
-                                sampled.hpp sampled.cpp)
+                                sampled.hpp sampled.cpp
+                                constant.hpp constant.cpp
+)
