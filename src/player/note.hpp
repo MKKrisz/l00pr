@@ -31,7 +31,7 @@ public:
     static Note* Make(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
 
 private:
-    static Note_Metadata default_note;
+    static std::function<Note*(std::istream&, const std::vector<AudioSource*>&, double, bool, int)> default_note_fun;
 };
 
 #endif
