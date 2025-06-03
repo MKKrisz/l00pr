@@ -32,7 +32,7 @@ float NotePlayer::getSample(double srate) {
             m_src->removePhase(i);
             delete m_notes[i];
             m_notes.erase(m_notes.begin() + int(i));
-            //i--;
+            i--;
             continue;
         }
         m_notes[i]->AddSample(*this, i, srate);
