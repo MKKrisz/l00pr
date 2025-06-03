@@ -2,6 +2,10 @@
 #define L00PR_PROGRAM_STATE
 
 #include "arg.hpp"
+#include "plugin_mgr.hpp"
+#include "device/device.hpp"
+
+#include <memory>
 
 // FIXME is a singleton
 // Not anymore, I guess??
@@ -14,6 +18,9 @@ struct Program {
     std::string opFile = "";
     std::vector<std::string> ifs = {};
     std::vector<Argument> args = {};
+
+    std::unique_ptr<Device> device = nullptr;
+    PluginManager manager {"plugins/"};
 
     Program() {/*nothing*/}
     Program(std::vector<Argument> a) : args(a) {}

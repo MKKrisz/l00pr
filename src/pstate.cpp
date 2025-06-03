@@ -56,6 +56,9 @@ void Program::run() {
         std::cout << "No input files provided!" << std::endl;
         return;
     }
+    
+    manager.hook_before_reads(this);
+
     Tune tune;
     for(size_t i = 0; i < ifs.size(); i++) {
         std::fstream file(ifs[i]);
@@ -68,21 +71,22 @@ void Program::run() {
         }
         file.close();
     }
-    std::unique_ptr<Device> dev = nullptr;
+    manager.hook_after_reads(this);
 
     if(opToFile) { 
-        dev = std::make_unique<RenderDevice>(opFile, tune.samplerate()); 
+        device = std::make_unique<RenderDevice>(opFile, tune.samplerate()); 
     } 
     else { 
-        dev = std::make_unique<AudioDevice>(tune.samplerate()); 
+        device = std::make_unique<AudioDevice>(tune.samplerate()); 
     }
 
-    dev->addTune(tune);
-    dev->setCursed(opCursed);
-    dev->fastForward(seekfwd);
+    device->addTune(tune);
+    device->setCursed(opCursed);
+    device->fastForward(seekfwd);
 
-    dev->start();
-    if(!dev->isRunning()) {return;}     // Don't wait if device is not realtime
+    manager.hook_before_run(this);
+    device->start();
+    if(!device->isRunning()) {return;}     // Don't wait if device is not realtime
     double len = tune.getLen() - seekfwd + stayopen + 1;
     uint u_len = len;
     if(len == std::numeric_limits<double>::infinity()) {
@@ -94,5 +98,6 @@ void Program::run() {
     }
 
     sleep(u_len);
-    dev->stop();
+    device->stop();
+    manager.hook_after_run(this);
 }

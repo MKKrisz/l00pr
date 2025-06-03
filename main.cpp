@@ -31,8 +31,10 @@ int main(int argc, char** argv) {
     Note::Init();
 
     Program program{Argument::getDefault()};
-
-    //Plugin code goes here
+    program.manager.load();
+    program.manager.add_extensions();
+    auto plugin_args = program.manager.arguments();
+    program.args.insert(program.args.end(), plugin_args.begin(), plugin_args.end());
 
     ArgumentManager argmgr{program.args};
     try {
