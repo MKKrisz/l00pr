@@ -3,24 +3,64 @@
 
 #include "arg.hpp"
 #include "audiosource.hpp"
-#include "filter/filter.hpp"
+#include "tune/tune.hpp"
+#include "tune/set_kwd.hpp"
+#include "device/builtin.hpp"
 #include "generator/generator.hpp"
-#include <optional>
+#include "filter/filter.hpp"
 #include <functional>
+#include <concepts>
 
-class Plugin {
-    std::vector<Argument> custom_args;
+//template<invokable F>
+//class FunctionProvider {
+//    
+//};
+extern "C" { 
 
-    std::vector<std::string> custom_filter_names;
-    std::vector<std::string> custom_generator_names;
-    std::pair<std::string, std::function<void(std::istream&, int)>> custom_file_keywords;
-    std::pair<std::string, std::function<void(std::istream&, int)>> custom_set_values;
+class Program;
 
+struct Plugin {
+    std::string name = "";
 
-    std::optional<std::function<AudioSource*(std::istream&, const int, const MakeFlags&)>> custom_as_make;
-    std::optional<std::function<Filter*(std::string&, std::istream&, const int, const MakeFlags&)>> custom_filter_make;
-    std::optional<std::function<Generator*(std::string&, std::istream&, const int, const MakeFlags&)>> custom_generator_make;
+    std::vector<Argument> custom_args {};
 
+    std::vector<Filter_Metadata> custom_filter_meta {};
+    std::vector<Gen_Metadata> custom_generator_meta {};
+    std::vector<Tkwd_Metadata> custom_tune_meta {};
+    std::vector<Set_Metadata> custom_set_meta {};
+    std::vector<Note_Metadata> custom_note_meta {};
+    
+    void (*hook_before_run)(Program* const) = nullptr;
+    void before_run(Program* const p) {
+        if(hook_before_run == nullptr) {return;}
+        hook_before_run(p);
+    }
+
+    void (*hook_after_run)(Program* const) = nullptr;
+    void after_run(Program* const p) {
+        if(hook_after_run == nullptr) {return;}
+        hook_after_run(p);
+    }
+
+    void (*hook_before_reads)(Program* const) = nullptr;
+    void before_reads(Program* const p) {
+        if(hook_before_reads == nullptr) {return;}
+        hook_before_reads(p);
+    }
+
+    void (*hook_after_reads)(Program* const) = nullptr;
+    void after_reads(Program* const p) {
+        if(hook_after_reads == nullptr) {return;}
+        hook_after_reads(p);
+    }
+    
+    static std::optional<Plugin> load(const std::string& path);
+
+    void unload();
+
+private:
+    void* handle = 0;
 };
+}
 
 #endif

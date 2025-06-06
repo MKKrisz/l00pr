@@ -15,13 +15,15 @@ class NotePlayer {
     std::vector<Note*> m_notes;
 
     /// <summary> The current source </summary>
-    AudioSource* m_src;
+    std::unique_ptr<AudioSource> m_src;
 
     /// <summary> The default generator this player was created with </summary>
     AudioSource* def_src;
 
 public:
     void setSrc(AudioSource* src);
+    AudioSource* getSrc() const { return m_src.get(); }
+
     inline bool hasBounds() { return m_src->getLengthBounds().has_value(); }
     inline std::pair<double, double> getBounds() { return m_src->getLengthBounds().value(); }
     /// <summary> Adds a note to be played </summary>
@@ -32,7 +34,7 @@ public:
     NotePlayer(const NotePlayer& player);
 
     // dtor
-    ~NotePlayer();
+    ~NotePlayer() {}
 
     /// <summary> Returns the current sample value, and sets itself up for the next sample generation.</summary>
     float getSample(double srate = 48000);

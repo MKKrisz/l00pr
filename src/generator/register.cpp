@@ -1,58 +1,69 @@
 #include "register.hpp"
 #include "../audiosource.hpp"
 
-Register::Register(std::vector<AudioSource*> gen) : generators(gen) {}
+Register::Register(std::vector<AudioSource*> gen) {
+    generators.reserve(gen.size());
+    for(auto g : gen) {
+        generators.emplace_back(g->copy());
+    }
+}
+Register::Register(const Register& r) : Generator(r) {
+    generators.reserve(r.generators.size());
+    for(auto& g : r.generators) {
+        generators.emplace_back(g->copy());
+    }
+}
 
 void Register::operator()(size_t noteId, double d, double t, double srate, double extmul) {
-    for(AudioSource* g : generators) {
+    for(auto& g : generators) {
         (*g)(noteId, d * m_phasemul(t), t, srate, extmul);
     }
 }
 
 double Register::calc() {
     double sum = feedback;
-    for(AudioSource* g : generators) {
+    for(auto& g : generators) {
         sum += g->calc();
     }
     return sum;
 }
 
 void Register::addPhase() {
-    for(AudioSource* g : generators) {
+    for(auto& g : generators) {
         g->addPhase();
     }
 }
 
 void Register::removePhase(int id) {
-    for(AudioSource* g : generators) {
+    for(auto& g : generators) {
         g->removePhase(id);
-    }
-}
-
-Register::~Register() {
-    for(AudioSource* g : generators) {
-        delete g;
     }
 }
 
 Register::Register(std::istream& stream, const int srate, const MakeFlags& flags) : Generator(stream) {
     stream >> expect('{');
     while((stream >> skipws).peek() != '}') {
-        AudioSource* src = AudioSource::Make(stream, srate, flags);
-        generators.push_back(src);
+        generators.emplace_back(std::move(AudioSource::Make(stream, srate, flags)));
     }
     stream.get();
 }
 
-Register* Register::copy() {
-    std::vector<AudioSource*> gs;
-    for(AudioSource* g : generators) {
-        gs.emplace_back(g->copy());
-    }
-    return new Register(gs);
+std::unique_ptr<AudioSource> Register::copy() {
+    return std::make_unique<Register>(*this);
 }
 
 
-Register* Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
-    return new Register(str, srate, flags);
+std::unique_ptr<Register> Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
+    return std::make_unique<Register>(str, srate, flags);
+}
+void Register::Write(std::ostream& str) const {
+    str << "register(";
+    Generator::WriteBaseParams(str);
+    str << ") {";
+    for(auto& g : generators) {
+        str << std::endl;
+        g->Write(str);
+    }
+    str << '}';
+    AudioSource::WriteLengthBounds(str);
 }

@@ -29,12 +29,14 @@ public:
 
     /// <summary> Multiplies the sample value by gain </summary>
     inline double filter(double sample, double, double, double) { return sample * gain; }
-    GainFilter* copy() {return new GainFilter(*this); }
+    std::unique_ptr<AudioSource> copy() {return std::make_unique<GainFilter>(*this); }
     inline GainFilter& operator=(const GainFilter&) = default;
-    std::string ToString() {return Filter::ToString() + "(" + std::to_string(gain) + ")";}
-    static GainFilter* Create(std::istream& str, const int srate, const MakeFlags& flags) {
-        return new GainFilter(str, srate, flags);
+    std::string ToString() const {return Filter::ToString() + "(" + std::to_string(gain) + ")";}
+    static std::unique_ptr<GainFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return make_unique<GainFilter>(str, srate, flags);
     }
+
+    std::string GetNameAndParams() const {return "gain(" + std::to_string(gain) + ")"; }
 };
 
 #endif

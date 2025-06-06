@@ -9,11 +9,10 @@ void NotePlayer::addNote(Note* note) {
 
 void NotePlayer::setSrc(AudioSource* src) {
     std::vector<double> phases = m_src->getPhases();
-    delete m_src;
     if(src == nullptr)
-        m_src = def_src->copy();
+        m_src = std::move(def_src->copy());
     else
-        m_src = src->copy();
+        m_src = std::move(src->copy());
     m_src->setPhases(phases);
 
     //hack to fix mismatch of phases
@@ -22,16 +21,10 @@ void NotePlayer::setSrc(AudioSource* src) {
     }
 }
 
-NotePlayer::NotePlayer(AudioSource* src) : m_notes(), m_src(src->copy()), def_src(src->copy()){}
+NotePlayer::NotePlayer(AudioSource* src) : m_notes(), m_src(std::move(src->copy())), def_src(src){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
-    : m_notes(player.m_notes), m_src(player.m_src->copy()), def_src(player.def_src->copy()){}
-
-NotePlayer::~NotePlayer() {
-    delete m_src;
-    delete def_src;
-}
-
+    : m_notes(player.m_notes), m_src(std::move(player.m_src->copy())), def_src(player.def_src){}
 
 float NotePlayer::getSample(double srate) {
     for(size_t i = 0; i < m_notes.size(); i++) {
@@ -39,11 +32,13 @@ float NotePlayer::getSample(double srate) {
             m_src->removePhase(i);
             delete m_notes[i];
             m_notes.erase(m_notes.begin() + int(i));
+            i--;
             continue;
         }
         m_notes[i]->AddSample(*this, i, srate);
     }
-    return m_src->calc();
+    float res = m_src->calc();
+    return res;
 }
 
 
@@ -52,6 +47,7 @@ NotePlayer& NotePlayer::operator=(const NotePlayer& player) {
         return *this;
     }
     m_notes = player.m_notes;
-    m_src = player.m_src;
+    m_src = player.m_src->copy();
+    def_src = player.def_src;
     return *this;
 }

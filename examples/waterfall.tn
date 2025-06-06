@@ -1,0 +1,57 @@
+set bpm: 70
+set globalfilter: split(
+    gain(0.25) {feedback(1 gain(0.73) {delay(0.0687)}) {gain(1)}}
+    gain(0.25) {feedback(1 gain(0.76) {delay(0.0708)}) {gain(1)}}
+    gain(0.25) {feedback(1 gain(0.851) {delay(0.0813)}) {gain(1)}}
+    gain(0.25) {feedback(1 gain(0.685) {delay(0.0834)}) {gain(1)}}
+)
+
+generators {
+    gain(0.2) {feedback(1 gain(0.4) {delay(0.333)}) {register {
+        sine(1 0.0: 0.3  - 1: 0.0)
+        sine(3 0.0: 0.27 - 0.8: 0.0)
+        #sine(3.567621345 0.0: 0.181  - 0.6: 0.0)
+        sine(6 0.0: 0.18 - 0.5: 0.0)
+        sine(8 0.0: 0.08 - 0.4: 0.0)
+        #sine(9.51365692 0.0: 0.06  - : 0.0)
+        sine(14 0.0: 0.07 - 0.3: 0.0)
+        #noise(1 0:0.2 - 0.1: 0)
+    }}}
+    gain(2) { pass(0: 0.1 - 100: 0.1 - 500: 1 - 4000: 0.1 300) {
+        split(
+            gain(0.7)
+            feedback(1 gain(-0.7)) {delay(0.0273) {gain(1)}}
+        ) {
+        register {
+            triangle(1 0.3 0) 
+            triangle(1 0.05 0 0) 
+    }}}}
+}
+
+player(0) {
+    <0 loop(5) {
+        <0   E5 0.5> 
+        <0.5 B5 0.5>
+        <1   F#6 0.5>
+        <1.5 D6 0.5>
+        <2   E6 0.5>
+        <2.5 B5 0.5>
+        <3   G5 0.5>
+        <3.5 B5 0.5>
+        <4   E5 0.5>
+        <4.5 B5 0.5>
+        <5   F#6 0.5>
+        <5.5 G6 0.5>
+        <6   A6 0.5>
+        <6.5 G6 0.5>
+        <7   F#6 0.5>
+        <7.5 D6 0.5>
+    }>
+}
+
+player(1) {
+    <16 C1 4>
+    <20 B0 4>
+    <24 E1 4>
+}
+

@@ -1,0 +1,13 @@
+set bpm: 60
+set samplerate: 44100
+set globalfilter: gain(0.5) {split (
+        gain(0.25) {feedback(1 gain(0.773) {delay(0.06748)}) {gain(1.01)}}
+        gain(0.25) {feedback(1 gain(0.802) {delay(0.06404)}) {gain(0.99)}}
+        gain(0.25) {feedback(1 gain(0.753) {delay(0.08212)}) {gain(1)}}
+        gain(0.25) {feedback(1 gain(0.733) {delay(0.09004)}) {gain(1)}}
+    )
+}
+generator :sampled: sampled(ppast.wav)
+player(sampled) {
+    <0 0.75 4 1>
+}

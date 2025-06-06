@@ -22,11 +22,19 @@ public:
     TriangleGenerator(const TriangleGenerator&);
 
     double getSample(double phase, double t) override;
-    TriangleGenerator* copy() override;
-    std::string ToString() override { return "Triangle"; }
+    std::unique_ptr<AudioSource> copy() override;
+    std::string ToString() const override { return "Triangle"; }
 
+    void Write(std::ostream& str) const override { 
+        str << "triangle(";
+        WriteBaseParams(str);
+        str << "  "; 
+        m_peak.Write(str);
+        str << ") ";
+        WriteLengthBounds(str);
+    }
 
-    static TriangleGenerator* Create(std::istream& str, const int, const MakeFlags&);
+    static std::unique_ptr<TriangleGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };
 
 #endif

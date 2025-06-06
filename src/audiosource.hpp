@@ -1,6 +1,7 @@
 #ifndef L00PR_AUDIOSOURCE_H
 #define L00PR_AUDIOSOURCE_H
 
+#include <memory>
 #include <vector>
 #include <iostream>
 #include <optional>
@@ -33,11 +34,11 @@ public:
     std::string desc;
     AS_Metadata(const char* kw, std::function<AudioSource*(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
-    std::string ToString() override;
+    std::string ToString() const override;
 };
 
 /// <summary> Base class for filters and generators </summary>
-class AudioSource : public StringConvertible {
+class AudioSource : public StringConvertible, public virtual Writeable {
 protected:
     
     /// <summary> Stores the current phases of generators </summary>
@@ -63,7 +64,7 @@ protected:
     }
 
     // Base constructors for subclasses.
-    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(0), length_bounds(src.length_bounds) {}
+    AudioSource(const AudioSource& src) : phases(src.phases), feedback(), accumulator(0), length_bounds(src.length_bounds), name(src.name) {}
     AudioSource() : phases(), feedback(0), accumulator(0), length_bounds() {}
 public:
     std::string name;
@@ -78,7 +79,7 @@ public:
         feedback = val;
     }
 
-    virtual std::string ToString() { return "AudioSource"; }
+    virtual std::string ToString() const { return "AudioSource"; }
 
     /// <summary> Returns the endpoint of the filter chain. Unused. </summary>
     virtual AudioSource* getBase() {return this;}
@@ -104,6 +105,8 @@ public:
         return length_bounds;
     }
 
+    void WriteLengthBounds(std::ostream& str) const;
+
     /// <summary> Returns this source's phases </summary>
     std::vector<double> getPhases() { return phases; }
 
@@ -115,7 +118,7 @@ public:
     virtual double calc() { return getAccumulator() + feedback; }
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
-    virtual AudioSource* copy() = 0;
+    virtual std::unique_ptr<AudioSource> copy() = 0;
     
     /// <summary> Creates a sample and adds it to the accumulator </summary>
     /// <remarks> For filters, should just send the action deeper into the chain </remarks>
@@ -128,8 +131,10 @@ public:
 
     /// <summary> Parser function for AudioSources </summary>
     /// <returns> A heap-allocated AudioSource value </summary>
-    static AudioSource* Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
-    static std::string getFormattedMetadata();
+    static std::unique_ptr<AudioSource> Make(std::istream&, const int = 44100, const MakeFlags& = MakeFlags::all);
+
+    static AudioSource* getByName(const std::vector<AudioSource*>&, const std::string&);
+    static AudioSource* getByName(const std::vector<std::unique_ptr<AudioSource>>&, const std::string&);
 };
 
 #endif

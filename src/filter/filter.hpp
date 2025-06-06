@@ -3,16 +3,38 @@
 
 #include "../audiosource.hpp"
 
+class Filter;
+
+struct Filter_Metadata : public Metadata<std::unique_ptr<AudioSource>, const int, const MakeFlags&>{
+public:
+    std::string syntax;
+    std::string desc;
+    Filter_Metadata(
+        const char* kw,
+        std::function<
+            std::unique_ptr<AudioSource>(
+                std::istream&,
+                const int,
+                const MakeFlags&)> func,
+        const char* syn,
+        const char* desc)
+        : Metadata(kw, func), syntax(syn), desc(desc) {};
+    Filter_Metadata(const Filter_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    std::string ToString() const override;
+
+    Filter_Metadata& operator=(const Filter_Metadata& m) = default;
+};
+
 /// <summary> 
 /// Modifies "incoming" audio samples 
 /// General syntax: filter_name(<arguments>) {[src]}
 /// The value `src` is another AudioSource. Usually `src` is not strictly as some filters make use of so-called generatorless filter chain (ex.: feedback filters)
 /// </summary>
-class Filter : public AudioSource, public Parseable<AudioSource*, AS_Metadata, const int, const MakeFlags&> {
+class Filter : public AudioSource, public Parseable<std::unique_ptr<AudioSource>, Filter_Metadata, const int, const MakeFlags&> {
 protected:
 
     /// <summary> The filter receives its' samples from here (in most cases...) </summary>
-    AudioSource* src = nullptr;
+    std::unique_ptr<AudioSource> src = nullptr;
 
     // base cctors
     Filter() : AudioSource() {}
@@ -68,8 +90,8 @@ public:
     virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
     
     // dtor
-    inline virtual ~Filter() { delete src; }
-    virtual Filter* copy() override = 0;
+    inline virtual ~Filter() {}
+    virtual std::unique_ptr<AudioSource> copy() override = 0;
 
     // copy assignment operator
     Filter& operator=(const Filter& f) {
@@ -79,7 +101,10 @@ public:
         return *this;
     }
 
-    virtual std::string ToString() override {return src->ToString() + " -> "; }
+    virtual std::string ToString() const override {return (src == nullptr? "" : src->ToString() + " -> "); }
+
+    virtual std::string GetNameAndParams() const = 0;
+    void Write(std::ostream&) const override; 
 
     static std::string getFormattedMetadata();
 };

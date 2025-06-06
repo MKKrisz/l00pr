@@ -3,6 +3,9 @@
 
 #include "filter.hpp"
 #include "../util.hpp"
+#include "dummy.hpp"
+
+#include <sstream>
 
 /// <summary> 
 /// Filter used to initiate feedback loops
@@ -20,7 +23,7 @@ class Feedback : public Filter {
     size_t depth;
 
     /// <summary> A filter chain applied to the sample that gets sent back </summary>
-    Filter* fbFilter = nullptr;
+    std::unique_ptr<Filter> fbFilter = std::make_unique<DummyFilter>();
 
 public:
     // cctors
@@ -28,12 +31,12 @@ public:
         : Filter(src), depth(depth), fbFilter(fb) {}
 
     Feedback(const Feedback& fb) : 
-        Filter(fb), depth(fb.depth), fbFilter(fb.fbFilter != nullptr ? (Filter*)fb.fbFilter->copy() : nullptr) {}
+        Filter(fb), depth(fb.depth), fbFilter(fb.fbFilter != nullptr ? (std::unique_ptr<Filter>&&)std::move(fb.fbFilter->copy()) : std::move(std::make_unique<DummyFilter>())) {}
 
     Feedback(std::istream& str, int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), fbFilter(nullptr) {
         str >> expect('(') >> depth >> skipws;
         if(str.peek() != ')') {
-            fbFilter = dynamic_cast<Filter*>(AudioSource::Make(str, srate, MakeFlags::onlyFilters));
+            fbFilter = (std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, srate, MakeFlags::onlyFilters));
         }
         str >> expect(')') >> skipws;
         if(str.peek() == '{') {
@@ -55,13 +58,23 @@ public:
         return sample;
     }
     
-    std::string ToString() { return Filter::ToString() + "Feedback"; }
+    std::string ToString() const { return Filter::ToString() + "Feedback"; }
+    std::string GetNameAndParams() const {
+        std::stringstream ss = {};
+        ss << depth;
+        if(fbFilter != nullptr) {
+            ss << "  ";
+            fbFilter->Write(ss);
+        }
+        
+        return "feedback(" + ss.str() + ")";
+    }
 
-    Feedback* copy() { return new Feedback(*this); }
-    ~Feedback() { delete fbFilter; }
+    std::unique_ptr<AudioSource> copy() { return std::make_unique<Feedback>(*this); }
+    ~Feedback() {}
 
-    static Feedback* Create(std::istream& str, const int srate, const MakeFlags& flags) {
-        return new Feedback(str, srate, flags);
+    static std::unique_ptr<Feedback> Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return std::make_unique<Feedback>(str, srate, flags);
     }
 };
 

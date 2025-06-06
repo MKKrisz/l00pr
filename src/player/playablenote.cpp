@@ -8,9 +8,9 @@ PlayableNote::PlayableNote(double l, Interpolated<Frequency> freq, Interpolated<
     amp.SetInterpolator(logarithmicInterpolator<double>);
 }
 
-bool PlayableNote::IsComplete() {
-    double tp = 1/freq(done/len).getFreq();
-    return done > len + (tp-fmod(len, tp));
+bool PlayableNote::IsComplete() const {
+    //double tp = 1/freq(done/len).getFreq();
+    return done > len; //- (tp-fmod(len, tp));
 }
 
 double PlayableNote::getDelta(int srate) {
@@ -32,6 +32,8 @@ double PlayableNote::getFreq() {
 }
 
 PlayableNote::PlayableNote(std::istream& stream, double bpm) : len(0), freq(), ampl(1), done(0){
+    bool starts_with_parenthesis = false;
+    if((stream >> skipws).peek() == '(') {stream.get(); starts_with_parenthesis = true; }
     if(!isNote((stream >> skipws).peek()))
         throw parse_error(stream, "Cannot parse note");
     freq.Clear();
@@ -46,6 +48,18 @@ PlayableNote::PlayableNote(std::istream& stream, double bpm) : len(0), freq(), a
         ampl.Clear();
         stream >> ampl;
     }
+
+    if(starts_with_parenthesis) {stream >> expect(')');}
+}
+PlayableNote* PlayableNote::Create(std::istream& str, const std::vector<AudioSource*>&, double bpm, bool, int) {
+    return new PlayableNote(str, bpm);
+}
+void PlayableNote::Write(std::ostream& str) const {
+    str << "note(";
+    freq.Write(str);
+    str << "  " << len << "  ";
+    ampl.Write(str);
+    str << ")";
 }
 
 std::ostream& operator<<(std::ostream& str, PlayableNote& n) {

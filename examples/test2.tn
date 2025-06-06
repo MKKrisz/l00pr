@@ -1,0 +1,5 @@
+generator sine(1 0.5)
+
+player(0) {
+    <0 2820 100>
+}

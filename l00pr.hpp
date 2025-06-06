@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "src/device.h"
+#include "src/device/builtin.hpp"
 #include "src/tune/tune.hpp"
 
 

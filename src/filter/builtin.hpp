@@ -7,5 +7,6 @@
 #include "feedback.hpp"
 #include "quantize.hpp"
 #include "splitter.hpp"
+#include "dummy.hpp"
 
 #endif

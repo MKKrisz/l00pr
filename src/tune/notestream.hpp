@@ -8,7 +8,7 @@ class Loop;
 class RandomNote;
 
 /// <summary> Class that stores and retreives note data
-class NoteStream {
+class NoteStream : public virtual Writeable{
 protected:
     /// Returns the place where t should be in playable
     inline size_t getId(double t) { return bSearch(notes, t); }
@@ -31,7 +31,10 @@ protected:
     
     double len = -1;
     double lastNoteTs = -1;
+
 public:
+    void calculateLen();
+
     /// self explanatory getters/setters
     inline void setBpm(double val) { bpm = val; }
     inline double getBpm() const { return bpm;}
@@ -43,8 +46,8 @@ public:
     inline int getSampleRate() const { return srate; }
 
     /// <summary> Caluclates how many seconds it takes to play the stream </summary>
-    double getLen();
-    inline size_t size() {return notes.size();}
+    double getLen() const;
+    inline size_t size() const {return notes.size();}
 
     /// <summary> Returns a reference to the note at index `id` </summary>
     inline Note* getNote(size_t id) {
@@ -52,12 +55,17 @@ public:
             throw std::out_of_range("NoteStream.playable");
         return notes[id].second;
     }
+    inline const Note* getNote(size_t id) const {
+        if(id >= notes.size())
+            throw std::out_of_range("NoteStream.playable");
+        return notes[id].second;
+    }
 
     /// constructors
-    inline NoteStream() : notes() {}
-    inline NoteStream(Note* n);
-    inline NoteStream(double t, Note* n);
-    inline NoteStream(std::pair<double, Note*> note);
+    inline NoteStream() : notes() {calculateLen();}
+    NoteStream(Note* n);
+    NoteStream(double t, Note* n);
+    NoteStream(std::pair<double, Note*> note);
     NoteStream(const NoteStream& s);
     NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate);
 
@@ -88,6 +96,8 @@ public:
             delete n.second;
         }
     }
+
+    void Write(std::ostream& str) const;
 };
 
 

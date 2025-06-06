@@ -4,8 +4,20 @@
 #include "../audiosource.hpp"
 #include "../interpolated.hpp"
 
+struct Gen_Metadata : public Metadata<std::unique_ptr<AudioSource>, const int, const MakeFlags&>{
+public:
+    std::string syntax;
+    std::string desc;
+    Gen_Metadata(const char* kw, std::function<std::unique_ptr<AudioSource>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
+        : Metadata(kw, func), syntax(syn), desc(desc) {};
+    Gen_Metadata(const Gen_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    std::string ToString() const override;
+
+    Gen_Metadata& operator=(const Gen_Metadata& m) = default;
+};
+
 /// <summary> AudioSource that actually generates samples </summary>
-class Generator : public AudioSource, public Parseable<AudioSource*, AS_Metadata, const int, const MakeFlags&> {
+class Generator : public AudioSource, public Parseable<std::unique_ptr<AudioSource>, Gen_Metadata, const int, const MakeFlags&> {
 protected:
     /// <summary> The frequency multiplier that should be applied </summary>
     Interpolated<double> m_phasemul;
@@ -40,9 +52,12 @@ public:
 
     virtual ~Generator() {}
 
-    virtual std::string ToString() override { return "Generator"; }
+    virtual std::string ToString() const override { return "Generator"; }
 
     static std::string getFormattedMetadata();
+
+    void WriteBaseParams(std::ostream& str) const;
+    void Write(std::ostream& str) const override;
 };
 
 #endif

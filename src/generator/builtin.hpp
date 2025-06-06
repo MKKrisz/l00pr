@@ -11,5 +11,6 @@
 #include "register.hpp"
 #include "noise.hpp"
 #include "sampled.hpp"
+#include "constant.hpp"
 
 #endif

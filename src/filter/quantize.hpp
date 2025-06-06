@@ -35,11 +35,12 @@ public:
         return (double(s_l) / (std::pow(2, bits)-1) * 2) - 1;
     }
 
-    QuantizeFilter* copy() {return new QuantizeFilter(*this);}
-    std::string ToString() { return Filter::ToString() + "q" + std::to_string(bits); }
-    static QuantizeFilter* Create(std::istream& str, const int srate, const MakeFlags& flags) {
-        return new QuantizeFilter(str, srate, flags);
+    std::unique_ptr<AudioSource> copy() {return std::make_unique<QuantizeFilter>(*this);}
+    std::string ToString() const { return Filter::ToString() + "q" + std::to_string(bits); }
+    static std::unique_ptr<QuantizeFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
+        return std::make_unique<QuantizeFilter>(str, srate, flags);
     } 
+    std::string GetNameAndParams() const {return "quantize(" + std::to_string(bits) + ")"; }
 };
 
 #endif

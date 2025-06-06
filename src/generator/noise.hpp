@@ -16,11 +16,11 @@ public:
     NoiseGenerator(std::istream& str);
     NoiseGenerator(const NoiseGenerator& g) : Generator(g) {}
 
-    double getSample(double, double t) { return double(rand())/RAND_MAX * m_gain(t);}
-    NoiseGenerator* copy() { return new NoiseGenerator(*this); }
-    std::string ToString() override { return "Noise"; }
+    double getSample(double, double t) override { return double(rand())/RAND_MAX * m_gain(t);}
+    std::unique_ptr<AudioSource> copy() override { return std::make_unique<NoiseGenerator>(*this); }
+    std::string ToString() const override { return "Noise"; }
 
-    static NoiseGenerator* Create(std::istream& str, const int, const MakeFlags&);
+    static std::unique_ptr<NoiseGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };
 
 

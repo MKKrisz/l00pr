@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-std::string AS_Metadata::ToString() {
+std::string AS_Metadata::ToString() const {
     std::string ret = keyword;
     size_t maxKwdLen = std::max(Generator::GetLongestKeywordMeta().keyword.size(), Filter::GetLongestKeywordMeta().keyword.size());
     for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {
@@ -27,6 +27,7 @@ void AudioSource::parse_lb(std::istream& str) {
     if(str.peek() != '-') 
         str >> min >> expect('-');
     else str.get();
+    str >> skipws;
     if(str.peek() != '}')
         str >> max >> expect('}');
     else str.get();
@@ -39,8 +40,8 @@ const MakeFlags MakeFlags::all = {true, true};
 const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
-AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
-    int start = str.tellg();
+std::unique_ptr<AudioSource> AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
+    auto start = str.tellg();
     std::string gen_except = ""; 
     std::string filter_except = "";
     std::string name = "";
@@ -56,31 +57,55 @@ AudioSource* AudioSource::Make(std::istream& str, const int srate, const MakeFla
         start = str.tellg();
     }
     if(flags.generators) {
+        str.clear();
+        str.seekg(start);
         try {
-            AudioSource* ret = Generator::Parse(str, srate, flags);
+            auto ret = Generator::Parse(str, srate, flags);
             ret->name = name;
             return ret;
         }
-        catch(std::exception* e) {
-            gen_except = e->what();
+        catch(const std::exception& e) {
+            gen_except = e.what();
         }
     }
     if(flags.filters) {
         str.clear();
         str.seekg(start);
         try {
-            AudioSource* ret = Filter::Parse(str, srate, flags);
+            auto ret = Filter::Parse(str, srate, flags);
             ret->name = name;
             return ret;
         }
-        catch(std::exception* e) {
-            filter_except = e->what();;
+        catch(const std::exception& e) {
+            filter_except = e.what();
         }
     }
     str.clear();
     str.seekg(start);
-    throw parse_error(str, gen_except + filter_except);
+    throw std::runtime_error(gen_except + '\n' + filter_except);
 }
-std::string AudioSource::getFormattedMetadata() {
-    return Generator::getFormattedMetadata();
+
+
+AudioSource* AudioSource::getByName(const std::vector<AudioSource*>& sources, const std::string& name) {
+    for(AudioSource* src : sources) {
+        if(src->name == name) {
+            return src;
+        }
+    }
+    throw std::out_of_range("No audiosource with label " + name);
+}
+
+AudioSource* AudioSource::getByName(const std::vector<std::unique_ptr<AudioSource>>& sources, const std::string& name) {
+    for(const auto& src : sources) {
+        if(src->name == name) {
+            return src.get();
+        }
+    }
+    throw std::out_of_range("No audiosource with label " + name);
+}
+void AudioSource::WriteLengthBounds(std::ostream& str) const {
+    if(!length_bounds.has_value()) { return; }
+    auto bounds = length_bounds.value();
+
+    str << '{' << bounds.first << " - " << bounds.second << '}';
 }

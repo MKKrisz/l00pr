@@ -5,7 +5,7 @@
 
 class StringConvertible {
 public:
-    virtual std::string ToString() = 0;
+    virtual std::string ToString() const = 0;
 };
 
 #endif

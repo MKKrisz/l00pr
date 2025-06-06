@@ -7,18 +7,21 @@
 
 NoteStream::NoteStream(Note* n) : notes() {
     notes.emplace_back(std::make_pair(0, n));
+    calculateLen();
 }
 
 NoteStream::NoteStream(double t, Note* n) : notes() {
     notes.emplace_back(std::make_pair(t, n));
+    calculateLen();
 }
 
 NoteStream::NoteStream(std::pair<double, Note*> p) : notes(){
     notes.emplace_back(p);
+    calculateLen();
 }
 
 NoteStream::NoteStream(const NoteStream& p) 
-    : notes(), bpm(p.bpm), polynote(p.polynote), srate(p.srate) {
+    : notes(), bpm(p.bpm), polynote(p.polynote), srate(p.srate), lastNoteTs(p.lastNoteTs), len(p.len){
     for(size_t i = 0; i < p.notes.size(); i++) {
         notes.emplace_back(std::make_pair(p.notes[i].first, p.notes[i].second->copy()));
     }
@@ -35,26 +38,22 @@ std::vector<Note*> NoteStream::GetStartingNotes(double t) {
     return ret;
 }
 
-double NoteStream::getLen() {
-        //if(!loops.empty()) return std::numeric_limits<double>::infinity();
-        //if(notes.empty()) return 0;
-        if (len < 0) {
-            //std::pair<double, Note*> last = notes[notes.size()-1];
-            //lastNoteTs = last.first;
-            //len = last.first + last.second->GetLen();
-            double max = 0;
-            double maxTs = 0;
-            for(size_t i = 0; i < notes.size(); i++) {
-                if(maxTs < notes[i].first) 
-                    maxTs = notes[i].first;
-                if(max < notes[i].first + notes[i].second->GetLen())
-                    max = notes[i].first + notes[i].second->GetLen();
-            }
-            len = max;
-            lastNoteTs = maxTs;
-        }
-        return len;
+void NoteStream::calculateLen() {
+    double max = 0;
+    double maxTs = 0;
+    for(size_t i = 0; i < notes.size(); i++) {
+        if(maxTs < notes[i].first) 
+            maxTs = notes[i].first;
+        if(max < notes[i].first + notes[i].second->GetLen())
+            max = notes[i].first + notes[i].second->GetLen();
     }
+    len = max;
+    lastNoteTs = maxTs;
+}
+
+double NoteStream::getLen() const {
+    return len;
+}
 
 NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate)
     : bpm(bpm), polynote(polynote), srate(srate) {
@@ -82,51 +81,10 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
                 }
             }
         }
-        if(isNote((str >> skipws).peek())) {
-            PlayableNote n = PlayableNote(str, bpm);
-            Add(std::make_pair(ts, n.copy()));
-            len = n.GetLen();
-        }
-        else {
-            std::string buf = "";
-            char c;
-            bool parsed = false;
-            str >> skipws;
-            for(int i = 0; i < 6 && str.get(c); i++) {
-                buf += tolower(c);
-                if(buf == "set") {
-                    SetterNote n = SetterNote(str, srate);
-                    int id = n.getId();
-                    if(n.getGen() != nullptr) continue;
-                    if((unsigned)id > srcs.size())
-                        throw std::runtime_error(
-                                "Index out of range at setter note");
-                    if(id != -1)
-                        n.setGen(srcs[id]);
+        Note* note = Note::Make(str, srcs, bpm, polynote, srate);
+        len = note->GetLen();
+        Add(std::make_pair(ts, note));
 
-                    Add(std::make_pair(ts, n.copy()));
-                    parsed = true;
-                    break;
-                }
-                if(buf == "loop") {
-                    Loop l = Loop(str, srcs, bpm, polynote, srate);
-                    Add(std::make_pair(ts, l.copy()));
-                    len = l.GetLen();
-                    parsed = true;
-                    break;
-                }
-                if(buf == "random") {
-                    RandomNote r = RandomNote(str, srcs, bpm, polynote, srate);
-                    Add(std::make_pair(ts, r.copy()));
-                    len = r.GetLen();
-                    parsed = true;
-                    break;
-                }
-            }
-            if(!parsed)
-                throw parse_error(str, "Could not parse special note");
-
-        }
         str >> expect('>') >> skipws;
         if(!polynote) {
             sumlen += len;
@@ -134,5 +92,13 @@ NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, 
             sumlen = ts + len;
         }
         prev_len = len;
+    }
+    calculateLen();
+}
+void NoteStream::Write(std::ostream& str) const {
+    for(const auto& note : notes) {
+        str << std::endl << "<" << note.first << " ";
+        note.second->Write(str);
+        str << '>';
     }
 }

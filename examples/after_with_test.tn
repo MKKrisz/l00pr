@@ -1,0 +1,16 @@
+set bpm: 120
+set samplerate: 44100
+
+generator :sine: sine(1 0.2)
+
+player(sine) {
+    <0 loop(5) {
+        <0 G4 0.5>
+        <1 0 0>
+    }>
+    <after A4 1>
+    <after B4 1>
+    <with D5 1>
+    <with F5 1>
+    <after A4 1>
+}

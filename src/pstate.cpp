@@ -12,12 +12,20 @@ typedef unsigned int uint;
 
 #include "pstate.hpp"
 #include "tune/tune.hpp"
-#include "device.h"
-#include "audiosource.hpp"
+#include "device/builtin.hpp"
+#include "generator/generator.hpp"
+#include "filter/filter.hpp"
 
-void Program::setOpToFile(Program* const p, const Argument& arg) {
-    p->opToFile = true;
+void Program::setOpToRendered(Program* const p, const Argument& arg) {
+    p->output = FILE_RENDERED;
     p->opFile = arg.getArg();
+}
+void Program::setOpToParsed(Program* const p, const Argument& arg) {
+    p->output = FILE_NOT_RENDERED;
+    p->opFile = arg.getArg();
+}
+void Program::disablePlugins(Program* const p, const Argument&) {
+    p->plugins = false;
 }
 
 void Program::setCursed(Program* const p, const Argument&) { 
@@ -40,7 +48,14 @@ void Program::remainOpen(Program* const p, const Argument& arg) {
 }
 
 void Program::listSources(Program* const p, const Argument&) {
-    std::cout << AudioSource::getFormattedMetadata();
+    std::cout << "Generators:" << std::endl << Generator::getFormattedMetadata()
+        << std::endl << "Filters:" << std::endl << Filter::getFormattedMetadata();
+}
+void Program::listGenerators(Program* const p, const Argument&) {
+    std::cout << Generator::getFormattedMetadata();
+}
+void Program::listFilters(Program* const p, const Argument&) {
+    std::cout << Filter::getFormattedMetadata();
 }
 
 void Program::run() {
@@ -48,6 +63,9 @@ void Program::run() {
         std::cout << "No input files provided!" << std::endl;
         return;
     }
+    
+    manager.hook_before_reads(this);
+
     Tune tune;
     for(size_t i = 0; i < ifs.size(); i++) {
         std::fstream file(ifs[i]);
@@ -60,31 +78,32 @@ void Program::run() {
         }
         file.close();
     }
-    AudioDevice dev{tune.getSampleRate()};
-    dev.addTune(tune);
-    dev.fastForward(seekfwd);
+    manager.hook_after_reads(this);
+    switch(output) {
+        case AUDIO: device = std::make_unique<AudioDevice>(tune.samplerate()); break;
+        case FILE_NOT_RENDERED: device = std::make_unique<PrinterDevice>(tune.samplerate()); break;
+        case FILE_RENDERED: device = std::make_unique<RenderDevice>(opFile, tune.samplerate()); break;
+        default: break;
+    }
 
-    if(!opToFile) {
-        dev.start(opCursed);
-        uint len = tune.getLen();
-        if(len == std::numeric_limits<double>::infinity())
+    device->addTune(tune);
+    device->setCursed(opCursed);
+    device->fastForward(seekfwd);
+
+    manager.hook_before_run(this);
+    device->start();
+    if(!device->isRunning()) {return;}     // Don't wait if device is not realtime
+    double len = tune.getLen() - seekfwd + stayopen + 1;
+    uint u_len = len;
+    if(len == std::numeric_limits<double>::infinity()) {
 #ifdef _WIN32
-            len = UINT_MAX;
+        u_len = UINT_MAX;
 #else
-            len = std::numeric_limits<uint>::max();
+        u_len = std::numeric_limits<uint>::max();
 #endif
-        else 
-            len++;
+    }
 
-        //TODO: use a loop that keeps the program awake
-        sleep(len - seekfwd + stayopen);
-        dev.stop();
-    }
-    else {
-        std::ofstream file(opFile);
-        if(!file.good())
-            throw std::runtime_error("Could not open file: " + opFile + " for writing!");
-        dev.render(file, opCursed);
-        file.close();
-    }
+    sleep(u_len);
+    device->stop();
+    manager.hook_after_run(this);
 }
