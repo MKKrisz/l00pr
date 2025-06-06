@@ -22,6 +22,8 @@ class NotePlayer {
 
 public:
     void setSrc(AudioSource* src);
+    AudioSource* getSrc() const { return m_src.get(); }
+
     inline bool hasBounds() { return m_src->getLengthBounds().has_value(); }
     inline std::pair<double, double> getBounds() { return m_src->getLengthBounds().value(); }
     /// <summary> Adds a note to be played </summary>

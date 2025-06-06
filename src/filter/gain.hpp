@@ -31,10 +31,12 @@ public:
     inline double filter(double sample, double, double, double) { return sample * gain; }
     std::unique_ptr<AudioSource> copy() {return std::make_unique<GainFilter>(*this); }
     inline GainFilter& operator=(const GainFilter&) = default;
-    std::string ToString() {return Filter::ToString() + "(" + std::to_string(gain) + ")";}
+    std::string ToString() const {return Filter::ToString() + "(" + std::to_string(gain) + ")";}
     static std::unique_ptr<GainFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return make_unique<GainFilter>(str, srate, flags);
     }
+
+    std::string GetNameAndParams() const {return "gain(" + std::to_string(gain) + ")"; }
 };
 
 #endif

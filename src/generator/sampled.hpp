@@ -25,13 +25,13 @@ public:
     double getSample(double, double) override;
 
     std::unique_ptr<AudioSource> copy() override { return std::make_unique<SampledGenerator>(*this); }
-    std::string ToString() override { return "Samples from " + filename; }
+    std::string ToString() const override { return "Samples from " + filename; }
 
     static std::unique_ptr<SampledGenerator> Create(std::istream& stream, const int, const MakeFlags&) {
         return std::make_unique<SampledGenerator>(stream);
     }
     
-    void operator()(size_t noteId, double delta, double t, double srate, double extmul) override {
+    void operator()(size_t noteId, double delta, double t, double, double extmul) override {
 #ifdef DEBUG
         if(noteId >= phases.size)
             throw std::out_of_range("SampledGenerator phases");
@@ -41,6 +41,8 @@ public:
         accumulator += (samples[mod(int((phase + m_phaseoffset(t))/timestep), samples.size())] * m_gain(t) * extmul);
         phase += delta * m_phasemul(t);
     }
+
+    void Write(std::ostream& str) const override { str << "sampled(" << filename << ")"; WriteLengthBounds(str);}
 };
 
 #endif

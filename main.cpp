@@ -30,11 +30,25 @@ int main(int argc, char** argv) {
     Tune::Init();
     Note::Init();
 
+    ArgumentManager unplugger{
+        {Argument("disable-plugins", "Disables loading of plugins.", Program::disablePlugins, FORBIDS_ARG)}
+    };
+    try {
+        unplugger.parse(argc, argv);
+    }
+    catch(std::exception& e) {
+        //std::cout << e.what() << std::endl;
+    }
+
     Program program{Argument::getDefault()};
-    program.manager.load();
-    program.manager.add_extensions();
-    auto plugin_args = program.manager.arguments();
-    program.args.insert(program.args.end(), plugin_args.begin(), plugin_args.end());
+    unplugger.setup(&program);
+
+    if(program.plugins) {
+        program.manager.load();
+        program.manager.add_extensions();
+        auto plugin_args = program.manager.arguments();
+        program.args.insert(program.args.end(), plugin_args.begin(), plugin_args.end());
+    }
 
     ArgumentManager argmgr{program.args};
     try {

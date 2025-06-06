@@ -10,6 +10,7 @@
 #include "exceptions/parse_error.hpp"
 #include "util.hpp"
 #include "string_convertible.hpp"
+#include "writeable.hpp"
 
 template <typename T, typename ... Args>
 class Metadata : StringConvertible {
@@ -19,12 +20,12 @@ protected:
 public:
     std::string keyword;
     std::function<T(std::istream&, Args...)> create_func;
-    virtual std::string ToString() { return keyword; }
+    virtual std::string ToString() const { return keyword; }
 };
 
 ///<summary> Base class for all classes that 
 template <typename T, typename Metadata_type, typename ... Args>
-class Parseable {
+class Parseable : public virtual Writeable {
 protected:
     static std::vector<Metadata_type> meta;
 public:

@@ -17,23 +17,23 @@ class DelayFilter : public Filter {
 
     /// <summary> Current position in `sbuf` </summary>
     size_t bufId = 0;
+    float len = 0;
 public:
     // cctors
-    DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0) {}
+    DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0), len(t) {}
 
     // parser
     DelayFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
-        double t;
-        str >> expect('(') >> t >> expect(')') >> skipws;
+        str >> expect('(') >> len >> expect(')') >> skipws;
         if(str.peek() == '{') {
             str.get();
             src = AudioSource::Make(str, srate, flags);
             str >> expect('}');
         }
-        sbuf = std::vector<double>(t*srate, 0);
+        sbuf = std::vector<double>(len*srate, 0);
     }
 
-    DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId){}
+    DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId), len(f.len){}
 
     /// <summary> stores `sample` at the current position then returns the next (oldest) sample in sbuf
     double filter(double sample, double, double, double) override {
@@ -43,7 +43,8 @@ public:
     }
     std::unique_ptr<AudioSource> copy() override {return std::make_unique<DelayFilter>(*this); }
 
-    std::string ToString() override { return Filter::ToString() + "Delay(" + std::to_string(sbuf.size()) + ")"; }
+    std::string ToString() const override { return Filter::ToString() + "Delay(" + std::to_string(sbuf.size()) + ")"; }
+    std::string GetNameAndParams() const override { return "delay(" + std::to_string(len) + ')';}
 
     DelayFilter& operator=(const DelayFilter& f) {
         if(this == &f) return *this;

@@ -2,7 +2,7 @@
 #include "builtin.hpp"
 
 
-std::string Note_Metadata::ToString() {
+std::string Note_Metadata::ToString() const {
     std::string ret = keyword;
     size_t maxKwdLen = Note::GetLongestKeywordMeta().keyword.size();
     for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {

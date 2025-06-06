@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-std::string AS_Metadata::ToString() {
+std::string AS_Metadata::ToString() const {
     std::string ret = keyword;
     size_t maxKwdLen = std::max(Generator::GetLongestKeywordMeta().keyword.size(), Filter::GetLongestKeywordMeta().keyword.size());
     for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {
@@ -102,4 +102,10 @@ AudioSource* AudioSource::getByName(const std::vector<std::unique_ptr<AudioSourc
         }
     }
     throw std::out_of_range("No audiosource with label " + name);
+}
+void AudioSource::WriteLengthBounds(std::ostream& str) const {
+    if(!length_bounds.has_value()) { return; }
+    auto bounds = length_bounds.value();
+
+    str << '{' << bounds.first << " - " << bounds.second << '}';
 }

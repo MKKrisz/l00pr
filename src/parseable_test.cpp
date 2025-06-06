@@ -5,7 +5,7 @@
 struct test_meta : public Metadata<void> {
     test_meta(const char* kw, std::function<void(std::istream&)> fn) : Metadata<void>(kw, fn) {}
     test_meta(const test_meta& m) : Metadata<void>(m) {}
-    std::string ToString() override { return "testmeta " + Metadata<void>::ToString(); }
+    std::string ToString() const override { return "testmeta " + Metadata<void>::ToString(); }
 };
 
 void func1(std::istream&) {std::cout << "1" << std::endl;}

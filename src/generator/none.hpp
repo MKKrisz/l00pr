@@ -12,7 +12,8 @@ public:
     NoGenerator();
     double getSample(double, double);
     std::unique_ptr<AudioSource> copy();
-    std::string ToString() { return "Dummy"; }
+    std::string ToString() const { return "Dummy"; }
+    void Write(std::ostream& str) const {str << "none";}
 
     static std::unique_ptr<NoGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };

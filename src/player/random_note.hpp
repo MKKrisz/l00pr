@@ -61,13 +61,13 @@ class RandomNote : public Note{
 public:
 
     /// <summary> Returns the "length" of this sequence </summary>
-    double GetLen() override {return len;}
+    double GetLen() const override {return len;}
 
     // cctor
     RandomNote(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
 
     /// <summary> Generates the actual note sequence that gets played</summary>
-    std::vector<std::pair<double, Note*>> Serialize(double start);
+    std::vector<std::pair<double, Note*>> Serialize(double start) const;
 
     void AddToPlayer(NotePlayer& p) override {
         //TODO: Check leaks
@@ -79,9 +79,11 @@ public:
         p.addNote(Loop(str, 1).copy());
     }
     void AddSample(NotePlayer&, size_t, int) override {}
-    bool IsComplete() override {return true;}
-    Note* copy() override { return new RandomNote(*this); }
-    std::string ToString() override { return "RandomSequence"; }
+    bool IsComplete() const override {return true;}
+    Note* copy() const override { return new RandomNote(*this); }
+    std::string ToString() const override { return "RandomSequence"; }
+
+    void Write(std::ostream&) const override;
 
     static RandomNote* Create(std::istream& src, const std::vector<AudioSource*>& gens, double bpm, bool poly, int srate) {
         return new RandomNote(src, gens, bpm, poly, srate);

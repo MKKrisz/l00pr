@@ -15,6 +15,9 @@ class Tkwd_Metadata : public Metadata<void, Tune*> {
 public:
     Tkwd_Metadata(const char* str, std::function<void(std::istream&, Tune*)> func) 
         : Metadata(str, func) {}
+    Tkwd_Metadata(const Tkwd_Metadata& m) : Metadata(m) {/*nothing*/}
+
+    Tkwd_Metadata& operator=(const Tkwd_Metadata& m) = default;
 };
 
 /// <summary> Stores a piece of sound data to be played </summary>
@@ -84,6 +87,7 @@ public:
     
     /// <summary> Calculates the next sample value </summary>
     [[nodiscard]] double getSample(double srate, bool print = true) ;
+    void Write(std::ostream&) const override;
 
     // dtor
     ~Tune() {}
@@ -111,6 +115,7 @@ private:
     double t = 0;
 
     std::vector<AudioSource*> getSources();
+
 };
 
 /// <summary> Parser for Tunes </summary>

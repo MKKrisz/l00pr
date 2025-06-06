@@ -13,17 +13,20 @@ public:
     std::string desc;
     Note_Metadata(const char* kw, std::function<Note*(std::istream&, const std::vector<AudioSource*>&, double, bool, int)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
-    std::string ToString() override;
+    Note_Metadata(const Note_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    std::string ToString() const override;
+
+    Note_Metadata& operator=(const Note_Metadata& m) = default;
 };
 
 class Note : public StringConvertible, public Parseable<Note*, Note_Metadata, const std::vector<AudioSource*>&, double, bool, int> {
 public:
     virtual void AddToPlayer(NotePlayer& p) = 0;
     virtual void AddSample(NotePlayer& p, size_t index, int srate) = 0;
-    virtual bool IsComplete() = 0;
-    virtual double GetLen() = 0;
-    virtual Note* copy() = 0;
-    virtual std::string ToString() {return "[Note:" + std::to_string(GetLen()) + "]";}
+    virtual bool IsComplete() const = 0;
+    virtual double GetLen() const = 0;
+    virtual Note* copy() const = 0;
+    virtual std::string ToString() const {return "[Note:" + std::to_string(GetLen()) + "]";}
     virtual ~Note() {}
 
     static void Init();

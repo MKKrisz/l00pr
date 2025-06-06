@@ -19,6 +19,7 @@ public:
     static void Polynote(std::istream& str, Tune*);
     static void NoPolynote(std::istream& str, Tune*);
     static void GlobalFilter(std::istream& str, Tune*);
+    void Write(std::ostream&) const {}
 };
 
 #endif

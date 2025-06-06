@@ -2,6 +2,7 @@
 #define L00PR_FILTER_SPLITTER
 
 #include "filter.hpp"
+#include <sstream>
 
 //TODO: this
 class Splitter : public Filter {
@@ -36,9 +37,20 @@ public:
 
     std::unique_ptr<AudioSource> copy() { return std::make_unique<Splitter>(*this); }
 
-    std::string ToString() { return Filter::ToString() + "BlackBox(TM)"; }
+    std::string ToString() const { return Filter::ToString() + "BlackBox(TM)"; }
     static std::unique_ptr<Splitter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return std::make_unique<Splitter>(str, srate, flags);
+    }
+
+    std::string GetNameAndParams() const {
+        std::stringstream ss {};
+        ss << "split(";
+        for(const auto& path : paths) {
+            ss << std::endl;
+            path->Write(ss);
+        }
+        ss << std::endl << ")";
+        return ss.str();
     }
 };
 

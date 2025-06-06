@@ -8,7 +8,6 @@ protected:
     bool cursed = false;
     std::vector<Tune*> tunes {};
     
-protected:
     [[nodiscard]] virtual float getSample(int sampleRate, bool print) {
         float sum = 0;
         for(auto t : tunes) {
@@ -38,5 +37,5 @@ public:
     void addTune(Tune& tune) { tunes.emplace_back(&tune); }
 
     virtual ~Device() {}
-    std::string ToString() override { return "Device base"; }
+    std::string ToString() const override { return "Device base"; }
 };

@@ -39,7 +39,7 @@ SampledGenerator::SampledGenerator(std::istream& str) {
     parse_file(filename);
 }
 
-double SampledGenerator::getSample(double ph, double t) {
+double SampledGenerator::getSample(double, double) {
     return 0;
 }
 

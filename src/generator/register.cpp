@@ -7,6 +7,12 @@ Register::Register(std::vector<AudioSource*> gen) {
         generators.emplace_back(g->copy());
     }
 }
+Register::Register(const Register& r) : Generator(r) {
+    generators.reserve(r.generators.size());
+    for(auto& g : r.generators) {
+        generators.emplace_back(g->copy());
+    }
+}
 
 void Register::operator()(size_t noteId, double d, double t, double srate, double extmul) {
     for(auto& g : generators) {
@@ -43,15 +49,21 @@ Register::Register(std::istream& stream, const int srate, const MakeFlags& flags
 }
 
 std::unique_ptr<AudioSource> Register::copy() {
-    std::vector<AudioSource*> gs {};
-    gs.reserve(generators.size());
-    for(auto& g : generators) {
-        gs.emplace_back(g.get());
-    }
-    return std::make_unique<Register>(gs);
+    return std::make_unique<Register>(*this);
 }
 
 
 std::unique_ptr<Register> Register::Create(std::istream& str, const int srate, const MakeFlags& flags) {
     return std::make_unique<Register>(str, srate, flags);
+}
+void Register::Write(std::ostream& str) const {
+    str << "register(";
+    Generator::WriteBaseParams(str);
+    str << ") {";
+    for(auto& g : generators) {
+        str << std::endl;
+        g->Write(str);
+    }
+    str << '}';
+    AudioSource::WriteLengthBounds(str);
 }

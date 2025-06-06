@@ -36,10 +36,11 @@ public:
     }
 
     std::unique_ptr<AudioSource> copy() {return std::make_unique<QuantizeFilter>(*this);}
-    std::string ToString() { return Filter::ToString() + "q" + std::to_string(bits); }
+    std::string ToString() const { return Filter::ToString() + "q" + std::to_string(bits); }
     static std::unique_ptr<QuantizeFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return std::make_unique<QuantizeFilter>(str, srate, flags);
     } 
+    std::string GetNameAndParams() const {return "quantize(" + std::to_string(bits) + ")"; }
 };
 
 #endif

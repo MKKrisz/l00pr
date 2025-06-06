@@ -19,7 +19,10 @@ public:
         const char* syn,
         const char* desc)
         : Metadata(kw, func), syntax(syn), desc(desc) {};
-    std::string ToString() override;
+    Filter_Metadata(const Filter_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    std::string ToString() const override;
+
+    Filter_Metadata& operator=(const Filter_Metadata& m) = default;
 };
 
 /// <summary> 
@@ -98,7 +101,10 @@ public:
         return *this;
     }
 
-    virtual std::string ToString() override {return (src == nullptr? "" : src->ToString() + " -> "); }
+    virtual std::string ToString() const override {return (src == nullptr? "" : src->ToString() + " -> "); }
+
+    virtual std::string GetNameAndParams() const = 0;
+    void Write(std::ostream&) const override; 
 
     static std::string getFormattedMetadata();
 };

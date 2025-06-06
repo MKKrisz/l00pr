@@ -21,6 +21,7 @@ struct is_setter<SetterNote> : std::true_type {};
 class SetterNote : public Note{
     /// <summary> The generator to set the player to use. </summary>
     AudioSource* gen = nullptr;
+    bool owner = false;
 public:
     // cctors
     SetterNote(AudioSource* ptr);
@@ -29,7 +30,7 @@ public:
     /// <summary> Parser for setter notes </summary>
     /// <param name="srate"> Used for accurate filter setup </param>
     SetterNote(std::istream& str, const std::vector<AudioSource*>& gens, int srate = 44100);
-    ~SetterNote() {};
+    ~SetterNote() {if(owner) delete gen;}
 
     //getters/setters
 
@@ -43,11 +44,13 @@ public:
         p.setSrc(getGen());
     }
     
-    inline bool IsComplete() override { return true; }
-    inline double GetLen() override { return 0; }
+    inline bool IsComplete() const override { return true; }
+    inline double GetLen() const override { return 0; }
     inline void AddSample(NotePlayer&, size_t, int) override { }
-    inline Note* copy() override { return new SetterNote(*this); }
-    std::string ToString() override { return "\n[" + gen->ToString() + "]"; }
+    inline Note* copy() const override { return new SetterNote(*this); }
+    std::string ToString() const override { return "\n[" + gen->ToString() + "]"; }
+
+    void Write(std::ostream&) const override;
 
     static SetterNote* Create(std::istream& str, const std::vector<AudioSource*>& sources, double, bool, int srate = 44100) {
         return new SetterNote(str, sources, srate);

@@ -17,7 +17,7 @@ public:
     SineGenerator(std::istream& stream);
     double getSample(double, double) override;
     std::unique_ptr<AudioSource> copy() override;
-    std::string ToString() override { return "Sine"; }
+    std::string ToString() const override { return "Sine"; }
 
 
     static std::unique_ptr<SineGenerator> Create(std::istream& stream, const int, const MakeFlags&);

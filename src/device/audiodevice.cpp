@@ -40,13 +40,13 @@ int AudioDevice::getSampleRate() { return spec.freq; }
 //Tune* AudioDevice::getTune() { return tune; }
 
 void AudioDevice::setSpec(const SDL_AudioSpec& s) {
-    std::cout << "Asked for: " <<  s.freq << " " << s.format << " " << s.channels << " " << s.samples << std::endl;;
+    std::cerr << "Asked for: " <<  s.freq << " " << s.format << " " << s.channels << " " << s.samples << std::endl;;
     SDL_AudioSpec temp;
     devHandle = SDL_OpenAudioDevice(nullptr, 0, &s, &temp, 0);
     //std::cout << "dev: " << devHandle << std::endl;
     //spec = temp;
     spec = s;
-    std::cout << "Got      : " <<  spec.freq << " " << spec.format << " " << spec.channels << " " << spec.samples << std::endl;;
+    std::cerr << "Got      : " <<  spec.freq << " " << spec.format << " " << spec.channels << " " << spec.samples << std::endl;;
     if(devHandle == 0) {
         std::cout << SDL_GetError() << std::endl;
     }

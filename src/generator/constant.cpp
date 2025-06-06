@@ -13,7 +13,7 @@ ConstantGenerator::ConstantGenerator(Interpolated<double> phasemul,
 
 ConstantGenerator::ConstantGenerator(const ConstantGenerator& g) : Generator(g), m_constant(g.m_constant) {}
 
-double ConstantGenerator::getSample(double p, double) {
+double ConstantGenerator::getSample(double, double) {
     return m_constant;
 }
 
@@ -29,4 +29,8 @@ std::unique_ptr<AudioSource> ConstantGenerator::copy() {
 
 std::unique_ptr<ConstantGenerator> ConstantGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
     return std::make_unique<ConstantGenerator>(stream);
+}
+void ConstantGenerator::Write(std::ostream& str) const {
+    str << "constant(" << m_constant << ") ";
+    WriteLengthBounds(str);
 }

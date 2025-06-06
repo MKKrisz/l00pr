@@ -16,9 +16,16 @@ typedef unsigned int uint;
 #include "generator/generator.hpp"
 #include "filter/filter.hpp"
 
-void Program::setOpToFile(Program* const p, const Argument& arg) {
-    p->opToFile = true;
+void Program::setOpToRendered(Program* const p, const Argument& arg) {
+    p->output = FILE_RENDERED;
     p->opFile = arg.getArg();
+}
+void Program::setOpToParsed(Program* const p, const Argument& arg) {
+    p->output = FILE_NOT_RENDERED;
+    p->opFile = arg.getArg();
+}
+void Program::disablePlugins(Program* const p, const Argument&) {
+    p->plugins = false;
 }
 
 void Program::setCursed(Program* const p, const Argument&) { 
@@ -72,12 +79,11 @@ void Program::run() {
         file.close();
     }
     manager.hook_after_reads(this);
-
-    if(opToFile) { 
-        device = std::make_unique<RenderDevice>(opFile, tune.samplerate()); 
-    } 
-    else { 
-        device = std::make_unique<AudioDevice>(tune.samplerate()); 
+    switch(output) {
+        case AUDIO: device = std::make_unique<AudioDevice>(tune.samplerate()); break;
+        case FILE_NOT_RENDERED: device = std::make_unique<PrinterDevice>(tune.samplerate()); break;
+        case FILE_RENDERED: device = std::make_unique<RenderDevice>(opFile, tune.samplerate()); break;
+        default: break;
     }
 
     device->addTune(tune);

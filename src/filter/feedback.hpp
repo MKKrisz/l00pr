@@ -5,6 +5,8 @@
 #include "../util.hpp"
 #include "dummy.hpp"
 
+#include <sstream>
+
 /// <summary> 
 /// Filter used to initiate feedback loops
 /// Syntax: feedback(<depth> [feedback_filter_chain]) {[source]}
@@ -56,7 +58,17 @@ public:
         return sample;
     }
     
-    std::string ToString() { return Filter::ToString() + "Feedback"; }
+    std::string ToString() const { return Filter::ToString() + "Feedback"; }
+    std::string GetNameAndParams() const {
+        std::stringstream ss = {};
+        ss << depth;
+        if(fbFilter != nullptr) {
+            ss << "  ";
+            fbFilter->Write(ss);
+        }
+        
+        return "feedback(" + ss.str() + ")";
+    }
 
     std::unique_ptr<AudioSource> copy() { return std::make_unique<Feedback>(*this); }
     ~Feedback() {}

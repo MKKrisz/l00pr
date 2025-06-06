@@ -35,10 +35,10 @@ public:
     inline double getTime() { return done; }
 
     /// <summary> Gets the length of this note </summary>
-    inline double GetLen() override { return len; }
+    inline double GetLen() const override { return len; }
 
     /// <summary> Gets the string representation of this note </summary>
-    inline std::string ToString() override {
+    inline std::string ToString() const override {
         return "[" + freq[0].second.getName() + (freq.Size() == 1 ? "       " : "-/\\/-- ") + std::to_string(len)  + "    " + std::to_string(ampl[0].second) + "] ";
     }
 
@@ -55,7 +55,7 @@ public:
     
     /// <summary> Checks whether the note is completed </summary>
     /// <remarks> A little more complicated than just "done > len", as that would chop off the end of the note... </remarks>
-    bool IsComplete() override;
+    bool IsComplete() const override;
 
     void AddToPlayer(NotePlayer& p) override {
         if(p.hasBounds()) {
@@ -83,7 +83,9 @@ public:
     /// <summary> Parser for notes </summary>
     PlayableNote(std::istream& str, double bpm);
 
-    Note* copy() override {return new PlayableNote(*this);}
+    Note* copy() const override {return new PlayableNote(*this);}
+
+    void Write(std::ostream&) const override;
 
     static PlayableNote* Create(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
 };

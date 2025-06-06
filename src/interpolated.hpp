@@ -14,6 +14,7 @@
 #include "exceptions/parse_error.hpp"
 #include "interpolator.hpp"
 #include "util.hpp"
+#include "writeable.hpp"
 
 #ifdef _WIN32
 #define M_PI 3.141592653589793238
@@ -36,7 +37,7 @@ struct is_interpolated<Interpolated<T>> : public std::true_type {};
 /// Data structures for storing and evaluating a keyframe-based interpolation
 ///</summary>
 template <Arithmetic T>
-class Interpolated {
+class Interpolated : public Writeable{
 protected:
     /// <summary> Internal data structure. </summary>
     std::vector<std::pair<double, T>> data;
@@ -182,6 +183,7 @@ public:
 
     /// <summary> Returns a reference to the datapoint at index 'i' </summar/summaryy>
     std::pair<double,T>& operator[](size_t i) {return data[i];}
+    const std::pair<double,T>& operator[](size_t i) const {return data[i];}
 
     friend std::istream& operator>> <> (std::istream& stream, Interpolated<T>& p);
 
@@ -227,6 +229,20 @@ public:
         std::pair<float, T> ret = data[getId(t)];
         if(almostEQ(ret.first, t)) return ret;
         return std::optional<std::pair<float, T>>();
+    }
+
+    void Write(std::ostream& str) const {
+        if(data.size() == 1) {
+            str << data[0].second;
+            return;
+        }
+
+        bool first = true;
+        for(const auto& ts : data) {
+            if(!first) str << " - ";
+            str << ts.first << ": " << ts.second;
+            first = false;
+        }
     }
 };
 

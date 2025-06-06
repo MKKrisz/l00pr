@@ -31,7 +31,7 @@ PassFilter::PassFilter(std::vector<double> dp, AudioSource* src) : FIR(src) {
     sbuf = std::vector<double>(kern.size(), 0);
 }
 
-PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, size_t scount) : FIR(src) {
+PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, size_t scount) : FIR(src), function(dp) {
     for(size_t i = 0; i < scount; i++) {
         double sum = 0;
         for(size_t j = 0; j < scount; j++) {
@@ -45,15 +45,13 @@ PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, si
 }
 
 PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
-    Interpolated<double> dp;
     std::unique_ptr<AudioSource> src = nullptr;
-    str >> expect('(') >> dp;
+    str >> expect('(') >> function;
     str >> skipws;
-    size_t scount = 200;
     if(str.peek() != ')') {
         if(!isdigit(str.peek()))
             throw parse_error(str, "Expected digit");
-        str >> scount;
+        str >> segments;
     }
     str >> expect(')') >> skipws;
     if(str.peek() == '{') {
@@ -61,7 +59,7 @@ PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
         src = std::move(AudioSource::Make(str, srate, flags));
         str >> expect('}');
     }
-    *this = PassFilter(dp, srate, src.get(), scount);
+    *this = PassFilter(function, srate, src.get(), segments);
 }
 
 PassFilter& PassFilter::operator=(const PassFilter& f) {
@@ -75,3 +73,10 @@ std::unique_ptr<PassFilter> PassFilter::Create(std::istream& str, const int srat
     return std::make_unique<PassFilter>(str, srate, flags);
 }
 
+std::string PassFilter::GetNameAndParams() const {
+    std::stringstream ss {};
+    function.Write(ss);
+    ss << "  " << segments;
+
+    return "pass(" + ss.str() + ")";
+}

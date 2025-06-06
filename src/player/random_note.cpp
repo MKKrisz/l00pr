@@ -50,13 +50,13 @@ RandomNote::RandomNote(std::istream& str, const std::vector<AudioSource*>& srcs,
     }
 }
 
-std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) {
+std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) const {
     std::vector<std::pair<double, Note*>> ret = {};
     double t = 0;
     if(noteBased) {
         while(t < len) {
             size_t id = rand() % notes.size();
-            Note* n = notes.getNote(id);
+            const Note* n = notes.getNote(id);
             double len = n->GetLen();
             ret.emplace_back(start + t, n->copy());
             t += len;
@@ -76,4 +76,13 @@ std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) {
         }
     }
     return ret;
+}
+void RandomNote::Write(std::ostream& str) const {
+    auto serialized = Serialize(0);
+    NoteStream notes {};
+    for(const auto& n : serialized) {
+        notes.Add(n);
+    }
+    Loop loop {notes, 1};
+    loop.Write(str);
 }

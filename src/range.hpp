@@ -36,7 +36,7 @@ public:
     inline size_t size() { return data.size();}
 
     /// <summary> Returns 
-    inline T get(double val) {
+    inline T get(double val) const {
         if(data.empty())
             throw std::out_of_range("Empty Range");
         if(val < 0 || val > 1) 

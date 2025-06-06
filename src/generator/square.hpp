@@ -22,7 +22,16 @@ public:
     SquareGenerator(const SquareGenerator& g);
     double getSample(double phase, double t) override;
     std::unique_ptr<AudioSource> copy() override;
-    std::string ToString() override { return "Square"; }
+    std::string ToString() const override { return "Square"; }
+
+    void Write(std::ostream& str) const override { 
+        str << "square(";
+        WriteBaseParams(str);
+        str << "  "; 
+        m_dutyCycle.Write(str);
+        str << ") ";
+        WriteLengthBounds(str);
+    }
 
     static std::unique_ptr<SquareGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };

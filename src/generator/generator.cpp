@@ -1,9 +1,10 @@
 #include "generator.hpp"
 #include "builtin.hpp"
 
+#include <algorithm>
 #include <cmath>
 
-std::string Gen_Metadata::ToString() {
+std::string Gen_Metadata::ToString() const {
     std::string ret = keyword;
     size_t maxKwdLen = Generator::GetLongestKeywordMeta().keyword.size();
     for(size_t i = 0; i < (maxKwdLen - keyword.size())/8 + 1; i++) {
@@ -69,4 +70,20 @@ std::string Generator::getFormattedMetadata() {
         ret += f.keyword + "\t" + (f.keyword.size() < 8? "\t" : "") + f.syntax + "\t" + f.desc + "\n";
     }
     return ret;
+}
+void Generator::WriteBaseParams(std::ostream& str) const {
+    m_phasemul.Write(str);
+    str << "  ";
+    m_gain.Write(str);
+    str << "  ";
+    m_phaseoffset.Write(str); 
+}
+
+void Generator::Write(std::ostream& str) const {
+    std::string generator_name = ToString();
+    std::transform(generator_name.begin(), generator_name.end(), generator_name.begin(), [](char c) -> char { return std::tolower(c); });
+    str << generator_name << '(';
+    WriteBaseParams(str);
+    str << ") ";
+    WriteLengthBounds(str);
 }

@@ -1,6 +1,6 @@
 #include "loop.hpp"
 
-Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {} 
+Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {calculateLen();} 
 Loop::Loop(const Loop& l) 
     : NoteStream(l), repAmount(l.repAmount), len(l.len), t(l.t), reps(l.reps), id(l.id) {}
 
@@ -35,3 +35,8 @@ void Loop::AddSample(NotePlayer& p, size_t, int) {
     }
 }
 
+void Loop::Write(std::ostream& str) const {
+    str << "loop(" << (repAmount < 0 ? "" : std::to_string(repAmount)) << ") {"; // << std::endl; - Not needed as NoteStream puts one there for free
+    NoteStream::Write(str);
+    str << std::endl << '}';
+}

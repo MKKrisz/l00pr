@@ -39,17 +39,17 @@ public:
         len = NoteStream::getLen();
     }
     void AddSample(NotePlayer& p, size_t, int) override;
-    double GetLen() override {
+    double GetLen() const override {
         if(repAmount < 0) 
             return std::numeric_limits<double>::infinity();
         return NoteStream::getLen() * repAmount;
     }
-    double getLen() { return GetLen(); }
-    bool IsComplete() override {
+    double getLen() const { return GetLen(); }
+    bool IsComplete() const override {
         if(repAmount < 0) return false;
         return (t + reps*len) > repAmount * len;
     }
-    Note* copy() override {return new Loop(*this);}
+    Note* copy() const override {return new Loop(*this);}
     Loop& operator=(const Loop& l) {
         if(this == &l) return *this;
         NoteStream::operator=(l);
@@ -61,7 +61,7 @@ public:
         return *this;
     };
 
-    std::string ToString() override {
+    std::string ToString() const override {
         std::string str = "\n" + (repAmount < 0? "inf" : std::to_string(repAmount)) +"*[\n";
         for(size_t i = 0; i < notes.size(); i++) {
             str += "\t" + std::to_string(notes[i].first) + ": " + notes[i].second->ToString() + "\n";
@@ -69,6 +69,7 @@ public:
         str += "]\n";
         return str;
     }
+    void Write(std::ostream&) const override;
 
     static Loop* Create(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
         return new Loop(str, sources, bpm, poly, srate);

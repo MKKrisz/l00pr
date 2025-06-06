@@ -1,4 +1,5 @@
 #include "tune.hpp"
+#include "../player/noteplayer.hpp"
 #include "../exceptions/parse_error.hpp"
 #include "set_kwd.hpp"
 
@@ -91,6 +92,7 @@ std::vector<AudioSource*> Tune::getSources() {
 void Tune::addLane(std::istream& stream) {
     stream >> skipws;
     AudioSource* gen = p_sources[0].get();
+    bool owner = false;
     NoteStream str;
     bool hasNotes = false;
     if(stream.peek() == '(') {
@@ -103,11 +105,15 @@ void Tune::addLane(std::istream& stream) {
             stream >> expect(')');
         }
         else {
+            auto pos = stream.tellg();
             std::string name;
             std::getline(stream, name, ')');
             gen = getSourceByName(name);
             if(gen == nullptr) {
-                throw parse_error(stream, "No audiosource named \"" + name + "\".");
+                stream.seekg(pos);
+                gen = AudioSource::Make(stream, m_srate).release();
+                owner = true;
+                stream >> expect(')');
             }
         }
     }
@@ -121,6 +127,7 @@ void Tune::addLane(std::istream& stream) {
         throw parse_error(stream, std::string("No notes to play.\n Player format: player(generator_id){note1 note2 ... note_n}\nNote format: <") + (m_polynote? "time" : "") +" frequency length amplitude>");
 
     m_lanes.emplace_back(Lane(NotePlayer(gen), str));
+    if(owner) delete gen;
 }
 void Tune::AddLane(std::istream& str, Tune* t) {
     t->addLane(str);
@@ -155,4 +162,38 @@ double Tune::getLen() {
             max = l.stream.getLen();
     }
     return max;
+}
+
+
+void Tune::Write(std::ostream& str) const {
+    str << "set bpm: 60" << std::endl;   //Hard-coded because at the point of writing everything is converted into seconds
+    str << "set samplerate: " << m_srate << std::endl;
+
+    str << "set globalfilter: ";
+    p_globalFilter->Write(str);
+    str << std::endl;
+
+    str << "generators {" << std::endl;
+    for(const auto& src : p_sources) {
+        if(src->name != "") {
+            str << ':' << src->name << ": ";
+        }
+        src->Write(str);
+        str << std::endl;
+    }
+    str << '}' << std::endl;
+
+    for(const auto& lane : m_lanes) {
+        str << "player(";
+
+        if(lane.player.getSrc()->name != "") {
+            str << lane.player.getSrc()->name;
+        }
+        else {
+            lane.player.getSrc()->Write(str);
+        }
+        str << ") {" << std::endl;
+        lane.stream.Write(str);
+        str << std::endl << '}' << std::endl;
+    }
 }

@@ -10,7 +10,10 @@ public:
     std::string desc;
     Gen_Metadata(const char* kw, std::function<std::unique_ptr<AudioSource>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
-    std::string ToString() override;
+    Gen_Metadata(const Gen_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    std::string ToString() const override;
+
+    Gen_Metadata& operator=(const Gen_Metadata& m) = default;
 };
 
 /// <summary> AudioSource that actually generates samples </summary>
@@ -49,9 +52,12 @@ public:
 
     virtual ~Generator() {}
 
-    virtual std::string ToString() override { return "Generator"; }
+    virtual std::string ToString() const override { return "Generator"; }
 
     static std::string getFormattedMetadata();
+
+    void WriteBaseParams(std::ostream& str) const;
+    void Write(std::ostream& str) const override;
 };
 
 #endif
