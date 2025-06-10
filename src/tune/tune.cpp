@@ -101,6 +101,7 @@ void Tune::addLane(std::istream& stream) {
         stream >> skipws;
         if(isdigit(stream.peek())) {
             stream >> genId;
+            if(genId > p_sources.size()) {throw std::runtime_error("The ID of the player source (" + std::to_string(genId) + ") is larger than the number of loaded generators. Maybe you're trying to load a multifile project?"); }
             gen = p_sources[genId].get();
             stream >> expect(')');
         }
