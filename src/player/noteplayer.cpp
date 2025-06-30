@@ -7,7 +7,7 @@ void NotePlayer::addNote(Note* note) {
     m_src->addPhase();
 }
 
-void NotePlayer::setSrc(AudioSource* src) {
+void NotePlayer::setSrc(Source* src) {
     std::vector<double> phases = m_src->getPhases();
     if(src == nullptr)
         m_src = std::move(def_src->copy());
@@ -21,7 +21,7 @@ void NotePlayer::setSrc(AudioSource* src) {
     }
 }
 
-NotePlayer::NotePlayer(AudioSource* src) : m_notes(), m_src(std::move(src->copy())), def_src(src){}
+NotePlayer::NotePlayer(Source* src) : m_notes(), m_src(std::move(src->copy())), def_src(src){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
     : m_notes(player.m_notes), m_src(std::move(player.m_src->copy())), def_src(player.def_src){}

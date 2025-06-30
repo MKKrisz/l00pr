@@ -23,7 +23,7 @@ ConstantGenerator::ConstantGenerator(std::istream& stream) : Generator() {
     stream >> skipws >> m_constant >> expect(')');
 }
 
-std::unique_ptr<AudioSource> ConstantGenerator::copy() { 
+std::unique_ptr<Source> ConstantGenerator::copy() { 
     return std::make_unique<ConstantGenerator>(*this);
 }
 

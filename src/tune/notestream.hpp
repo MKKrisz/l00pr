@@ -67,7 +67,7 @@ public:
     NoteStream(double t, Note* n);
     NoteStream(std::pair<double, Note*> note);
     NoteStream(const NoteStream& s);
-    NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate);
+    NoteStream(std::istream& str, const std::vector<Source*> srcs, double bpm, bool polynote, int srate);
 
     /// <summary> Adds a note to the structure at the specified timestamp </summary>
     void Add(std::pair<double, Note*> p) { ordered_add(notes, p); }

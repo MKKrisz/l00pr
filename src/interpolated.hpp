@@ -249,40 +249,42 @@ public:
 /// <summary> Parser for Interpolated values. Syntax can be: <value>; <time1>: <data1> - <time2>:<data2> - ... - <time_n>:<data_n> </summary>
 /// <remarks> Does not clear 'p' </remarks>
 template<typename T>
-std::istream& operator>>(std::istream& stream, Interpolated<T>& p){
-    stream >> skipws;
-    size_t start = stream.tellg();
-    int i = 0;
-    while(true) {
-        double t;
-        T val;
-        //if(!isalpha((stream >> skipws).peek())) break;
-        stream >> skipws >> t;
-        if((stream >> skipws).peek() != ':') {
-            if(i == 0)  {
-                stream.clear();
-                stream.seekg(start) >> val;
-                if(!stream.good()) {
-                    throw parse_error(stream, "Invalid value");
-                }
-                p.data.emplace_back(std::make_pair(0, val));
-                break;
-            }
-            else 
-                throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value.\n Syntax for interpolated values can be: <value>; <timestamp>:<value> [ - <timestamp2>:<value2> - ... - <timestamp_n>:<value_n>]");
-        }
-        stream.get();
-        stream >> skipws >> val;
-        p.data.emplace_back(std::make_pair(t, val));
-
-        if((stream >> skipws).peek() != '-') break;
-        i++;
-        stream.get();
+std::istream& operator>>(std::istream& str, Interpolated<T>& p){
+    brace(str, '(', ')', 0, [&](std::istream& stream) {
         stream >> skipws;
-        //if((stream >> skipws).peek() == '-') break;
-    }
-    p.sort();
-    return stream;
+        size_t start = stream.tellg();
+        int i = 0;
+        while(true) {
+            double t;
+            T val;
+            //if(!isalpha((stream >> skipws).peek())) break;
+            stream >> skipws >> t;
+            if((stream >> skipws).peek() != ':') {
+                if(i == 0)  {
+                    stream.clear();
+                    stream.seekg(start) >> val;
+                    if(!stream.good()) {
+                        throw parse_error(stream, "Invalid value");
+                    }
+                    p.data.emplace_back(std::make_pair(0, val));
+                    break;
+                }
+                else 
+                    throw parse_error(stream, "Couldn't interpret interpolated value: No ':' after timestamp value.\n Syntax for interpolated values can be: <value>; <timestamp>:<value> [ - <timestamp2>:<value2> - ... - <timestamp_n>:<value_n>]");
+            }
+            stream.get();
+            stream >> skipws >> val;
+            p.data.emplace_back(std::make_pair(t, val));
+
+            if((stream >> skipws).peek() != '-') break;
+            i++;
+            stream.get();
+            stream >> skipws;
+            //if((stream >> skipws).peek() == '-') break;
+        }
+        p.sort();
+    });
+    return str;
 }
 
 /// <summary> base default interpolator for all values </summary>

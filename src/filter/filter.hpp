@@ -5,14 +5,14 @@
 
 class Filter;
 
-struct Filter_Metadata : public Metadata<std::unique_ptr<AudioSource>, const int, const MakeFlags&>{
+struct Filter_Metadata : public Metadata<std::unique_ptr<Source>, const int, const MakeFlags&>{
 public:
     std::string syntax;
     std::string desc;
     Filter_Metadata(
         const char* kw,
         std::function<
-            std::unique_ptr<AudioSource>(
+            std::unique_ptr<Source>(
                 std::istream&,
                 const int,
                 const MakeFlags&)> func,
@@ -28,21 +28,21 @@ public:
 /// <summary> 
 /// Modifies "incoming" audio samples 
 /// General syntax: filter_name(<arguments>) {[src]}
-/// The value `src` is another AudioSource. Usually `src` is not strictly as some filters make use of so-called generatorless filter chain (ex.: feedback filters)
+/// The value `src` is another Source. Usually `src` is not strictly as some filters make use of so-called generatorless filter chain (ex.: feedback filters)
 /// </summary>
-class Filter : public AudioSource, public Parseable<std::unique_ptr<AudioSource>, Filter_Metadata, const int, const MakeFlags&> {
+class Filter : public Source, public Parseable<std::unique_ptr<Source>, Filter_Metadata, const int, const MakeFlags&> {
 protected:
 
     /// <summary> The filter receives its' samples from here (in most cases...) </summary>
-    std::unique_ptr<AudioSource> src = nullptr;
+    std::unique_ptr<Source> src = nullptr;
 
     // base cctors
-    Filter() : AudioSource() {}
-    Filter(AudioSource* src) : AudioSource() {
+    Filter() : Source() {}
+    Filter(Source* src) : Source() {
         if(src != nullptr) 
             this->src = src->copy();
     }
-    Filter(const Filter& f) : AudioSource(f), src(f.src == nullptr? nullptr : (f.src)->copy()) {}
+    Filter(const Filter& f) : Source(f), src(f.src == nullptr? nullptr : (f.src)->copy()) {}
 public:
     static void Init();
 
@@ -65,11 +65,11 @@ public:
             src->addSample(sample);
             return;
         }
-        AudioSource::addSample(sample);
+        Source::addSample(sample);
     }
 
     /// <summary> Unused function, returns the base generator of a filter chain </summary>
-    virtual AudioSource* getBase() override {
+    virtual Source* getBase() override {
         return src == nullptr? nullptr : src->getBase();
     }
 
@@ -91,12 +91,12 @@ public:
     
     // dtor
     inline virtual ~Filter() {}
-    virtual std::unique_ptr<AudioSource> copy() override = 0;
+    virtual std::unique_ptr<Source> copy() override = 0;
 
     // copy assignment operator
     Filter& operator=(const Filter& f) {
         if(this == &f) return *this;
-        AudioSource::operator=(f);
+        Source::operator=(f);
         src = f.src != nullptr? f.src->copy() : nullptr;
         return *this;
     }

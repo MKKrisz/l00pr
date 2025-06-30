@@ -58,14 +58,14 @@ void Tune::setGen(std::istream& stream) {
     if(stream.peek() != '{') {
         if(multiple)
             std::cout << "Warning: 'generators' specified, but using single generator syntax." << std::endl;
-        p_sources.emplace_back(AudioSource::Make(stream, m_srate));
+        p_sources.emplace_back(Source::Make(stream, m_srate));
         return;
     }
     if(!multiple)
         std::cout << "Warning: 'generator' specified, but using multiple generator syntax." << std::endl;
     stream.get();
     while((stream >> skipws).peek() != '}') {
-        p_sources.emplace_back(AudioSource::Make(stream, m_srate));
+        p_sources.emplace_back(Source::Make(stream, m_srate));
     }
     stream.get();
 }
@@ -73,15 +73,15 @@ void Tune::SetGen(std::istream& str, Tune* t) {
     t->setGen(str);
 }
 
-AudioSource* Tune::getSourceByName(std::string name) {
+Source* Tune::getSourceByName(std::string name) {
     try {
-        return AudioSource::getByName(p_sources, name);
+        return Source::getByName(p_sources, name);
     } catch(const std::out_of_range& ) {
         return nullptr;
     }
 }
-std::vector<AudioSource*> Tune::getSources() {
-    std::vector<AudioSource*> ret {};
+std::vector<Source*> Tune::getSources() {
+    std::vector<Source*> ret {};
     ret.reserve(p_sources.size());
     for(const auto& s : p_sources) {
         ret.emplace_back(s.get());
@@ -91,7 +91,7 @@ std::vector<AudioSource*> Tune::getSources() {
 
 void Tune::addLane(std::istream& stream) {
     stream >> skipws;
-    AudioSource* gen = p_sources[0].get();
+    Source* gen = p_sources[0].get();
     bool owner = false;
     NoteStream str;
     bool hasNotes = false;
@@ -112,7 +112,7 @@ void Tune::addLane(std::istream& stream) {
             gen = getSourceByName(name);
             if(gen == nullptr) {
                 stream.seekg(pos);
-                gen = AudioSource::Make(stream, m_srate).release();
+                gen = Source::Make(stream, m_srate).release();
                 owner = true;
                 stream >> expect(')');
             }

@@ -27,7 +27,7 @@ class Feedback : public Filter {
 
 public:
     // cctors
-    Feedback(size_t depth = 0, Filter* fb = nullptr, AudioSource* src = nullptr)
+    Feedback(size_t depth = 0, Filter* fb = nullptr, Source* src = nullptr)
         : Filter(src), depth(depth), fbFilter(fb) {}
 
     Feedback(const Feedback& fb) : 
@@ -36,12 +36,12 @@ public:
     Feedback(std::istream& str, int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), fbFilter(nullptr) {
         str >> expect('(') >> depth >> skipws;
         if(str.peek() != ')') {
-            fbFilter = (std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, srate, MakeFlags::onlyFilters));
+            fbFilter = (std::unique_ptr<Filter>&&)std::move(Source::Make(str, srate, MakeFlags::onlyFilters));
         }
         str >> expect(')') >> skipws;
         if(str.peek() == '{') {
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
     }
@@ -70,7 +70,7 @@ public:
         return "feedback(" + ss.str() + ")";
     }
 
-    std::unique_ptr<AudioSource> copy() { return std::make_unique<Feedback>(*this); }
+    std::unique_ptr<Source> copy() { return std::make_unique<Feedback>(*this); }
     ~Feedback() {}
 
     static std::unique_ptr<Feedback> Create(std::istream& str, const int srate, const MakeFlags& flags) {

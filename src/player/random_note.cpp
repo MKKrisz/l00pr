@@ -2,7 +2,7 @@
 #include "playablenote.hpp"
 #include "../exceptions/parse_error.hpp"
 
-RandomNote::RandomNote(std::istream& str, const std::vector<AudioSource*>& srcs, double bpm, bool poly, int srate) : 
+RandomNote::RandomNote(std::istream& str, const std::vector<Source*>& srcs, double bpm, bool poly, int srate) : 
     frequencies(), lengths(), notes(), bpm(bpm) {
     //random|( (A4, C5, E5))
     notes.setBpm(bpm);

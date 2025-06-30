@@ -51,7 +51,7 @@ PlayableNote::PlayableNote(std::istream& stream, double bpm) : len(0), freq(), a
 
     if(starts_with_parenthesis) {stream >> expect(')');}
 }
-PlayableNote* PlayableNote::Create(std::istream& str, const std::vector<AudioSource*>&, double bpm, bool, int) {
+PlayableNote* PlayableNote::Create(std::istream& str, const std::vector<Source*>&, double bpm, bool, int) {
     return new PlayableNote(str, bpm);
 }
 void PlayableNote::Write(std::ostream& str) const {

@@ -52,5 +52,5 @@ void Set::GlobalFilter(std::istream& str, Tune* t) {
         return;
     }
     str.get();
-    t->globalFilter((std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, t->samplerate(), MakeFlags::onlyFilters)));
+    t->globalFilter((std::unique_ptr<Filter>&&)std::move(Source::Make(str, t->samplerate(), MakeFlags::onlyFilters)));
 }

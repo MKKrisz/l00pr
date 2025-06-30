@@ -33,7 +33,7 @@ TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), 
     parse_lb(stream);
 }
 
-std::unique_ptr<AudioSource> TriangleGenerator::copy() {
+std::unique_ptr<Source> TriangleGenerator::copy() {
     return std::make_unique<TriangleGenerator>(*this);
 }
 

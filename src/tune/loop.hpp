@@ -31,7 +31,7 @@ public:
     Loop(const Loop& l);
 
     /// <summary> Parser for loops </summary>
-    Loop(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate);
+    Loop(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate);
 
     NoteStream& getBaseStream() {return *this; }
 
@@ -71,7 +71,7 @@ public:
     }
     void Write(std::ostream&) const override;
 
-    static Loop* Create(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
+    static Loop* Create(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
         return new Loop(str, sources, bpm, poly, srate);
     }
 };

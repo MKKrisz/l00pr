@@ -11,7 +11,7 @@ public:
 
     ConstantGenerator(std::istream& stream);
     double getSample(double, double) override;
-    std::unique_ptr<AudioSource> copy() override;
+    std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Constant"; }
     void Write(std::ostream& str) const override;
 

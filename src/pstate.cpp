@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 
@@ -66,14 +67,39 @@ void Program::run() {
     
     manager.hook_before_reads(this);
 
+    std::vector<std::filesystem::path> files {};
+    files.insert(files.end(), ifs.begin(), ifs.end());
+
+    for(size_t i = 0; i < files.size(); i++) {
+        if(!std::filesystem::exists(files[i])) { throw std::runtime_error("File " + files[i].generic_string() + " does not exist!"); }
+        if(std::filesystem::is_directory(files[i])) {
+            auto dir = files[i];
+            files.erase(files.begin() + i);
+            i--;
+            for(auto file : std::filesystem::directory_iterator(dir)) {
+                if(file.path().extension() != ".tn" && !file.is_directory()) {
+                    std::cerr << "File " + file.path().generic_string() + " expanded from directory " + dir.generic_string() + " is not a .tn file, skipping!" << std::endl;
+                    continue;
+                }
+                files.emplace_back(file.path());
+            }
+            continue;
+        }
+        std::cout << files[i] << std::endl;
+        if(files[i].extension() != ".tn") {
+            std::cerr << "Directly specified file " + files[i].generic_string() + " is not a .tn file, but will be parsed as one!" << std::endl;
+        }
+    }
+    std::cout << "files resolved" << std::endl;
+
     Tune tune;
-    for(size_t i = 0; i < ifs.size(); i++) {
-        std::fstream file(ifs[i]);
+    for(size_t i = 0; i < files.size(); i++) {
+        std::fstream file(files[i]);
         try {
             file >> tune;
         }
         catch(std::exception& e) {
-            std::cout << "Exception while parsing \"" << ifs[i] << '"' << std::endl << e.what() << std::endl;
+            std::cout << "Exception while parsing \"" << files[i] << '"' << std::endl << e.what() << std::endl;
             return;
         }
         file.close();

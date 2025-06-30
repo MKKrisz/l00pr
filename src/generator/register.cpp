@@ -1,7 +1,7 @@
 #include "register.hpp"
 #include "../audiosource.hpp"
 
-Register::Register(std::vector<AudioSource*> gen) {
+Register::Register(std::vector<Source*> gen) {
     generators.reserve(gen.size());
     for(auto g : gen) {
         generators.emplace_back(g->copy());
@@ -43,12 +43,12 @@ void Register::removePhase(int id) {
 Register::Register(std::istream& stream, const int srate, const MakeFlags& flags) : Generator(stream) {
     stream >> expect('{');
     while((stream >> skipws).peek() != '}') {
-        generators.emplace_back(std::move(AudioSource::Make(stream, srate, flags)));
+        generators.emplace_back(std::move(Source::Make(stream, srate, flags)));
     }
     stream.get();
 }
 
-std::unique_ptr<AudioSource> Register::copy() {
+std::unique_ptr<Source> Register::copy() {
     return std::make_unique<Register>(*this);
 }
 
@@ -65,5 +65,5 @@ void Register::Write(std::ostream& str) const {
         g->Write(str);
     }
     str << '}';
-    AudioSource::WriteLengthBounds(str);
+    Source::WriteLengthBounds(str);
 }

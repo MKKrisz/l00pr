@@ -87,7 +87,7 @@ public:
 
     void Write(std::ostream&) const override;
 
-    static PlayableNote* Create(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
+    static PlayableNote* Create(std::istream&, const std::vector<Source*>&, double, bool, int);
 };
 
 /// <summary> Writes the string representation of `n` onto `str` </summary>

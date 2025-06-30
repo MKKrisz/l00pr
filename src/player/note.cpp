@@ -11,7 +11,7 @@ std::string Note_Metadata::ToString() const {
     ret += (maxKwdLen == keyword.size()?"":"\tSyntax: ") + syntax + "\t" + desc;
     return ret;
 }
-std::function<Note*(std::istream&, const std::vector<AudioSource*>&, double, bool, int)> Note::default_note_fun = PlayableNote::Create;
+std::function<Note*(std::istream&, const std::vector<Source*>&, double, bool, int)> Note::default_note_fun = PlayableNote::Create;
 
 void Note::Init() {
     AddMetadata(Note_Metadata("note", PlayableNote::Create, "<frequency> <length> <amplitude>", "A playable note"));
@@ -20,7 +20,7 @@ void Note::Init() {
     AddMetadata(Note_Metadata("random", RandomNote::Create, "honestly I don't remember", "Random note"));
 }
 
-Note* Note::Make(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
+Note* Note::Make(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
     auto pos = str.tellg();
     try {
         return Note::Parse(str, sources, bpm, poly, srate);

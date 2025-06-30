@@ -16,7 +16,7 @@ class QuantizeFilter : public Filter {
 
 public:
     // cctors
-    QuantizeFilter(size_t bits, AudioSource* src = nullptr) : Filter(src), bits(bits) {}
+    QuantizeFilter(size_t bits, Source* src = nullptr) : Filter(src), bits(bits) {}
     QuantizeFilter(const QuantizeFilter& f) : Filter(f), bits(f.bits) {}
 
     // parser
@@ -24,7 +24,7 @@ public:
         str >> expect('(') >> bits >> expect(')') >> skipws;
         if(str.peek() == '{') {
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
     }
@@ -35,7 +35,7 @@ public:
         return (double(s_l) / (std::pow(2, bits)-1) * 2) - 1;
     }
 
-    std::unique_ptr<AudioSource> copy() {return std::make_unique<QuantizeFilter>(*this);}
+    std::unique_ptr<Source> copy() {return std::make_unique<QuantizeFilter>(*this);}
     std::string ToString() const { return Filter::ToString() + "q" + std::to_string(bits); }
     static std::unique_ptr<QuantizeFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
         return std::make_unique<QuantizeFilter>(str, srate, flags);

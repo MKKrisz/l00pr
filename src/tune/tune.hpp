@@ -46,7 +46,7 @@ public:
     void globalFilter(std::unique_ptr<Filter> src) {
         p_globalFilter = (src.get() != nullptr ? std::move(src) : std::make_unique<DummyFilter>());
     }
-    AudioSource* globalFilter() { return p_globalFilter.get(); }
+    Source* globalFilter() { return p_globalFilter.get(); }
 
     /// <summary> Gets the time it takes to play the tune </summary>
     double getLen();
@@ -69,12 +69,12 @@ public:
     int sourceCount() const { return p_sources.size(); }
 
     /// <summary> Returns a pointer to the generator at index `id` </summary>
-    AudioSource* getSource(size_t id) {
+    Source* getSource(size_t id) {
         if(id >= p_sources.size())
             throw std::runtime_error("Index out of range for generators");
         return p_sources[id].get();
     }
-    AudioSource* getSourceByName(std::string name);
+    Source* getSourceByName(std::string name);
 
     Tune();
     Tune(NotePlayer&, NoteStream&);
@@ -98,7 +98,7 @@ private:
     std::vector<Lane> m_lanes;
 
     /// <summary> Sources specified using the "generator" keyword end up in this array </summary>
-    std::vector<std::unique_ptr<AudioSource>> p_sources;
+    std::vector<std::unique_ptr<Source>> p_sources;
 
     std::unique_ptr<Filter> p_globalFilter = std::make_unique<DummyFilter>();
 
@@ -114,7 +114,7 @@ private:
     /// <summary> A value indicating how much time has elapsed since the start of playing </summary>
     double t = 0;
 
-    std::vector<AudioSource*> getSources();
+    std::vector<Source*> getSources();
 
 };
 

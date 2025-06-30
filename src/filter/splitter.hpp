@@ -16,12 +16,12 @@ public:
     Splitter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), paths() {
         str >> expect('(');
         while((str >> skipws).peek() != ')') {
-            paths.emplace_back((std::unique_ptr<Filter>&&)std::move(AudioSource::Make(str, srate, MakeFlags::onlyFilters)));
+            paths.emplace_back((std::unique_ptr<Filter>&&)std::move(Source::Make(str, srate, MakeFlags::onlyFilters)));
         }
         str.get();
         if((str >> skipws).peek() == '{') {
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
     }
@@ -35,7 +35,7 @@ public:
         return sum;
     }
 
-    std::unique_ptr<AudioSource> copy() { return std::make_unique<Splitter>(*this); }
+    std::unique_ptr<Source> copy() { return std::make_unique<Splitter>(*this); }
 
     std::string ToString() const { return Filter::ToString() + "BlackBox(TM)"; }
     static std::unique_ptr<Splitter> Create(std::istream& str, const int srate, const MakeFlags& flags) {

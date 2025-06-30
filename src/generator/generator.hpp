@@ -4,11 +4,11 @@
 #include "../audiosource.hpp"
 #include "../interpolated.hpp"
 
-struct Gen_Metadata : public Metadata<std::unique_ptr<AudioSource>, const int, const MakeFlags&>{
+struct Gen_Metadata : public Metadata<std::unique_ptr<Source>, const int, const MakeFlags&>{
 public:
     std::string syntax;
     std::string desc;
-    Gen_Metadata(const char* kw, std::function<std::unique_ptr<AudioSource>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
+    Gen_Metadata(const char* kw, std::function<std::unique_ptr<Source>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
     Gen_Metadata(const Gen_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
     std::string ToString() const override;
@@ -16,8 +16,8 @@ public:
     Gen_Metadata& operator=(const Gen_Metadata& m) = default;
 };
 
-/// <summary> AudioSource that actually generates samples </summary>
-class Generator : public AudioSource, public Parseable<std::unique_ptr<AudioSource>, Gen_Metadata, const int, const MakeFlags&> {
+/// <summary> Source that actually generates samples </summary>
+class Generator : public Source, public Parseable<std::unique_ptr<Source>, Gen_Metadata, const int, const MakeFlags&> {
 protected:
     /// <summary> The frequency multiplier that should be applied </summary>
     Interpolated<double> m_phasemul;
@@ -30,10 +30,10 @@ protected:
 
     // Base constructors for subclasses
     Generator(Interpolated<double> mul = 1.0f, Interpolated<double> gain = 1.0f, Interpolated<double> offs = 0.0f)
-        : AudioSource(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
+        : Source(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
 
     Generator(const Generator& g) 
-        : AudioSource(g), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {}
+        : Source(g), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {}
     
     Generator(std::istream&);
 

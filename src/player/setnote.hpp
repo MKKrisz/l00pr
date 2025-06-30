@@ -20,25 +20,25 @@ struct is_setter<SetterNote> : std::true_type {};
 /// <remarks> In the first type of declaration it resets the player to its default generator (the one it's been declared with) </remarks>
 class SetterNote : public Note{
     /// <summary> The generator to set the player to use. </summary>
-    AudioSource* gen = nullptr;
+    Source* gen = nullptr;
     bool owner = false;
 public:
     // cctors
-    SetterNote(AudioSource* ptr);
+    SetterNote(Source* ptr);
     SetterNote(const SetterNote& s) : gen(s.gen) {}
 
     /// <summary> Parser for setter notes </summary>
     /// <param name="srate"> Used for accurate filter setup </param>
-    SetterNote(std::istream& str, const std::vector<AudioSource*>& gens, int srate = 44100);
+    SetterNote(std::istream& str, const std::vector<Source*>& gens, int srate = 44100);
     ~SetterNote() {if(owner) delete gen;}
 
     //getters/setters
 
     /// <summary> Returns the note's generator </summary>
-    inline AudioSource* getGen() { return gen; }
+    inline Source* getGen() { return gen; }
 
     /// <summary> Returns the note's generator of nullptr if not set </summary>
-    inline void setGen(AudioSource* gen) { this->gen = gen; }
+    inline void setGen(Source* gen) { this->gen = gen; }
 
     inline void AddToPlayer(NotePlayer& p) override{
         p.setSrc(getGen());
@@ -52,7 +52,7 @@ public:
 
     void Write(std::ostream&) const override;
 
-    static SetterNote* Create(std::istream& str, const std::vector<AudioSource*>& sources, double, bool, int srate = 44100) {
+    static SetterNote* Create(std::istream& str, const std::vector<Source*>& sources, double, bool, int srate = 44100) {
         return new SetterNote(str, sources, srate);
     }
 };

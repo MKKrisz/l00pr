@@ -1,9 +1,9 @@
 #include "setnote.hpp"
 #include "../util.hpp"
 
-SetterNote::SetterNote(AudioSource* gen) : gen(gen){}
+SetterNote::SetterNote(Source* gen) : gen(gen){}
 
-SetterNote::SetterNote(std::istream& str, const std::vector<AudioSource*>& gens, int srate){
+SetterNote::SetterNote(std::istream& str, const std::vector<Source*>& gens, int srate){
     str >> expect('(');
     str >>skipws;
     if(isdigit(str.peek())) {
@@ -15,10 +15,10 @@ SetterNote::SetterNote(std::istream& str, const std::vector<AudioSource*>& gens,
         auto pos = str.tellg();
         std::string name = "";
         std::getline(str, name, ')');
-        gen = AudioSource::getByName(gens, name);
+        gen = Source::getByName(gens, name);
         if(gen == nullptr) {
             str.seekg(pos);
-            gen = AudioSource::Make(str, srate).release();
+            gen = Source::Make(str, srate).release();
             owner = true;
         }
     }

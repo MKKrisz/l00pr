@@ -28,7 +28,7 @@ SineGenerator::SineGenerator(std::istream& stream) : Generator(stream) {
     parse_lb(stream);
 }
 
-std::unique_ptr<AudioSource> SineGenerator::copy() { 
+std::unique_ptr<Source> SineGenerator::copy() { 
     return std::make_unique<SineGenerator>(*this);
 }
 

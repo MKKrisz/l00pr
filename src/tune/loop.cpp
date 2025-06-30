@@ -4,7 +4,7 @@ Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {calculateLen(
 Loop::Loop(const Loop& l) 
     : NoteStream(l), repAmount(l.repAmount), len(l.len), t(l.t), reps(l.reps), id(l.id) {}
 
-Loop::Loop(std::istream& str, const std::vector<AudioSource*>& sources, double bpm, bool poly, int srate) {
+Loop::Loop(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
     setBpm(bpm); setPolynote(poly);
     if((str >> skipws).peek() == '(') {
         str.get();

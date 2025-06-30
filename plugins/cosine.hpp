@@ -13,7 +13,7 @@ public:
 
     CosineGenerator(std::istream& stream);
     double getSample(double, double) override;
-    std::unique_ptr<AudioSource> copy() override;
+    std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Cosine"; }
 
     static std::unique_ptr<CosineGenerator> Create(std::istream& stream, const int, const MakeFlags&);

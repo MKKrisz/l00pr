@@ -103,5 +103,42 @@ struct exp_p {
 exp_p expect(char c);
 std::istream& operator>>(std::istream&, const exp_p&);
 
+/// <summary> Handles multiple parenthesis around object </summary>
+template <typename F>
+void brace(std::istream& str, char opening_brace, char closing_brace, int minimum_braces, F function) {
+    int brace_count = minimum_braces;
+    while(minimum_braces > 0) {
+        str >> expect(opening_brace);
+        minimum_braces--;
+    }
 
+    // handle additional braces
+    while((str >> skipws).peek() == opening_brace) {
+        str.get();
+        brace_count++;
+    }
+
+    // call whatever needs to be parsed inside the braces
+    function(str);
+
+    while(brace_count > 0) {
+        str >> expect(closing_brace);
+        minimum_braces--;
+    }
+}
+
+template <typename F>
+void brace(std::istream& str, char brace_char, int minimum_braces, F function) {
+    brace(str, brace_char, brace_char, minimum_braces, function);
+}
+
+template <typename F>
+void brace(std::istream& str, char opening_brace, char closing_brace, F function) {
+    brace(str, opening_brace, closing_brace, 0, function);
+}
+
+template <typename F>
+void brace(std::istream& str, char brace_char, F function) {
+    brace(str, brace_char, brace_char, 0, function);
+}
 #endif

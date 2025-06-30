@@ -55,7 +55,7 @@ double NoteStream::getLen() const {
     return len;
 }
 
-NoteStream::NoteStream(std::istream& str, const std::vector<AudioSource*> srcs, double bpm, bool polynote, int srate)
+NoteStream::NoteStream(std::istream& str, const std::vector<Source*> srcs, double bpm, bool polynote, int srate)
     : bpm(bpm), polynote(polynote), srate(srate) {
     double sumlen = 0;
     double prev_len = 0;

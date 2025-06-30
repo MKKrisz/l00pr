@@ -25,7 +25,7 @@ void Generator::Init() {
     AddMetadata(Gen_Metadata("constant", ConstantGenerator::Create, "constant([value])", "Returns a constant float"));
 }
 
-Generator::Generator(std::istream& str) : AudioSource() {
+Generator::Generator(std::istream& str) : Source() {
     Interpolated<double> a[3] = {1, 1, 0.0f};
     if((str >> skipws).peek() != '('){
         m_phasemul = a[0];

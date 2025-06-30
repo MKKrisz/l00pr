@@ -21,7 +21,7 @@ public:
     SquareGenerator(std::istream& stream);
     SquareGenerator(const SquareGenerator& g);
     double getSample(double phase, double t) override;
-    std::unique_ptr<AudioSource> copy() override;
+    std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Square"; }
 
     void Write(std::ostream& str) const override { 

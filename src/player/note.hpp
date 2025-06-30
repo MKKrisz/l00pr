@@ -7,11 +7,11 @@
 
 class Note;
 
-class Note_Metadata : public Metadata<Note*, const std::vector<AudioSource*>&, double, bool, int> {
+class Note_Metadata : public Metadata<Note*, const std::vector<Source*>&, double, bool, int> {
 public:
     std::string syntax;
     std::string desc;
-    Note_Metadata(const char* kw, std::function<Note*(std::istream&, const std::vector<AudioSource*>&, double, bool, int)> func, const char* syn, const char* desc) 
+    Note_Metadata(const char* kw, std::function<Note*(std::istream&, const std::vector<Source*>&, double, bool, int)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
     Note_Metadata(const Note_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
     std::string ToString() const override;
@@ -19,7 +19,7 @@ public:
     Note_Metadata& operator=(const Note_Metadata& m) = default;
 };
 
-class Note : public StringConvertible, public Parseable<Note*, Note_Metadata, const std::vector<AudioSource*>&, double, bool, int> {
+class Note : public StringConvertible, public Parseable<Note*, Note_Metadata, const std::vector<Source*>&, double, bool, int> {
 public:
     virtual void AddToPlayer(NotePlayer& p) = 0;
     virtual void AddSample(NotePlayer& p, size_t index, int srate) = 0;
@@ -31,10 +31,10 @@ public:
 
     static void Init();
 
-    static Note* Make(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
+    static Note* Make(std::istream&, const std::vector<Source*>&, double, bool, int);
 
 private:
-    static std::function<Note*(std::istream&, const std::vector<AudioSource*>&, double, bool, int)> default_note_fun;
+    static std::function<Note*(std::istream&, const std::vector<Source*>&, double, bool, int)> default_note_fun;
 };
 
 #endif

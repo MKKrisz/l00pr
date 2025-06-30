@@ -26,7 +26,7 @@ SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_du
     parse_lb(stream);
 }
 
-std::unique_ptr<AudioSource> SquareGenerator::copy() { 
+std::unique_ptr<Source> SquareGenerator::copy() { 
     return std::make_unique<SquareGenerator>(*this);
 }
 

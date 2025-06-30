@@ -5,17 +5,17 @@
 class DummyFilter : public Filter {
 public:
     DummyFilter() : Filter(nullptr) {}
-    DummyFilter(AudioSource* s) : Filter(s) {}
+    DummyFilter(Source* s) : Filter(s) {}
     DummyFilter(const DummyFilter& f) : Filter(f) {}
     DummyFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
         if(str.peek() == '{'){
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
     }
     inline double filter(double sample, double, double, double) { return sample; }
-    std::unique_ptr<AudioSource> copy() {return std::make_unique<DummyFilter>(*this); }
+    std::unique_ptr<Source> copy() {return std::make_unique<DummyFilter>(*this); }
     inline DummyFilter& operator=(const DummyFilter&) = default;
     std::string ToString() const {return Filter::ToString() + "Dummy";}
     std::string GetNameAndParams() const { return "dummy"; }

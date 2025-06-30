@@ -20,14 +20,14 @@ class DelayFilter : public Filter {
     float len = 0;
 public:
     // cctors
-    DelayFilter(double t, AudioSource* src, int srate) : Filter(src), sbuf(t*srate, 0), len(t) {}
+    DelayFilter(double t, Source* src, int srate) : Filter(src), sbuf(t*srate, 0), len(t) {}
 
     // parser
     DelayFilter(std::istream& str, const int srate, const MakeFlags& flags = MakeFlags::all) {
         str >> expect('(') >> len >> expect(')') >> skipws;
         if(str.peek() == '{') {
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
         sbuf = std::vector<double>(len*srate, 0);
@@ -41,7 +41,7 @@ public:
         bufId = bufId % sbuf.size();
         return sbuf[bufId];
     }
-    std::unique_ptr<AudioSource> copy() override {return std::make_unique<DelayFilter>(*this); }
+    std::unique_ptr<Source> copy() override {return std::make_unique<DelayFilter>(*this); }
 
     std::string ToString() const override { return Filter::ToString() + "Delay(" + std::to_string(sbuf.size()) + ")"; }
     std::string GetNameAndParams() const override { return "delay(" + std::to_string(len) + ')';}

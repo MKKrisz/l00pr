@@ -64,7 +64,7 @@ public:
     double GetLen() const override {return len;}
 
     // cctor
-    RandomNote(std::istream&, const std::vector<AudioSource*>&, double, bool, int);
+    RandomNote(std::istream&, const std::vector<Source*>&, double, bool, int);
 
     /// <summary> Generates the actual note sequence that gets played</summary>
     std::vector<std::pair<double, Note*>> Serialize(double start) const;
@@ -85,7 +85,7 @@ public:
 
     void Write(std::ostream&) const override;
 
-    static RandomNote* Create(std::istream& src, const std::vector<AudioSource*>& gens, double bpm, bool poly, int srate) {
+    static RandomNote* Create(std::istream& src, const std::vector<Source*>& gens, double bpm, bool poly, int srate) {
         return new RandomNote(src, gens, bpm, poly, srate);
     }
 };

@@ -17,7 +17,7 @@ double FIR::filter(double sample, double, double, double) {
     return ret;
 }
 
-PassFilter::PassFilter(std::vector<double> dp, AudioSource* src) : FIR(src) {
+PassFilter::PassFilter(std::vector<double> dp, Source* src) : FIR(src) {
     //TODO: Implement IFFT instead of IDFT
     for(size_t i = 0; i < dp.size(); i++) {
         double sum = 0;
@@ -31,7 +31,7 @@ PassFilter::PassFilter(std::vector<double> dp, AudioSource* src) : FIR(src) {
     sbuf = std::vector<double>(kern.size(), 0);
 }
 
-PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, size_t scount) : FIR(src), function(dp) {
+PassFilter::PassFilter(Interpolated<double>& dp, int srate, Source* src, size_t scount) : FIR(src), function(dp) {
     for(size_t i = 0; i < scount; i++) {
         double sum = 0;
         for(size_t j = 0; j < scount; j++) {
@@ -45,7 +45,7 @@ PassFilter::PassFilter(Interpolated<double>& dp, int srate, AudioSource* src, si
 }
 
 PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
-    std::unique_ptr<AudioSource> src = nullptr;
+    std::unique_ptr<Source> src = nullptr;
     str >> expect('(') >> function;
     str >> skipws;
     if(str.peek() != ')') {
@@ -56,7 +56,7 @@ PassFilter::PassFilter(std::istream& str, int srate, const MakeFlags& flags) {
     str >> expect(')') >> skipws;
     if(str.peek() == '{') {
         str.get();
-        src = std::move(AudioSource::Make(str, srate, flags));
+        src = std::move(Source::Make(str, srate, flags));
         str >> expect('}');
     }
     *this = PassFilter(function, srate, src.get(), segments);

@@ -27,7 +27,7 @@ CosineGenerator::CosineGenerator(std::istream& stream) : Generator(stream) {
     parse_lb(stream);
 }
 
-std::unique_ptr<AudioSource> CosineGenerator::copy() { 
+std::unique_ptr<Source> CosineGenerator::copy() { 
     return std::make_unique<CosineGenerator>(*this);
 }
 

@@ -24,7 +24,7 @@ public:
 
     double getSample(double, double) override;
 
-    std::unique_ptr<AudioSource> copy() override { return std::make_unique<SampledGenerator>(*this); }
+    std::unique_ptr<Source> copy() override { return std::make_unique<SampledGenerator>(*this); }
     std::string ToString() const override { return "Samples from " + filename; }
 
     static std::unique_ptr<SampledGenerator> Create(std::istream& stream, const int, const MakeFlags&) {

@@ -15,7 +15,7 @@ std::string AS_Metadata::ToString() const {
     return ret;
 }
 
-void AudioSource::parse_lb(std::istream& str) {
+void Source::parse_lb(std::istream& str) {
     str >> skipws;
     if(str.peek() != '{') {
         length_bounds = {};
@@ -40,7 +40,7 @@ const MakeFlags MakeFlags::all = {true, true};
 const MakeFlags MakeFlags::onlyFilters = {true, false};
 const MakeFlags MakeFlags::onlyGenerators = {false, true};
 
-std::unique_ptr<AudioSource> AudioSource::Make(std::istream& str, const int srate, const MakeFlags& flags) {
+std::unique_ptr<Source> Source::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     auto start = str.tellg();
     std::string gen_except = ""; 
     std::string filter_except = "";
@@ -86,8 +86,8 @@ std::unique_ptr<AudioSource> AudioSource::Make(std::istream& str, const int srat
 }
 
 
-AudioSource* AudioSource::getByName(const std::vector<AudioSource*>& sources, const std::string& name) {
-    for(AudioSource* src : sources) {
+Source* Source::getByName(const std::vector<Source*>& sources, const std::string& name) {
+    for(Source* src : sources) {
         if(src->name == name) {
             return src;
         }
@@ -95,7 +95,7 @@ AudioSource* AudioSource::getByName(const std::vector<AudioSource*>& sources, co
     throw std::out_of_range("No audiosource with label " + name);
 }
 
-AudioSource* AudioSource::getByName(const std::vector<std::unique_ptr<AudioSource>>& sources, const std::string& name) {
+Source* Source::getByName(const std::vector<std::unique_ptr<Source>>& sources, const std::string& name) {
     for(const auto& src : sources) {
         if(src->name == name) {
             return src.get();
@@ -103,7 +103,7 @@ AudioSource* AudioSource::getByName(const std::vector<std::unique_ptr<AudioSourc
     }
     throw std::out_of_range("No audiosource with label " + name);
 }
-void AudioSource::WriteLengthBounds(std::ostream& str) const {
+void Source::WriteLengthBounds(std::ostream& str) const {
     if(!length_bounds.has_value()) { return; }
     auto bounds = length_bounds.value();
 

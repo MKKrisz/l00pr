@@ -14,7 +14,7 @@ class GainFilter : public Filter {
     double gain;
 public:
     // cctors
-    GainFilter(double gain = 1, AudioSource* src = nullptr) : Filter(src), gain(gain) {}
+    GainFilter(double gain = 1, Source* src = nullptr) : Filter(src), gain(gain) {}
 
     GainFilter(const GainFilter& f) : Filter(f), gain(f.gain) {}
 
@@ -22,14 +22,14 @@ public:
         str >> expect('(') >> gain >> expect(')') >> skipws;
         if(str.peek() == '{'){
             str.get();
-            src = AudioSource::Make(str, srate, flags);
+            src = Source::Make(str, srate, flags);
             str >> expect('}');
         }
     }
 
     /// <summary> Multiplies the sample value by gain </summary>
     inline double filter(double sample, double, double, double) { return sample * gain; }
-    std::unique_ptr<AudioSource> copy() {return std::make_unique<GainFilter>(*this); }
+    std::unique_ptr<Source> copy() {return std::make_unique<GainFilter>(*this); }
     inline GainFilter& operator=(const GainFilter&) = default;
     std::string ToString() const {return Filter::ToString() + "(" + std::to_string(gain) + ")";}
     static std::unique_ptr<GainFilter> Create(std::istream& str, const int srate, const MakeFlags& flags) {
