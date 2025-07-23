@@ -33,6 +33,9 @@ public:
     /// <summary> Parses the player keyword </summary>
     void addLane(std::istream& stream);
 
+    void addSource(std::unique_ptr<Source> src);
+    Source* getSource(std::istream& str);
+
     void   bpm(double bpm) { this->m_bpm = bpm; }
     double bpm()           { return m_bpm; }
 
@@ -74,7 +77,9 @@ public:
             throw std::runtime_error("Index out of range for generators");
         return p_sources[id].get();
     }
-    Source* getSourceByName(std::string name);
+    Source* getSourceByName(const std::string& name, const std::string& error_if_not_found = "");
+
+    void resolveReferences();
 
     Tune();
     Tune(NotePlayer&, NoteStream&);
@@ -99,6 +104,8 @@ private:
 
     /// <summary> Sources specified using the "generator" keyword end up in this array </summary>
     std::vector<std::unique_ptr<Source>> p_sources;
+    std::vector<SourceRef*> p_refs;
+    std::unordered_map<std::string, Source*> p_labeled;
 
     std::unique_ptr<Filter> p_globalFilter = std::make_unique<DummyFilter>();
 

@@ -13,17 +13,17 @@ void Tune::Init() {
     AddMetadata(Tkwd_Metadata("player", Tune::AddLane));
 }
 
-Tune::Tune() : m_lanes(), p_sources() {}
+Tune::Tune() : m_lanes(), p_sources(), p_refs(), p_labeled() {}
 
-Tune::Tune(NotePlayer& p, NoteStream& s) : m_lanes() {
+Tune::Tune(NotePlayer& p, NoteStream& s) : m_lanes(), p_sources(), p_refs(), p_labeled() {
     m_lanes.push_back(Lane(p, s));
 }
 
-Tune::Tune(Lane& p) : m_lanes() {
+Tune::Tune(Lane& p) : m_lanes(), p_sources(), p_refs(), p_labeled() {
     m_lanes.push_back(p);
 }
 
-Tune::Tune(const Tune& t) : m_lanes(t.m_lanes), p_sources(), p_globalFilter((std::unique_ptr<Filter>&&)std::move(t.p_globalFilter->copy())), m_bpm(t.m_bpm), m_srate(t.m_srate), m_polynote(t.m_polynote) {
+Tune::Tune(const Tune& t) : m_lanes(t.m_lanes), p_sources(), p_globalFilter((std::unique_ptr<Filter>&&)std::move(t.p_globalFilter->copy())), m_bpm(t.m_bpm), m_srate(t.m_srate), m_polynote(t.m_polynote), p_refs(t.p_refs), p_labeled(t.p_labeled) {
     for(auto& s : t.p_sources) {
         p_sources.emplace_back(s->copy());
     }
@@ -31,7 +31,7 @@ Tune::Tune(const Tune& t) : m_lanes(t.m_lanes), p_sources(), p_globalFilter((std
 
 template <std::ranges::range T>
     requires std::same_as<std::ranges::range_value_t<T>, Lane>
-Tune::Tune(T data) : m_lanes() {
+Tune::Tune(T data) : m_lanes(), p_sources(), p_refs(), p_labeled() {
     for(auto d : data) {
         m_lanes.push_back(d);
     }
@@ -58,14 +58,14 @@ void Tune::setGen(std::istream& stream) {
     if(stream.peek() != '{') {
         if(multiple)
             std::cout << "Warning: 'generators' specified, but using single generator syntax." << std::endl;
-        p_sources.emplace_back(Source::Make(stream, m_srate));
+        p_sources.push_back(Source::Make(stream, m_srate));
         return;
     }
     if(!multiple)
         std::cout << "Warning: 'generator' specified, but using multiple generator syntax." << std::endl;
     stream.get();
     while((stream >> skipws).peek() != '}') {
-        p_sources.emplace_back(Source::Make(stream, m_srate));
+        p_sources.push_back(Source::Make(stream, m_srate));
     }
     stream.get();
 }
@@ -73,11 +73,15 @@ void Tune::SetGen(std::istream& str, Tune* t) {
     t->setGen(str);
 }
 
-Source* Tune::getSourceByName(std::string name) {
+Source* Tune::getSourceByName(const std::string& name, const std::string& err) {
     try {
         return Source::getByName(p_sources, name);
     } catch(const std::out_of_range& ) {
-        return nullptr;
+        auto ref = std::make_unique<SourceRef>(name, err);
+        SourceRef* ret = ref.get();
+        p_refs.emplace_back(ret);
+        p_sources.push_back(std::move(ref));
+        return ret;
     }
 }
 std::vector<Source*> Tune::getSources() {
@@ -89,61 +93,108 @@ std::vector<Source*> Tune::getSources() {
     return ret;
 }
 
-void Tune::addLane(std::istream& stream) {
+Source* Tune::getSource(std::istream& stream) {
     stream >> skipws;
-    Source* gen = p_sources[0].get();
-    bool owner = false;
-    NoteStream str;
-    bool hasNotes = false;
-    if(stream.peek() == '(') {
-        stream.get();
+    if(stream.peek() != '(') { return nullptr; }
+    stream.get();
+    if(stream.peek() == ')') { return nullptr; }
+    stream >> skipws;
+
+    Source* gen = nullptr;
+
+    if(isdigit(stream.peek())) {
         int genId;
-        stream >> skipws;
-        if(isdigit(stream.peek())) {
-            stream >> genId;
-            if(genId > p_sources.size()) {throw std::runtime_error("The ID of the player source (" + std::to_string(genId) + ") is larger than the number of loaded generators. Maybe you're trying to load a multifile project?"); }
-            gen = p_sources[genId].get();
-            stream >> expect(')');
+        stream >> genId;
+        if(genId >= p_sources.size()) {
+            auto ref = std::make_unique<SourceRef>(genId, "The ID of the player source (" + std::to_string(genId) + ") is larger than the number of loaded generators. Maybe you're trying to load a multifile project?");
+            gen = ref.get();
+            p_refs.emplace_back(ref.get());
+            p_sources.push_back(std::move(ref));
         }
         else {
-            auto pos = stream.tellg();
+            gen = p_sources[genId].get();
+        }
+        stream >> expect(')');
+    }
+    else {
+        auto pos = stream.tellg();
+        try {
+            auto temp = Source::Make(stream, m_srate);
+            gen = temp.get();
+            addSource(std::move(temp));
+            stream >> expect(')');
+        } catch(std::exception& err) {
+            stream.seekg(pos);
             std::string name;
             std::getline(stream, name, ')');
-            gen = getSourceByName(name);
-            if(gen == nullptr) {
-                stream.seekg(pos);
-                gen = Source::Make(stream, m_srate).release();
-                owner = true;
-                stream >> expect(')');
-            }
+            gen = getSourceByName(trim(name), err.what());
         }
     }
+    return gen;
+}
+
+void Tune::addLane(std::istream& stream) {
+    Source* gen = getSource(stream);
+    if(gen == nullptr) { gen = p_sources[0].get();}
+
+
+    NoteStream str;
+
     if((stream >> skipws).peek() == '{') {
         stream.get();
-        str = NoteStream(stream, getSources(), m_bpm, m_polynote, m_srate);
-        if(str.size() > 0) hasNotes = true;
+        str = NoteStream(stream, this, m_bpm, m_polynote, m_srate);
         stream >> expect('}');    
     }
-    if(!hasNotes)
-        throw parse_error(stream, std::string("No notes to play.\n Player format: player(generator_id){note1 note2 ... note_n}\nNote format: <") + (m_polynote? "time" : "") +" frequency length amplitude>");
 
     m_lanes.emplace_back(Lane(NotePlayer(gen), str));
-    if(owner) delete gen;
 }
 void Tune::AddLane(std::istream& str, Tune* t) {
     t->addLane(str);
+}
+
+void Tune::resolveReferences() {
+    // fetch all (potentially missing) references and labels
+    for(auto& s : p_sources) {
+        //fetch
+        auto s_refs = s->getSourceRefs();
+        auto s_labels = s->getLabeled();
+
+        //insert
+        p_refs.insert(p_refs.begin(), s_refs.begin(), s_refs.end());
+        for(const auto& l : s_labels) {
+            bool success = p_labeled.emplace(l->label(), l).second;
+            if(!success) { throw std::runtime_error("Multiple sources with the same label aren't allowed!"); }
+        }
+    }
+    for(auto& r : p_refs) {
+        if(r->resolved()) continue;
+        auto label = r->getWanted();
+        if(!r->labeled()) {
+            if(label.second >= p_sources.size()) {
+                throw std::out_of_range(r->getError());
+            }
+            r->setSource(p_sources[label.second].get());
+            continue;
+        }
+        try {
+            auto src = p_labeled.at(label.first);
+            r->setSource(src);
+        } catch (std::out_of_range& err) {
+            throw std::out_of_range("Unresolved reference: No source labeled as :" + label.first + ": was found!\nIf you tried to create a source inplace, here is the error for that:\n\n" + r->getError());
+        }
+    }
 }
 
 double Tune::getSample(double srate, bool print) {
     double sum = 0;
     bool hasNewNotes = false;
     for(auto& l : m_lanes) {
-        std::vector<Note*> newNotes = l.stream.GetStartingNotes(t);
+        std::vector<std::unique_ptr<Note>> newNotes = l.stream.GetStartingNotes(t);
         if(print && !newNotes.empty()) 
             hasNewNotes = true;
         for(size_t i = 0; i < newNotes.size(); i++) {
             if(print) std::cout << newNotes[i]->ToString() << "    ";
-            l.player.addNote(newNotes[i]);
+            l.player.addNote(std::move(newNotes[i]));
         }
         sum += l.player.getSample(srate);
     }
@@ -153,7 +204,7 @@ double Tune::getSample(double srate, bool print) {
     p_globalFilter->addSample(sum);
     //}
     t += 1.0f/srate;
-    return p_globalFilter->calc();
+    return p_globalFilter->getSample(srate);
 }
 
 double Tune::getLen() {
@@ -163,6 +214,9 @@ double Tune::getLen() {
             max = l.stream.getLen();
     }
     return max;
+}
+void Tune::addSource(std::unique_ptr<Source> src) {
+    p_sources.emplace_back(std::move(src));
 }
 
 
@@ -176,8 +230,8 @@ void Tune::Write(std::ostream& str) const {
 
     str << "generators {" << std::endl;
     for(const auto& src : p_sources) {
-        if(src->name != "") {
-            str << ':' << src->name << ": ";
+        if(src->label() != "") {
+            str << ':' << src->label() << ": ";
         }
         src->Write(str);
         str << std::endl;
@@ -187,8 +241,8 @@ void Tune::Write(std::ostream& str) const {
     for(const auto& lane : m_lanes) {
         str << "player(";
 
-        if(lane.player.getSrc()->name != "") {
-            str << lane.player.getSrc()->name;
+        if(lane.player.getSrc()->label() != "") {
+            str << lane.player.getSrc()->label();
         }
         else {
             lane.player.getSrc()->Write(str);
