@@ -34,7 +34,7 @@
 /// Syntax: random(<frequencies> <full_length> <lengths> <amplitudes>) 
 /// or random(<length>){<note1> <note2> ... <note_n>}
 /// </summary>
-class RandomNote : public Note{
+class RandomNote : public Note {
     /// <summary> The frequencies the object can choose from </summary>
     Range<Interpolated<Frequency>> frequencies;
     //TODO: implement note-based frequency interpolation
@@ -64,29 +64,30 @@ public:
     double GetLen() const override {return len;}
 
     // cctor
-    RandomNote(std::istream&, const std::vector<Source*>&, double, bool, int);
+    RandomNote(std::istream&, Tune*, double, bool, int);
 
     /// <summary> Generates the actual note sequence that gets played</summary>
-    std::vector<std::pair<double, Note*>> Serialize(double start) const;
+    std::vector<std::pair<double, std::unique_ptr<Note>>> Serialize(double start) const;
 
-    void AddToPlayer(NotePlayer& p) override {
+    void AddToSource(Source* src) override {
         //TODO: Check leaks
-        std::vector<std::pair<double, Note*>> notes = Serialize(0);
+        std::vector<std::pair<double, std::unique_ptr<Note>>> notes = Serialize(0);
         NoteStream str{};
-        for(const auto& n : notes) {
-            str.Add(n);
+        for(auto& n : notes) {
+            str.Add(std::move(n));
         }
-        p.addNote(Loop(str, 1).copy());
+        str.calculateLen();
+        src->addNote(Loop(str, 1).copy());
     }
-    void AddSample(NotePlayer&, size_t, int) override {}
+    void AddSample(Source*, int) override {}
     bool IsComplete() const override {return true;}
-    Note* copy() const override { return new RandomNote(*this); }
+    std::unique_ptr<Note> copy() const override { return std::make_unique<RandomNote>(*this); }
     std::string ToString() const override { return "RandomSequence"; }
 
     void Write(std::ostream&) const override;
 
-    static RandomNote* Create(std::istream& src, const std::vector<Source*>& gens, double bpm, bool poly, int srate) {
-        return new RandomNote(src, gens, bpm, poly, srate);
+    static std::unique_ptr<RandomNote> Create(std::istream& src, Tune* tune, double bpm, bool poly, int srate) {
+        return std::make_unique<RandomNote>(src, tune, bpm, poly, srate);
     }
 };
 

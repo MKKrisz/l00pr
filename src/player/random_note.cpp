@@ -2,8 +2,8 @@
 #include "playablenote.hpp"
 #include "../exceptions/parse_error.hpp"
 
-RandomNote::RandomNote(std::istream& str, const std::vector<Source*>& srcs, double bpm, bool poly, int srate) : 
-    frequencies(), lengths(), notes(), bpm(bpm) {
+RandomNote::RandomNote(std::istream& str, Tune* tune, double bpm, bool poly, int srate) : 
+    Note(), frequencies(), lengths(), notes(), bpm(bpm) {
     //random|( (A4, C5, E5))
     notes.setBpm(bpm);
     notes.setPolynote(false);
@@ -42,7 +42,7 @@ RandomNote::RandomNote(std::istream& str, const std::vector<Source*>& srcs, doub
             if((str >> skipws).peek() != '{')
                 throw parse_error(str, "No notes specified for random note sequence to choose from");
             str.get();
-            notes = NoteStream(str, srcs, bpm, poly, srate);
+            notes = NoteStream(str, tune, bpm, poly, srate);
             if((str >> skipws).peek() != '}')
                 throw parse_error(str, "Expected '}'");
             str.get();
@@ -50,8 +50,8 @@ RandomNote::RandomNote(std::istream& str, const std::vector<Source*>& srcs, doub
     }
 }
 
-std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) const {
-    std::vector<std::pair<double, Note*>> ret = {};
+std::vector<std::pair<double, std::unique_ptr<Note>>> RandomNote::Serialize(double start) const {
+    std::vector<std::pair<double, std::unique_ptr<Note>>> ret = {};
     double t = 0;
     if(noteBased) {
         while(t < len) {
@@ -80,8 +80,8 @@ std::vector<std::pair<double, Note*>> RandomNote::Serialize(double start) const 
 void RandomNote::Write(std::ostream& str) const {
     auto serialized = Serialize(0);
     NoteStream notes {};
-    for(const auto& n : serialized) {
-        notes.Add(n);
+    for(auto& n : serialized) {
+        notes.Add(std::move(n));
     }
     Loop loop {notes, 1};
     loop.Write(str);

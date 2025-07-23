@@ -3,6 +3,7 @@
 
 #include "../interpolated.hpp"
 #include "../freq.hpp"
+#include "../audiosource.hpp"
 #include "note.hpp"
 
 /// <summary> 
@@ -12,18 +13,21 @@
 class PlayableNote : public Note{
     
     /// <summary> The length of the note measured in seconds </summary>
-    double len = 1;
+    double m_length = 1;
 
     /// <summary> The frequency of the note measured in Hz </summary>
-    Interpolated<Frequency> freq = Frequency(0.0);
+    Interpolated<Frequency> m_frequency = Frequency(0.0);
 
     /// <summary> The amplitude of the note </summary>
-    Interpolated<double> ampl = 1;
+    Interpolated<double> m_amplitude = 1;
 
     /// <summary> The amount that is completed measured in seconds </summary>
     double done = 0;
+    double phase = 0;
 
 public:
+    void advance(int srate, double fm = 1.0);
+
     /// <summary> Calculates the next phase delta value </summary>
     /// <returns>
     /// the current phase value, then increments it according to the 
@@ -32,14 +36,14 @@ public:
     double getDelta(int srate = 48000);
 
     /// <summary> Gets how much has been elapsed since the start of this note in seconds </summary>
-    inline double getTime() { return done; }
+     double getTime() { return done; }
 
     /// <summary> Gets the length of this note </summary>
-    inline double GetLen() const override { return len; }
+     double GetLen() const override { return m_length; }
 
     /// <summary> Gets the string representation of this note </summary>
-    inline std::string ToString() const override {
-        return "[" + freq[0].second.getName() + (freq.Size() == 1 ? "       " : "-/\\/-- ") + std::to_string(len)  + "    " + std::to_string(ampl[0].second) + "] ";
+     std::string ToString() const override {
+        return "[" + m_frequency[0].second.getName() + (m_frequency.Size() == 1 ? "       " : "-/\\/-- ") + std::to_string(m_length)  + "    " + std::to_string(m_amplitude[0].second) + "] ";
     }
 
     /// <summary> Gets the amplitude value at timestamp t </summary>
@@ -57,22 +61,19 @@ public:
     /// <remarks> A little more complicated than just "done > len", as that would chop off the end of the note... </remarks>
     bool IsComplete() const override;
 
-    void AddToPlayer(NotePlayer& p) override {
-        if(p.hasBounds()) {
-            const auto& bounds = p.getBounds();
-            clampLength(bounds.first, bounds.second);
-        }
-    }
+    void SetLength(double l) {m_length = l;}
 
-    void AddSample(NotePlayer& p, size_t index, int srate) override {
+    void AddSample(Source* p, int srate) override {
         double t = getTime();
         double ampl = getAmplitude();
-        p(index, getDelta(srate), t, srate, ampl);
+        double freq_mul = p->getFrequencyMultiplier(t);
+        (*p)(phase, t, srate, ampl);
+        advance(srate, freq_mul);
     }
 
     void clampLength(double min, double max) {
-        if(len < min) len = min;
-        if(len > max) len = max;
+        if(m_length < min) m_length = min;
+        if(m_length > max) m_length = max;
     }
 
     // cctor
@@ -83,11 +84,11 @@ public:
     /// <summary> Parser for notes </summary>
     PlayableNote(std::istream& str, double bpm);
 
-    Note* copy() const override {return new PlayableNote(*this);}
+    std::unique_ptr<Note> copy() const override {return std::make_unique<PlayableNote>(*this);}
 
     void Write(std::ostream&) const override;
 
-    static PlayableNote* Create(std::istream&, const std::vector<Source*>&, double, bool, int);
+    static std::unique_ptr<PlayableNote> Create(std::istream&, Tune*, double, bool, int);
 };
 
 /// <summary> Writes the string representation of `n` onto `str` </summary>

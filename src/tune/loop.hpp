@@ -17,7 +17,6 @@
 class Loop : public NoteStream, public Note {
     /// <summary> The amount the loop needs to repeat </summary>
     double repAmount = -1;
-    double len = 0;
 
     double t = 0;
     int reps = 0;
@@ -31,14 +30,14 @@ public:
     Loop(const Loop& l);
 
     /// <summary> Parser for loops </summary>
-    Loop(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate);
+    Loop(std::istream& str, Tune*, double bpm, bool poly, int srate);
 
     NoteStream& getBaseStream() {return *this; }
 
-    void AddToPlayer(NotePlayer&) override {
-        len = NoteStream::getLen();
+    void AddToSource(Source* src) override {
+        NoteStream::calculateLen();
     }
-    void AddSample(NotePlayer& p, size_t, int) override;
+    void AddSample(Source*, int) override;
     double GetLen() const override {
         if(repAmount < 0) 
             return std::numeric_limits<double>::infinity();
@@ -49,7 +48,7 @@ public:
         if(repAmount < 0) return false;
         return (t + reps*len) > repAmount * len;
     }
-    Note* copy() const override {return new Loop(*this);}
+    std::unique_ptr<Note> copy() const override {return std::make_unique<Loop>(*this);}
     Loop& operator=(const Loop& l) {
         if(this == &l) return *this;
         NoteStream::operator=(l);
@@ -71,8 +70,8 @@ public:
     }
     void Write(std::ostream&) const override;
 
-    static Loop* Create(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
-        return new Loop(str, sources, bpm, poly, srate);
+    static std::unique_ptr<Loop> Create(std::istream& str, Tune* tune, double bpm, bool poly, int srate) {
+        return std::make_unique<Loop>(str, tune, bpm, poly, srate);
     }
 };
 

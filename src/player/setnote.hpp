@@ -21,7 +21,6 @@ struct is_setter<SetterNote> : std::true_type {};
 class SetterNote : public Note{
     /// <summary> The generator to set the player to use. </summary>
     Source* gen = nullptr;
-    bool owner = false;
 public:
     // cctors
     SetterNote(Source* ptr);
@@ -29,8 +28,8 @@ public:
 
     /// <summary> Parser for setter notes </summary>
     /// <param name="srate"> Used for accurate filter setup </param>
-    SetterNote(std::istream& str, const std::vector<Source*>& gens, int srate = 44100);
-    ~SetterNote() {if(owner) delete gen;}
+    SetterNote(std::istream& str, Tune* tune, int srate = 44100);
+    ~SetterNote() {}
 
     //getters/setters
 
@@ -46,14 +45,14 @@ public:
     
     inline bool IsComplete() const override { return true; }
     inline double GetLen() const override { return 0; }
-    inline void AddSample(NotePlayer&, size_t, int) override { }
-    inline Note* copy() const override { return new SetterNote(*this); }
+    inline void AddSample(Source*, int) override { }
+    inline std::unique_ptr<Note> copy() const override { return std::make_unique<SetterNote>(*this); }
     std::string ToString() const override { return "\n[" + gen->ToString() + "]"; }
 
     void Write(std::ostream&) const override;
 
-    static SetterNote* Create(std::istream& str, const std::vector<Source*>& sources, double, bool, int srate = 44100) {
-        return new SetterNote(str, sources, srate);
+    static std::unique_ptr<SetterNote> Create(std::istream& str, Tune* tune, double, bool, int srate = 44100) {
+        return std::make_unique<SetterNote>(str, tune, srate);
     }
 };
 

@@ -2,9 +2,9 @@
 
 Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {calculateLen();} 
 Loop::Loop(const Loop& l) 
-    : NoteStream(l), repAmount(l.repAmount), len(l.len), t(l.t), reps(l.reps), id(l.id) {}
+    : NoteStream(l), repAmount(l.repAmount), t(l.t), reps(l.reps), id(l.id) {}
 
-Loop::Loop(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
+Loop::Loop(std::istream& str, Tune* tune, double bpm, bool poly, int srate) {
     setBpm(bpm); setPolynote(poly);
     if((str >> skipws).peek() == '(') {
         str.get();
@@ -12,20 +12,20 @@ Loop::Loop(std::istream& str, const std::vector<Source*>& sources, double bpm, b
         str >> expect(')');
     }
     str >> expect('{');
-    NoteStream nstr = NoteStream(str, sources, bpm, poly, srate);
+    NoteStream nstr = NoteStream(str, tune, bpm, poly, srate);
     *this = Loop(nstr, repAmount);
     str >> expect('}');
 }
 
-void Loop::AddSample(NotePlayer& p, size_t, int) {
-    if(repAmount >= 0 && IsComplete()) 
+void Loop::AddSample(Source* src, int srate) {
+    if(IsComplete()) 
         return;
 
     for( ; id < notes.size(); id++) {
         if(notes[id].first > t) 
             break;
 
-        p.addNote(notes[id].second->copy());
+        src->addNote(notes[id].second->copy());
     }
     t += 1.0/srate;
     if(t > len) {
