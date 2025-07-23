@@ -1,5 +1,6 @@
 #include "generator.hpp"
 #include "builtin.hpp"
+#include "../player/note.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -25,7 +26,10 @@ void Generator::Init() {
     AddMetadata(Gen_Metadata("constant", ConstantGenerator::Create, "constant([value])", "Returns a constant float"));
 }
 
-Generator::Generator(std::istream& str) : Source() {
+Generator::Generator(Interpolated<double> mul, Interpolated<double> gain, Interpolated<double> offs)
+        : Source(), playing_notes(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
+
+Generator::Generator(std::istream& str) : Source(), playing_notes() {
     Interpolated<double> a[3] = {1, 1, 0.0f};
     if((str >> skipws).peek() != '('){
         m_phasemul = a[0];
@@ -53,15 +57,35 @@ Generator::Generator(std::istream& str) : Source() {
 
 }
 
-void Generator::operator()(size_t noteId, double delta, double t, double, double extmul) {
-#ifdef DEBUG
-    if(noteId >= phases.size)
-        throw std::out_of_range("Generator phases");
-#endif
-    if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
-    double& phase = phases[noteId];
-    accumulator += (getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * extmul);
-    phases[noteId] = fmod(phase + delta * m_phasemul(t), 1);
+Generator::Generator(const Generator& g) : Source(g), playing_notes(), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {
+    playing_notes.reserve(g.playing_notes.size());
+    for(const auto& note : g.playing_notes) { playing_notes.emplace_back(note->copy()); }
+}
+
+void Generator::addNote(std::unique_ptr<Note> note) {
+    note->AddToSource(this);
+    playing_notes.emplace_back(std::move(note));
+}
+
+double Generator::getSample(int srate) {
+    for(size_t i = 0; i < playing_notes.size(); i++) {
+        if(playing_notes[i]->IsComplete()) {
+            playing_notes[i]->RemoveFromSource(this);
+            playing_notes.erase(playing_notes.begin() + int(i));
+            i--;
+            continue;
+        }
+        playing_notes[i]->AddSample(this, srate);
+    }
+    return getAccumulator();
+}
+
+double Generator::getFrequencyMultiplier(double t) {
+    return m_phasemul(t);
+}
+
+void Generator::operator()(double phase, double t, int, double note_amplitude) {
+    m_accumulator += getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * note_amplitude;
 }
 
 std::string Generator::getFormattedMetadata() {
@@ -85,5 +109,6 @@ void Generator::Write(std::ostream& str) const {
     str << generator_name << '(';
     WriteBaseParams(str);
     str << ") ";
-    WriteLengthBounds(str);
 }
+
+Generator::~Generator() {}

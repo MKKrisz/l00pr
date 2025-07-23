@@ -19,6 +19,9 @@ public:
 /// <summary> Source that actually generates samples </summary>
 class Generator : public Source, public Parseable<std::unique_ptr<Source>, Gen_Metadata, const int, const MakeFlags&> {
 protected:
+
+    std::vector<std::unique_ptr<Note>> playing_notes;
+
     /// <summary> The frequency multiplier that should be applied </summary>
     Interpolated<double> m_phasemul;
 
@@ -29,11 +32,9 @@ protected:
     Interpolated<double> m_phaseoffset;
 
     // Base constructors for subclasses
-    Generator(Interpolated<double> mul = 1.0f, Interpolated<double> gain = 1.0f, Interpolated<double> offs = 0.0f)
-        : Source(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
+    Generator(Interpolated<double> mul = 1.0f, Interpolated<double> gain = 1.0f, Interpolated<double> offs = 0.0f);
 
-    Generator(const Generator& g) 
-        : Source(g), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {}
+    Generator(const Generator& g);
     
     Generator(std::istream&);
 
@@ -41,6 +42,12 @@ protected:
     bool shouldBeDefault;
 public: 
     static void Init();
+
+    void addNote(std::unique_ptr<Note>) override;
+
+    double getSample(int samplerate) override;
+
+    double getFrequencyMultiplier(double t) override;
     
     /// <summary> Gets a sample of this generator </summary>
     /// <param name="phase"> A value going from 0 to 1 </param>
@@ -48,9 +55,9 @@ public:
     virtual double getSample(double phase, double t) = 0;
 
     /// <summary> Generates the sample from this generator with all the modifiers applied, then adds that to the accumulator </summary>
-    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
+    virtual void operator()(double phase, double t, int srate, double note_amplitude) override;
 
-    virtual ~Generator() {}
+    virtual ~Generator();
 
     virtual std::string ToString() const override { return "Generator"; }
 
