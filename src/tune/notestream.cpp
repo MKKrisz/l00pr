@@ -1,9 +1,5 @@
 #include "notestream.hpp"
 #include "../exceptions/parse_error.hpp"
-#include "loop.hpp"
-#include "../player/random_note.hpp"
-#include "../player/setnote.hpp"
-#include "../player/playablenote.hpp"
 
 NoteStream::NoteStream(Note* n) : notes() {
     notes.emplace_back(std::make_pair(0, n));
@@ -27,14 +23,14 @@ NoteStream::NoteStream(const NoteStream& p)
     }
 }
 
-std::vector<Note*> NoteStream::GetStartingNotes(double t) {
+std::vector<std::unique_ptr<Note>> NoteStream::GetStartingNotes(double t) {
     if(notes.empty()) return {};
-    std::vector<Note*> ret;
-    auto i = notes.begin();
-    for( ; i != notes.end() && i->first <= t; i++) {
-        ret.emplace_back(i->second);
+    std::vector<std::unique_ptr<Note>> ret;
+    //auto i = notes.begin();
+    for( ; m_next_note_idx < notes.size() && notes[m_next_note_idx].first <= t; m_next_note_idx++) {
+        ret.emplace_back(std::move(notes[m_next_note_idx].second));
     }
-    notes.erase(notes.begin(), i); 
+    //notes.erase(notes.begin(), i); 
     return ret;
 }
 
@@ -55,7 +51,7 @@ double NoteStream::getLen() const {
     return len;
 }
 
-NoteStream::NoteStream(std::istream& str, const std::vector<Source*> srcs, double bpm, bool polynote, int srate)
+NoteStream::NoteStream(std::istream& str, Tune* tune, double bpm, bool polynote, int srate)
     : bpm(bpm), polynote(polynote), srate(srate) {
     double sumlen = 0;
     double prev_len = 0;
@@ -81,9 +77,9 @@ NoteStream::NoteStream(std::istream& str, const std::vector<Source*> srcs, doubl
                 }
             }
         }
-        Note* note = Note::Make(str, srcs, bpm, polynote, srate);
+        std::unique_ptr<Note> note = Note::Make(str, tune, bpm, polynote, srate);
         len = note->GetLen();
-        Add(std::make_pair(ts, note));
+        Add(std::make_pair(ts, std::move(note)));
 
         str >> expect('>') >> skipws;
         if(!polynote) {

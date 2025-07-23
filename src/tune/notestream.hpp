@@ -6,6 +6,7 @@
 
 class Loop;
 class RandomNote;
+class Tune;
 
 /// <summary> Class that stores and retreives note data
 class NoteStream : public virtual Writeable{
@@ -14,7 +15,7 @@ protected:
     inline size_t getId(double t) { return bSearch(notes, t); }
 
     /// The Data
-    std::vector<std::pair<double, Note*>> notes;
+    std::vector<std::pair<double, std::unique_ptr<Note>>> notes;
 
     /// <summary> Beats per minute calue, used for parsing (so you don't need to count the seconds) </summary>
     double bpm = 60;
@@ -28,9 +29,13 @@ protected:
 
     /// <summary> Sample rate. Used to properly calculate filters and other things</summary>
     int srate = 48000;
-    
+
+    // <summary> Length of notestream. If less than zero, it has not been cached yet </summary>
     double len = -1;
+    // <summary> The timestamp when the last note starts. </summary>
     double lastNoteTs = -1;
+    // <summary> 
+    size_t m_next_note_idx = 0;
 
 public:
     void calculateLen();
@@ -45,20 +50,21 @@ public:
     inline void setSampleRate(double val) { srate = val; }
     inline int getSampleRate() const { return srate; }
 
-    /// <summary> Caluclates how many seconds it takes to play the stream </summary>
+    /// <summary> Caluclates how many seconds it takes to play the stream. This value is cached, if you modify the stream in any way, please call invalidateLen() </summary>
     double getLen() const;
+    void invalidateLen() {len = -1; lastNoteTs = -1;}
     inline size_t size() const {return notes.size();}
 
     /// <summary> Returns a reference to the note at index `id` </summary>
     inline Note* getNote(size_t id) {
         if(id >= notes.size())
             throw std::out_of_range("NoteStream.playable");
-        return notes[id].second;
+        return notes[id].second.get();
     }
     inline const Note* getNote(size_t id) const {
         if(id >= notes.size())
             throw std::out_of_range("NoteStream.playable");
-        return notes[id].second;
+        return notes[id].second.get();
     }
 
     /// constructors
@@ -67,19 +73,16 @@ public:
     NoteStream(double t, Note* n);
     NoteStream(std::pair<double, Note*> note);
     NoteStream(const NoteStream& s);
-    NoteStream(std::istream& str, const std::vector<Source*> srcs, double bpm, bool polynote, int srate);
+    NoteStream(std::istream& str, Tune* tune, double bpm, bool polynote, int srate);
 
     /// <summary> Adds a note to the structure at the specified timestamp </summary>
-    void Add(std::pair<double, Note*> p) { ordered_add(notes, p); }
+    void Add(std::pair<double, std::unique_ptr<Note>> p) { ordered_add(notes, p); }
 
     /// <summary> Returns all notes that start before t and have not been started yet </summary>
-    virtual std::vector<Note*> GetStartingNotes(double t);
+    virtual std::vector<std::unique_ptr<Note>> GetStartingNotes(double t);
 
     NoteStream& operator=(const NoteStream& s){
         if(&s == this) return *this;
-        for(size_t i = 0; i < notes.size(); i++) {
-            delete notes[i].second;
-        }
         len = s.len;
         lastNoteTs = s.lastNoteTs;
         srate = s.srate;
@@ -91,11 +94,7 @@ public:
         return *this;
     }
 
-    ~NoteStream() {
-        for(auto& n : notes) {
-            delete n.second;
-        }
-    }
+    ~NoteStream() {}
 
     void Write(std::ostream& str) const;
 };
