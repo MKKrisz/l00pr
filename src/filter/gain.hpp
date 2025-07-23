@@ -28,7 +28,7 @@ public:
     }
 
     /// <summary> Multiplies the sample value by gain </summary>
-    inline double filter(double sample, double, double, double) { return sample * gain; }
+    inline double filter(double sample, double, double, int) { return sample * gain; }
     std::unique_ptr<Source> copy() {return std::make_unique<GainFilter>(*this); }
     inline GainFilter& operator=(const GainFilter&) = default;
     std::string ToString() const {return Filter::ToString() + "(" + std::to_string(gain) + ")";}

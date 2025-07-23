@@ -31,7 +31,7 @@ public:
     FIR(const FIR& f) = default;
 
     /// <summary> Adds `sample` to the rotating buffer, then executes the convolution operation </summary>
-    double filter(double sample, double delta, double t, double srate);
+    double filter(double sample, double delta, double t, int srate);
     
     std::unique_ptr<Source> copy() {return std::make_unique<FIR>(*this); }
     std::string GetNameAndParams() const { return ""; }

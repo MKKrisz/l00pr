@@ -47,11 +47,11 @@ public:
     }
 
     /// <summary> Sends back the sample modified by `fbFilter` `depth` filters deep, then returns the original, unmodified sample </summary>
-    double filter(double sample, double, double, double) {
+    double filter(double sample, double, double, int srate) {
         double fbs = sample; 
         if(fbFilter != nullptr) {
             fbFilter->addSample(sample);
-            fbs = fbFilter->calc();
+            fbs = fbFilter->getSample(srate);
         }
         //fbFilter == nullptr? sample : fbFilter->filter(sample, delta, t, srate);
         src->recvFeedback(fbs, depth);

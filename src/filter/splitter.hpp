@@ -26,11 +26,11 @@ public:
         }
     }
     
-    virtual double filter(double sample, double, double, double) {
+    virtual double filter(double sample, double, double, int srate) {
         double sum = 0;
         for(auto& path : paths) {
             path->addSample(sample);
-            sum += path->calc();
+            sum += path->getSample(srate);
         }
         return sum;
     }

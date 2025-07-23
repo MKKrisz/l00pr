@@ -36,7 +36,7 @@ public:
     DelayFilter(const DelayFilter& f) : Filter(f), sbuf(f.sbuf), bufId(f.bufId), len(f.len){}
 
     /// <summary> stores `sample` at the current position then returns the next (oldest) sample in sbuf
-    double filter(double sample, double, double, double) override {
+    double filter(double sample, double, double, int) override {
         sbuf[bufId++] = sample;
         bufId = bufId % sbuf.size();
         return sbuf[bufId];

@@ -14,7 +14,7 @@ public:
             str >> expect('}');
         }
     }
-    inline double filter(double sample, double, double, double) { return sample; }
+    inline double filter(double sample, double, double, int) { return sample; }
     std::unique_ptr<Source> copy() {return std::make_unique<DummyFilter>(*this); }
     inline DummyFilter& operator=(const DummyFilter&) = default;
     std::string ToString() const {return Filter::ToString() + "Dummy";}

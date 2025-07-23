@@ -30,7 +30,7 @@ public:
     }
 
     /// <summary> quantizes the floating-point sample by first turning it into PCM64 format, then bitshifting it, then turning it back into floating-point </summary>
-    double filter(double sample, double, double, double) {
+    double filter(double sample, double, double, int) {
         unsigned long s_l = (unsigned long)((sample + 1)/ 2 * (double)std::numeric_limits<unsigned long>::max()) >> (64 - bits);
         return (double(s_l) / (std::pow(2, bits)-1) * 2) - 1;
     }

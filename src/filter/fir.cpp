@@ -7,7 +7,7 @@
 #define M_PI 3.141592653589793238
 #endif
 
-double FIR::filter(double sample, double, double, double) {
+double FIR::filter(double sample, double, double, int) {
     sbuf[bufId++] = sample;
     bufId = bufId % sbuf.size();
     double ret = 0;
