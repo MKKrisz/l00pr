@@ -1,6 +1,7 @@
 #include "note.hpp"
 #include "builtin.hpp"
 
+uint32_t Note::note_id_ctr = 0;
 
 std::string Note_Metadata::ToString() const {
     std::string ret = keyword;
@@ -11,7 +12,7 @@ std::string Note_Metadata::ToString() const {
     ret += (maxKwdLen == keyword.size()?"":"\tSyntax: ") + syntax + "\t" + desc;
     return ret;
 }
-std::function<Note*(std::istream&, const std::vector<Source*>&, double, bool, int)> Note::default_note_fun = PlayableNote::Create;
+std::function<std::unique_ptr<Note>(std::istream&, Tune*, double, bool, int)> Note::default_note_fun = PlayableNote::Create;
 
 void Note::Init() {
     AddMetadata(Note_Metadata("note", PlayableNote::Create, "<frequency> <length> <amplitude>", "A playable note"));
@@ -20,13 +21,13 @@ void Note::Init() {
     AddMetadata(Note_Metadata("random", RandomNote::Create, "honestly I don't remember", "Random note"));
 }
 
-Note* Note::Make(std::istream& str, const std::vector<Source*>& sources, double bpm, bool poly, int srate) {
+std::unique_ptr<Note> Note::Make(std::istream& str, Tune* tune, double bpm, bool poly, int srate) {
     auto pos = str.tellg();
     try {
-        return Note::Parse(str, sources, bpm, poly, srate);
+        return Note::Parse(str, tune, bpm, poly, srate);
     } catch (const std::exception& e){
         str.seekg(pos);
-        return default_note_fun(str, sources, bpm, poly, srate);
+        return default_note_fun(str, tune, bpm, poly, srate);
     }
 }
 
