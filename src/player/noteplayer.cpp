@@ -1,44 +1,25 @@
 #include "noteplayer.hpp"
 #include "note.hpp"
 
-void NotePlayer::addNote(Note* note) {
+void NotePlayer::addNote(std::unique_ptr<Note> note) {
     note->AddToPlayer(*this);
-    m_notes.emplace_back(note);
-    m_src->addPhase();
+    m_src->addNote(std::move(note));
 }
 
 void NotePlayer::setSrc(Source* src) {
-    std::vector<double> phases = m_src->getPhases();
     if(src == nullptr)
-        m_src = std::move(def_src->copy());
+        m_src = def_src;
     else
-        m_src = std::move(src->copy());
-    m_src->setPhases(phases);
-
-    //hack to fix mismatch of phases
-    for(size_t i = m_src->getPhases().size(); i < m_notes.size(); i++) {
-        m_src->addPhase();
-    }
+        m_src = src;
 }
 
-NotePlayer::NotePlayer(Source* src) : m_notes(), m_src(std::move(src->copy())), def_src(src){}
+NotePlayer::NotePlayer(Source* src) : m_src(src), def_src(src){}
 
 NotePlayer::NotePlayer(const NotePlayer& player) 
-    : m_notes(player.m_notes), m_src(std::move(player.m_src->copy())), def_src(player.def_src){}
+    : m_src(player.m_src), def_src(player.def_src) {}
 
-float NotePlayer::getSample(double srate) {
-    for(size_t i = 0; i < m_notes.size(); i++) {
-        if(m_notes[i]->IsComplete()) {
-            m_src->removePhase(i);
-            delete m_notes[i];
-            m_notes.erase(m_notes.begin() + int(i));
-            i--;
-            continue;
-        }
-        m_notes[i]->AddSample(*this, i, srate);
-    }
-    float res = m_src->calc();
-    return res;
+float NotePlayer::getSample(int srate) {
+    return m_src->getSample(srate);
 }
 
 
@@ -46,8 +27,7 @@ NotePlayer& NotePlayer::operator=(const NotePlayer& player) {
     if(this == &player) {
         return *this;
     }
-    m_notes = player.m_notes;
-    m_src = player.m_src->copy();
+    m_src = player.m_src;
     def_src = player.def_src;
     return *this;
 }

@@ -10,24 +10,18 @@ class Note;
 // <summary> Structure to hold and play currently playing notes. </summary>
 // <remarks> Can't be declared alone, and altough technically doesn't store the entire stream, still requires one to function. (see: lane.hpp, notestream.hpp)</remarks>
 class NotePlayer {
-
-    /// <summary> The notes the player is currently playing </summary>
-    std::vector<Note*> m_notes;
-
     /// <summary> The current source </summary>
-    std::unique_ptr<Source> m_src;
+    Source* m_src;
 
     /// <summary> The default generator this player was created with </summary>
     Source* def_src;
 
 public:
     void setSrc(Source* src);
-    Source* getSrc() const { return m_src.get(); }
+    Source* getSrc() const { return m_src; }
 
-    inline bool hasBounds() { return m_src->getLengthBounds().has_value(); }
-    inline std::pair<double, double> getBounds() { return m_src->getLengthBounds().value(); }
     /// <summary> Adds a note to be played </summary>
-    void addNote(Note* note);
+    void addNote(std::unique_ptr<Note> note);
 
     // cctors
     NotePlayer(Source* gen);
@@ -37,12 +31,12 @@ public:
     ~NotePlayer() {}
 
     /// <summary> Returns the current sample value, and sets itself up for the next sample generation.</summary>
-    float getSample(double srate = 48000);
+    float getSample(int srate = 48000);
 
     // copy assgn op.
     NotePlayer& operator=(const NotePlayer& player);
-    void operator()(size_t id, double delta, double t, int srate, double ampl) {
-        (*m_src)(id, delta, t, srate, ampl);
+    void operator()(double phase, double t, int srate, double ampl) {
+        (*m_src)(phase, t, srate, ampl);
     }
 
 
