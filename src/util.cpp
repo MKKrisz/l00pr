@@ -86,3 +86,15 @@ std::istream& operator>>(std::istream& str, const exp_p& c) {
     str.get();
     return str;
 }
+
+std::string trim(const std::string& str) {
+    const std::string spaces = " \f\n\r\t\v";
+    const auto strBegin = str.find_first_not_of(spaces);
+    if (strBegin == std::string::npos)
+        return "";
+
+    const auto strEnd = str.find_last_not_of(spaces);
+    const auto strRange = strEnd - strBegin + 1;
+
+    return str.substr(strBegin, strRange);
+}

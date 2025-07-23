@@ -4,6 +4,7 @@
 #include <istream>
 #include <ranges>
 #include <cmath>
+#include <type_traits>
 #include "concepts.hpp"
 
 /// <summary> 
@@ -61,11 +62,11 @@ bool almostEQ(T a, T  b) {
 /// <summary> Binary search algorithm for arbitrary ordered ranges of std::pair<F, T>, where F is a floating point type </summary>
 template <std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
-size_t bSearch(U data, F t) {
-    if(data.size() == 0) return 0;
+size_t bSearch(U& data, F t) {
+    if(data.size() < 1) return 0;
     int min = 0;
     int max = data.size()-1;
-    size_t mid = (min + max)/2;
+    int mid = (min + max)/2;
     while(min<=max && !almostEQ(data[mid].first, t)) {
         if(data[mid].first < t)
             min = mid+1;
@@ -79,16 +80,29 @@ size_t bSearch(U data, F t) {
 /// <summary> Ordered insertion for arbitrary ranges of std::pair<F, T> where F is a floating point type </summary>
 template<std::ranges::range U, std::floating_point F, typename T = std::ranges::range_value_t<U>::second_type>
     requires std::same_as<std::ranges::range_value_t<U>, std::pair<F, T>>
-void ordered_add(U& data, std::pair<F, T> p) {
-    if(data.empty()) { 
-        data.emplace_back(p);
-        return;
+void ordered_add(U& data, std::pair<F, T>& p) {
+    if constexpr (std::is_copy_constructible<T>::value) {
+        if(data.empty()) { 
+            data.emplace_back(p);
+            return;
+        }
+        size_t id = bSearch(data, p.first) + 1;
+        if(id == data.size())
+            data.emplace_back(p);
+        else
+            data.insert(std::next(data.begin(), id), p);
     }
-    size_t id = bSearch(data, p.first) + 1;
-    if(id == data.size())
-        data.emplace_back(p);
-    else
-        data.insert(std::next(data.begin(), id), p);
+    else {
+        if(data.empty()) { 
+            data.push_back(std::move(p));
+            return;
+        }
+        size_t id = bSearch(data, p.first) + 1;
+        if(id == data.size())
+            data.push_back(std::move(p));
+        else
+            data.insert(std::next(data.begin(), id), std::move(p));
+    }
 }
 
 /// <summary> Stream manipulator that skips whitespace and comments </summary>
@@ -141,4 +155,6 @@ template <typename F>
 void brace(std::istream& str, char brace_char, F function) {
     brace(str, brace_char, brace_char, 0, function);
 }
+
+std::string trim(const std::string& str);
 #endif
