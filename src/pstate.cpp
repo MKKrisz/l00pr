@@ -104,6 +104,7 @@ void Program::run() {
         }
         file.close();
     }
+    tune.resolveReferences();
     manager.hook_after_reads(this);
     switch(output) {
         case AUDIO: device = std::make_unique<AudioDevice>(tune.samplerate()); break;
@@ -118,7 +119,10 @@ void Program::run() {
 
     manager.hook_before_run(this);
     device->start();
-    if(!device->isRunning()) {return;}     // Don't wait if device is not realtime
+    if(!device->isRunning()) {
+        manager.hook_after_run(this);
+        return;     // Don't wait if device is not realtime
+    }
     double len = tune.getLen() - seekfwd + stayopen + 1;
     uint u_len = len;
     if(len == std::numeric_limits<double>::infinity()) {
