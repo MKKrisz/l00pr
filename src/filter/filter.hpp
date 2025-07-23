@@ -46,18 +46,15 @@ protected:
 public:
     static void Init();
 
+    void addNote(std::unique_ptr<Note> note) override;
+
     /// <summary> Function for  handling feedback samples </summary>
     virtual void recvFeedback(double val, size_t depth) override {
         if(depth > 0 && src != nullptr) {
             src->recvFeedback(val, depth-1);
             return;
         }
-        feedback = val;
-    }
-
-    virtual std::optional<std::pair<double, double>> getLengthBounds() override {
-        if(src == nullptr) return {};
-        return src->getLengthBounds();
+        m_feedback = val;
     }
 
     virtual void addSample(double sample) override {
@@ -72,22 +69,26 @@ public:
     virtual Source* getBase() override {
         return src == nullptr? nullptr : src->getBase();
     }
-
-    /// <summary> Adds a phase to the filter chain's base, since filters don't use phases </summary>
-    inline void addPhase() override { src->addPhase(); }
-
-    /// <summary> Removes the phase at id from the base of the filter chain </summary>
-    inline void removePhase(int id) override { src->removePhase(id);}
+    std::vector<SourceRef*> getSourceRefs() override {
+        return src==nullptr ? std::vector<SourceRef*>() : src->getSourceRefs();
+    }
+    std::vector<Source*> getLabeled() override {
+        if(src == nullptr) { return Source::getLabeled(); }
+        auto labels = src->getLabeled();
+        auto self = Source::getLabeled();
+        labels.insert(labels.end(), self.begin(), self.end());
+        return labels;
+    }
 
     /// <summary> Function that gets called by calc() to filter the sample. </summary>
-    virtual double filter(double sample, double delta, double t, double srate) = 0;
+    virtual double filter(double sample, double delta, double t, int srate) = 0;
 
     /// <summary> Filters the sample given by `src` </summary>
     /// <returns> The filtered sample </summary>
-    virtual double calc() override;
+    virtual double getSample(int samplerate) override;
 
     /// <summary> Propagates the call down to the base generator </summary>
-    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) override;
+    virtual void operator()(double phase, double t, int srate, double note_amplitude) override;
     
     // dtor
     inline virtual ~Filter() {}

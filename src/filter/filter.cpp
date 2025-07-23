@@ -1,6 +1,7 @@
 #include "filter.hpp"
 #include "../exceptions/parse_error.hpp"
 #include "builtin.hpp"
+#include "../player/note.hpp"
 
 std::string Filter_Metadata::ToString() const {
     std::string ret = keyword;
@@ -19,15 +20,21 @@ void Filter::Init() {
     AddMetadata(Filter_Metadata("gain", GainFilter::Create, "gain(<amount>) [{src}]", "Multiplies the samples coming from src by `amount`(double)"));
     AddMetadata(Filter_Metadata("quantize", QuantizeFilter::Create, "quantize(<bits>) [{src}]", "Quantizes the signal coming from `src` to be `bits`(uint)"));
     AddMetadata(Filter_Metadata("split", Splitter::Create, "split([f_1] [f_2] ... [f_n]) [{src}]", "Splits the signal into different paths, then combines them. (f_k: Filterchain)"));
-    AddMetadata(Filter_Metadata("dummy", DummyFilter::Create, "", "Does nothing"));
+    AddMetadata(Filter_Metadata("dummy", DummyFilter::Create, "dummy()", "Does nothing"));
 }
 
-void Filter::operator()(size_t noteId, double delta, double t, double srate, double extmul) {
-    (*src)(noteId, delta, t, srate, extmul);
+void Filter::operator()(double phase, double t, int srate, double note_amplitude) {
+    if(src == nullptr) { return; }
+    (*src)(phase, t, srate, note_amplitude);
 }
 
-double Filter::calc() {
-    return filter(src == nullptr? getAccumulator() + feedback : src->calc(), 0, 0, 0) + (src == nullptr ? 0 : feedback);
+void Filter::addNote(std::unique_ptr<Note> note) {
+    if(src == nullptr) { return; }
+    src->addNote(std::move(note));
+}
+
+double Filter::getSample(int samplerate) {
+    return filter(src == nullptr? getAccumulator() : src->getSample(samplerate), 0, 0, 0) + m_feedback;
 }
 
 std::string Filter::getFormattedMetadata() {
@@ -44,5 +51,4 @@ void Filter::Write(std::ostream& str) const {
         src->Write(str);
         str << "}";
     }
-    WriteLengthBounds(str);
 } 
