@@ -12,9 +12,10 @@
 #include "parseable_base.hpp"
 
 class Source;
+class Note;
+class SourceRef;
 
-
-
+// TODO: Make this a vector of the names of valid generators to be built
 /// <summary> Helper struct that specifies what kind of sources to generate when calling `AudioSource::Make()` </summary>
 struct MakeFlags {
     /// <summary> If set, AudioSource::Make() will be allowed to make filters </summary>
@@ -40,34 +41,31 @@ public:
 /// <summary> Base class for filters and generators </summary>
 class Source : public StringConvertible, public virtual Writeable {
 protected:
-    
-    /// <summary> Stores the current phases of generators </summary>
-    std::vector<double> phases;
+    std::string m_label;
 
     /// <summary> Ending point for feedback loops. </summary>
-    double feedback;
+    double m_feedback;
 
     /// <summary> Accumulates generators' generated values for this sample before sending it through the filter chain </summary>
-    double accumulator;
-
-    /// <summary> If set, specifies the minimum and maximum lengths a generator can output </summary>
-    std::optional<std::pair<double, double>> length_bounds;
-
-    /// <summary> Standard parser for length bounds </summary>
-    void parse_lb(std::istream& str);
+    double m_accumulator;
 
     /// <summary> Returns (and then resets) the accumulator value </summary>
     double getAccumulator() {
-        double ac = accumulator;
-        accumulator = 0;
+        double ac = m_accumulator;
+        m_accumulator = 0;
         return ac;
     }
 
     // Base constructors for subclasses.
-    Source(const Source& src) : phases(src.phases), feedback(), accumulator(0), length_bounds(src.length_bounds), name(src.name) {}
-    Source() : phases(), feedback(0), accumulator(0), length_bounds() {}
+    Source(const Source& src) : m_label(src.m_label), m_feedback(), m_accumulator(0) {}
+    Source() : m_feedback(0), m_accumulator(0) {}
 public:
-    std::string name;
+
+    void label(const std::string& str) { m_label = str; }
+    const std::string& label() { return m_label; }
+
+    /// <summary> Function to call to handle the starting of notes </summary>
+    virtual void addNote(std::unique_ptr<Note>) = 0;
 
     /// <summary> Handles receiving feedback values. </summary>
     /// <remarks> 
@@ -76,7 +74,7 @@ public:
     /// Filters should overload this, since they can implement that kind of functionality
     /// </remarks>
     virtual void recvFeedback(double val, size_t) {
-        feedback = val;
+        m_feedback = val;
     }
 
     virtual std::string ToString() const { return "AudioSource"; }
@@ -86,43 +84,23 @@ public:
 
     /// <summary> Forces a sample into the sample accumulator </summary>
     virtual void addSample(double sample) {
-        accumulator += sample;
+        m_accumulator += sample;
     }
 
-    /// <summary> Adds a phase value to this source </summary>
-    /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
-    virtual void addPhase() {
-        phases.emplace_back(0.0);
-    }
-
-    /// <summary> Removes the phase value at index `id` from this source </summary>
-    /// <remarks> Filters may want to overload this since in most cases, they don't need the phase values to function. </remarks>
-    virtual void removePhase(int id) {
-        phases.erase(std::next(phases.begin(), id));
-    }
-
-    virtual std::optional<std::pair<double, double>> getLengthBounds() {
-        return length_bounds;
-    }
-
-    void WriteLengthBounds(std::ostream& str) const;
-
-    /// <summary> Returns this source's phases </summary>
-    std::vector<double> getPhases() { return phases; }
-
-    /// <summary> Sets this source's phase values to `p` </summary>
-    void setPhases(std::vector<double>& p) { phases = p;}
+    virtual double getFrequencyMultiplier(double) { return 1; }
 
     /// <summary> Sends accumulated sample values through the filter chain to be processed </summary>
     /// <remarks> For filters, this function should end up processing the samples </remarks> 
-    virtual double calc() { return getAccumulator() + feedback; }
+    virtual double getSample(int) { return getAccumulator() + m_feedback; }
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
     virtual std::unique_ptr<Source> copy() = 0;
+    virtual std::vector<SourceRef*> getSourceRefs() { return {}; }
+    virtual std::vector<Source*> getLabeled();
     
     /// <summary> Creates a sample and adds it to the accumulator </summary>
     /// <remarks> For filters, should just send the action deeper into the chain </remarks>
-    virtual void operator()(size_t noteId, double delta, double t, double srate, double extmul) = 0;
+    virtual void operator()(double phase, double t, int srate, double extmul) = 0;
     
     /// <summary> Copy assignment operator </summary>
     Source& operator=(const Source&) = default;
@@ -135,6 +113,36 @@ public:
 
     static Source* getByName(const std::vector<Source*>&, const std::string&);
     static Source* getByName(const std::vector<std::unique_ptr<Source>>&, const std::string&);
+};
+
+class SourceRef : public Source {
+public:
+    SourceRef(const std::string& label, const std::string& err_str = "");
+    SourceRef(size_t id, const std::string& err_str = "");
+    std::pair<const std::string&, size_t> getWanted();
+    const std::string& getError();
+    void setSource(Source* src);
+    bool resolved();
+    bool labeled();
+
+    void addNote(std::unique_ptr<Note> note) override;
+    void addSample(double sample) override;
+    std::vector<SourceRef*> getSourceRefs() override;
+    double getFrequencyMultiplier(double t) override;
+    double getSample(int srate) override;
+    std::unique_ptr<Source> copy() override;
+    void operator()(double phase, double t, int srate, double extmul) override;
+    std::string ToString() const override;
+    void Write(std::ostream&) const override;
+
+
+private:
+    std::string wanted_label;
+    size_t wanted_id;
+    std::string err_str;
+    Source* src = nullptr;
+
+    void assert_resolved();
 };
 
 #endif
