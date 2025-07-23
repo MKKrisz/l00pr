@@ -30,7 +30,6 @@ public:
         str << "  "; 
         m_dutyCycle.Write(str);
         str << ") ";
-        WriteLengthBounds(str);
     }
 
     static std::unique_ptr<SquareGenerator> Create(std::istream& str, const int, const MakeFlags&);

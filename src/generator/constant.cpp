@@ -32,5 +32,4 @@ std::unique_ptr<ConstantGenerator> ConstantGenerator::Create(std::istream& strea
 }
 void ConstantGenerator::Write(std::ostream& str) const {
     str << "constant(" << m_constant << ") ";
-    WriteLengthBounds(str);
 }

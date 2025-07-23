@@ -31,18 +31,11 @@ public:
         return std::make_unique<SampledGenerator>(stream);
     }
     
-    void operator()(size_t noteId, double delta, double t, double, double extmul) override {
-#ifdef DEBUG
-        if(noteId >= phases.size)
-            throw std::out_of_range("SampledGenerator phases");
-#endif
-        if (getLengthBounds().has_value() && t > getLengthBounds().value().second) return;
-        double& phase = phases[noteId];
-        accumulator += (samples[mod(int((phase + m_phaseoffset(t))/timestep), samples.size())] * m_gain(t) * extmul);
-        phase += delta * m_phasemul(t);
+    void operator()(double, double t, int, double note_amplitude) override {
+        m_accumulator += (samples[mod(int((t * m_phasemul(t) + m_phaseoffset(t)) * timestep), samples.size())] * m_gain(t) * note_amplitude);
     }
 
-    void Write(std::ostream& str) const override { str << "sampled(" << filename << ")"; WriteLengthBounds(str);}
+    void Write(std::ostream& str) const override { str << "sampled(" << filename << ")";}
 };
 
 #endif

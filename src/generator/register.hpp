@@ -9,11 +9,13 @@ class Register : public Generator {
     std::vector<std::unique_ptr<Source>> generators {};
 
 public:
-    void operator()(size_t noteId, double delta, double t, double srate, double extmul);
-    double calc();
-    void addPhase();
-    void removePhase(int id);
-    inline double getSample(double, double) {return 0;}
+    void operator()(double phase, double t, int srate, double note_amplitude);
+    double getSample(int srate);
+    void addNote(std::unique_ptr<Note>);
+    std::vector<SourceRef*> getSourceRefs();
+    std::vector<Source*> getLabeled();
+
+    double getSample(double, double) {return 0;}
     Register(std::vector<Source*> gen);
     Register(std::istream& stream, const int, const MakeFlags& = MakeFlags::all);
     Register(const Register& r);

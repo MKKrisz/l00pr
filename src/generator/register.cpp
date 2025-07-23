@@ -1,5 +1,6 @@
 #include "register.hpp"
 #include "../audiosource.hpp"
+#include "../player/note.hpp"
 
 Register::Register(std::vector<Source*> gen) {
     generators.reserve(gen.size());
@@ -14,29 +15,24 @@ Register::Register(const Register& r) : Generator(r) {
     }
 }
 
-void Register::operator()(size_t noteId, double d, double t, double srate, double extmul) {
+void Register::operator()(double p, double t, int srate, double a) {
+    p = fmod(p * m_phasemul(t) + m_phaseoffset(t), 1);
+    a *= m_gain(t);
     for(auto& g : generators) {
-        (*g)(noteId, d * m_phasemul(t), t, srate, extmul);
+        (*g)(p, t, srate, a);
     }
 }
 
-double Register::calc() {
-    double sum = feedback;
+double Register::getSample(int srate) {
     for(auto& g : generators) {
-        sum += g->calc();
+        m_accumulator += g->getSample(srate);
     }
-    return sum;
+    return getAccumulator();
 }
 
-void Register::addPhase() {
+void Register::addNote(std::unique_ptr<Note> note) {
     for(auto& g : generators) {
-        g->addPhase();
-    }
-}
-
-void Register::removePhase(int id) {
-    for(auto& g : generators) {
-        g->removePhase(id);
+        g->addNote(note->copy());
     }
 }
 
@@ -65,5 +61,22 @@ void Register::Write(std::ostream& str) const {
         g->Write(str);
     }
     str << '}';
-    Source::WriteLengthBounds(str);
+}
+std::vector<SourceRef*> Register::getSourceRefs() {
+    std::vector<SourceRef*> ret {};
+    for(auto& g : generators) {
+        auto g_refs = g->getSourceRefs();
+        ret.insert(ret.end(), g_refs.begin(), g_refs.end());
+    }
+    return ret;
+}
+std::vector<Source*> Register::getLabeled() {
+    std::vector<Source*> labels {};
+    for(auto& g : generators) {
+        auto g_labels = g->getLabeled();
+        labels.insert(labels.end(), g_labels.begin(), g_labels.end());
+    }
+    auto self = Source::getLabeled();
+    labels.insert(labels.end(), self.begin(), self.end());
+    return labels;
 }

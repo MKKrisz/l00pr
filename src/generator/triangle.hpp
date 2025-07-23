@@ -31,7 +31,6 @@ public:
         str << "  "; 
         m_peak.Write(str);
         str << ") ";
-        WriteLengthBounds(str);
     }
 
     static std::unique_ptr<TriangleGenerator> Create(std::istream& str, const int, const MakeFlags&);

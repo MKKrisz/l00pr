@@ -101,7 +101,7 @@ void SampledGenerator::parse_file(const std::string& filename) {
 
     unsigned int sample_rate = 0;
     read32(file, &sample_rate);
-    timestep = 1.0/sample_rate;
+    timestep = sample_rate;
 
     unsigned int byte_rate = 0;
     read32(file, &byte_rate);

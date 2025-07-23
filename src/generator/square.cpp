@@ -15,7 +15,6 @@ SquareGenerator::SquareGenerator(const SquareGenerator& g)
 
 SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_dutyCycle(0.5) {
     if(shouldBeDefault) { 
-        parse_lb(stream);
         return;
     }
     if((stream >> skipws).peek() != ')') {
@@ -23,7 +22,6 @@ SquareGenerator::SquareGenerator(std::istream& stream) : Generator(stream), m_du
         stream >> m_dutyCycle;
     }
     stream >> expect(')');
-    parse_lb(stream);
 }
 
 std::unique_ptr<Source> SquareGenerator::copy() { 

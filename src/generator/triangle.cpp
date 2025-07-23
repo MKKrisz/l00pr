@@ -22,7 +22,6 @@ TriangleGenerator::TriangleGenerator(const TriangleGenerator& g)
 
 TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), m_peak(0.5){
     if(shouldBeDefault) { 
-        parse_lb(stream);
         return;
     }
     if((stream >> skipws).peek() != ')') {
@@ -30,7 +29,6 @@ TriangleGenerator::TriangleGenerator(std::istream& stream) : Generator(stream), 
         stream >> m_peak;
     }
     stream >> expect(')');
-    parse_lb(stream);
 }
 
 std::unique_ptr<Source> TriangleGenerator::copy() {
