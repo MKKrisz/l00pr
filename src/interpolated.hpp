@@ -142,6 +142,13 @@ public:
         return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
     }
 
+    std::pair<double, T> getDataPoint(size_t idx) {
+#ifndef NDEBUG
+        if(idx > data.size()) { throw std::out_of_range("Interpolated<t>::getDataPoint(), idx: " + std::to_string(idx) + ", datapooints: " + std::to_string(data.size())); }
+#endif
+        return data[idx];
+    }
+
     /// <summary> Modifies datapoint at 't' if exsists, adds a new datapoint otherwise </summary>
     void Set(double t, const T& data) {
         Set(std::make_pair(t, data));
