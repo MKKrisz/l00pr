@@ -43,7 +43,6 @@ public:
     static std::unique_ptr<Note> Make(std::istream&, Tune*, double, bool, int);
 
 private:
-    static std::function<std::unique_ptr<Note>(std::istream&, Tune*, double, bool, int)> default_note_fun;
     static uint32_t note_id_ctr;
     uint32_t note_id;
 };

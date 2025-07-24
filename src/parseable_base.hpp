@@ -6,8 +6,10 @@
 #include <functional>
 #include <cstdarg>
 #include <istream>
+#include <optional>
 
 #include "exceptions/parse_error.hpp"
+#include "exceptions/no_keyword.hpp"
 #include "util.hpp"
 #include "string_convertible.hpp"
 #include "writeable.hpp"
@@ -28,6 +30,7 @@ template <typename T, typename Metadata_type, typename ... Args>
 class Parseable : public virtual Writeable {
 protected:
     static std::vector<Metadata_type> meta;
+    static std::optional<Metadata_type> default_meta;
 public:
     static void AddMetadata(const Metadata_type& m) { meta.emplace_back(m); }
     static void ClearMetadata() {meta.clear();}
@@ -47,6 +50,7 @@ public:
     }
 
     static T Parse(std::istream& str, Args... args) {
+        auto idx = str.tellg();
         str >> skipws;
         std::string buf;
         char c;
@@ -59,7 +63,14 @@ public:
                 }
             }
         }
-        throw parse_error(str, "Unknown keyword: \"" + buf + "\".\nAvailable:\n" + GetFormattedMetadata());
+        if(default_meta.has_value()) {
+            try {
+                str.seekg(idx);
+                return default_meta.value().create_func(str, args...);
+            }
+            catch (no_such_keyword&) {/*nothing, signals to the class that the data was unrecogniseable*/}
+        }
+        throw no_such_keyword(str, "Unknown keyword: \"" + buf + "\".\nAvailable:\n" + GetFormattedMetadata());
     }
 
     static std::string GetFormattedMetadata() {
@@ -73,5 +84,8 @@ public:
 
 template <typename T, typename Metadata_type, typename ... Args>
 std::vector<Metadata_type> Parseable<T, Metadata_type, Args...>::meta = std::vector<Metadata_type>();
+
+template <typename T, typename Metadata_type, typename ... Args>
+std::optional<Metadata_type> Parseable<T, Metadata_type, Args...>::default_meta = std::nullopt;
 
 #endif
