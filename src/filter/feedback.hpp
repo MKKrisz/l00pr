@@ -34,7 +34,7 @@ public:
         Filter(fb), depth(fb.depth), fbFilter(fb.fbFilter != nullptr ? (std::unique_ptr<Filter>&&)std::move(fb.fbFilter->copy()) : std::move(std::make_unique<DummyFilter>())) {}
 
     Feedback(std::istream& str, int srate, const MakeFlags& flags = MakeFlags::all) : Filter(), fbFilter(nullptr) {
-        str >> expect('(') >> depth >> skipws;
+        str >> expect('(') >> skipws >> depth >> skipws;
         if(str.peek() != ')') {
             fbFilter = (std::unique_ptr<Filter>&&)std::move(Source::Make(str, srate, MakeFlags::onlyFilters));
         }
