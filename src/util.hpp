@@ -137,7 +137,7 @@ void brace(std::istream& str, char opening_brace, char closing_brace, int minimu
 
     while(brace_count > 0) {
         str >> expect(closing_brace);
-        minimum_braces--;
+        brace_count--;
     }
 }
 
