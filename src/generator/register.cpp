@@ -36,7 +36,7 @@ void Register::addNote(std::unique_ptr<Note> note) {
     }
 }
 
-Register::Register(std::istream& stream, const int srate, const MakeFlags& flags) : Generator(stream) {
+Register::Register(std::istream& stream, const int srate, const MakeFlags& flags) : Generator() {
     stream >> expect('{');
     while((stream >> skipws).peek() != '}') {
         generators.emplace_back(std::move(Source::Make(stream, srate, flags)));
