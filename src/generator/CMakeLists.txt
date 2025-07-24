@@ -7,5 +7,5 @@ target_sources(${PROJECT_NAME} PUBLIC generator.hpp generator.cpp
                                 register.hpp register.cpp
                                 noise.hpp noise.cpp
                                 sampled.hpp sampled.cpp
-                                constant.hpp constant.cpp
+                                value.hpp value.cpp
 )

@@ -7,4 +7,5 @@ target_sources(${PROJECT_NAME} PUBLIC builtin.hpp
                                       quantize.hpp
                                       splitter.hpp
                                       dummy.hpp
+                                      bounds.hpp
 )

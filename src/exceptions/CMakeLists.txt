@@ -1,1 +1,3 @@
-target_sources(${PROJECT_NAME} PUBLIC parse_error.hpp parse_error.cpp)
+target_sources(${PROJECT_NAME} PUBLIC parse_error.hpp parse_error.cpp
+                                      no_keyword.hpp
+)
