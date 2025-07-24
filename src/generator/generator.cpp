@@ -16,14 +16,16 @@ std::string Gen_Metadata::ToString() const {
 }
 
 void Generator::Init() {
-    AddMetadata(Gen_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", ""));
-    AddMetadata(Gen_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", ""));
-    AddMetadata(Gen_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", ""));
-    AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([freq_multiplier] [amplitude] [phase_offset])", "Only `amplitude` does anything"));
-    AddMetadata(Gen_Metadata("register", Register::Create, "register([fm] [amp] [po]){ [src_1] [src_2] ... [src_n]}", "`po` does nothing, (`src_k`: any source)"));
-    AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "WIP")); //TODO: proper description
+    AddMetadata(Gen_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", "Generates a sine wave"));
+    AddMetadata(Gen_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", "Generates square wave"));
+    AddMetadata(Gen_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", "Generatess arbitrary triangle wawe (yes, sawtooth too)"));
+    AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([amplitude])", "Generates white noise"));
+    AddMetadata(Gen_Metadata("register", Register::Create, "register { [src_1] [src_2] ... [src_n]}", "Wraps multiple sources into one"));
+    AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "loads a (.wav) file from disk and plays it back. Note frequency controls playback speed")); //TODO: proper description
     AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
-    AddMetadata(Gen_Metadata("constant", ConstantGenerator::Create, "constant([value])", "Returns a constant float"));
+    AddMetadata(Gen_Metadata("constant", ValueGenerator::Create, "constant([value])", "Same as value, just for some backwards compatibility"));
+    AddMetadata(Gen_Metadata("value", ValueGenerator::Create, "value([value])", "Returns a value interpolated over time"));
+    default_meta = Gen_Metadata("value", ValueGenerator::CreateAsDefault, "value([value])", "Returns a value interpolated over time");
 }
 
 Generator::Generator(Interpolated<double> mul, Interpolated<double> gain, Interpolated<double> offs)
