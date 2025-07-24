@@ -163,7 +163,7 @@ void Tune::resolveReferences() {
         p_refs.insert(p_refs.begin(), s_refs.begin(), s_refs.end());
         for(const auto& l : s_labels) {
             bool success = p_labeled.emplace(l->label(), l).second;
-            if(!success) { throw std::runtime_error("Multiple sources with the same label aren't allowed!"); }
+            if(!success) { throw std::runtime_error("Multiple sources with the same label aren't allowed! (label: " + l->label() + ")"); }
         }
     }
     for(auto& r : p_refs) {
