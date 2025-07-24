@@ -8,5 +8,6 @@
 #include "quantize.hpp"
 #include "splitter.hpp"
 #include "dummy.hpp"
+#include "bounds.hpp"
 
 #endif

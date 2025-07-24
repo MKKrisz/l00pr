@@ -21,6 +21,7 @@ void Filter::Init() {
     AddMetadata(Filter_Metadata("quantize", QuantizeFilter::Create, "quantize(<bits>) [{src}]", "Quantizes the signal coming from `src` to be `bits`(uint)"));
     AddMetadata(Filter_Metadata("split", Splitter::Create, "split([f_1] [f_2] ... [f_n]) [{src}]", "Splits the signal into different paths, then combines them. (f_k: Filterchain)"));
     AddMetadata(Filter_Metadata("dummy", DummyFilter::Create, "dummy()", "Does nothing"));
+    AddMetadata(Filter_Metadata("bounds", BoundsFilter::Create, "bounds([lower]:[upper])", "Restricts playable notes to have a length of fixed size"));
 }
 
 void Filter::operator()(double phase, double t, int srate, double note_amplitude) {
