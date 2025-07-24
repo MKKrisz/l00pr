@@ -27,7 +27,9 @@ const MakeFlags MakeFlags::onlyGenerators = {false, true};
 std::unique_ptr<Source> Source::Make(std::istream& str, const int srate, const MakeFlags& flags) {
     auto start = str.tellg();
     std::string gen_except = ""; 
+    bool generator_found_keyword = false;
     std::string filter_except = "";
+    bool filter_found_keyword = false;
     std::string name = "";
 
     if((str >> skipws).peek() == ':') {
@@ -48,7 +50,12 @@ std::unique_ptr<Source> Source::Make(std::istream& str, const int srate, const M
             ret->m_label = name;
             return ret;
         }
+        catch(const no_such_keyword& e) {
+            generator_found_keyword = false;
+            gen_except = e.what();
+        }
         catch(const std::exception& e) {
+            generator_found_keyword = true;
             gen_except = e.what();
         }
     }
@@ -60,13 +67,21 @@ std::unique_ptr<Source> Source::Make(std::istream& str, const int srate, const M
             ret->m_label = name;
             return ret;
         }
+        catch(const no_such_keyword& e) {
+            filter_found_keyword = false;
+            filter_except = e.what();
+        }
         catch(const std::exception& e) {
+            filter_found_keyword = true;
             filter_except = e.what();
         }
     }
     str.clear();
     str.seekg(start);
-    throw std::runtime_error(gen_except + '\n' + filter_except);
+
+    std::string err_str = (filter_found_keyword ? "" : gen_except + '\n') + (generator_found_keyword ? "" : filter_except);
+    if(filter_found_keyword && generator_found_keyword) { err_str = gen_except + '\n' + filter_except; }
+    throw std::runtime_error(err_str);
 }
 
 
