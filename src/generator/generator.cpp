@@ -28,38 +28,41 @@ void Generator::Init() {
     default_meta = Gen_Metadata("value", ValueGenerator::CreateAsDefault, "value([value])", "Returns a value interpolated over time");
 }
 
+Generator::Generator(bool will_self_initialize) : Source(), playing_notes() {if(!will_self_initialize) {throw std::runtime_error("Generator(bool): will_self_initialize was false"); }}
 Generator::Generator(Interpolated<double> mul, Interpolated<double> gain, Interpolated<double> offs)
-        : Source(), playing_notes(), m_phasemul(mul), m_gain(gain), m_phaseoffset(offs) {}
+        : Source(), playing_notes(), m_phasemul(std::make_unique<ValueGenerator>(mul)), m_gain(std::make_unique<ValueGenerator>(gain)), m_phaseoffset(std::make_unique<ValueGenerator>(offs)) {}
 
-Generator::Generator(std::istream& str) : Source(), playing_notes() {
-    Interpolated<double> a[3] = {1, 1, 0.0f};
+Generator::Generator(std::istream& str, int samplerate) : Source(), playing_notes() {
+    Interpolated<double> a[3] = {1.0, 1.0, 0.0};
+    m_phasemul = std::make_unique<ValueGenerator>(a[0]);
+    m_gain = std::make_unique<ValueGenerator>(a[1]);
+    m_phaseoffset = std::make_unique<ValueGenerator>(a[2]);
+
     if((str >> skipws).peek() != '('){
-        m_phasemul = a[0];
-        m_gain = a[1];
-        m_phaseoffset = a[2];
         shouldBeDefault = true;
         return;
     }
     shouldBeDefault = false;
     str.get();
-    for(int i = 0; i < 3; i++) {
-        if((str >> skipws).peek() == ')') {
-            break;
-        }
-        a[i].Clear();
-        str >> a[i];
+    if((str >> skipws).peek() == ')') {
+        return;
     }
+    m_phasemul = Source::Make(str, samplerate, MakeFlags::all);
+    if((str >> skipws).peek() == ')') {
+        return;
+    }
+    m_gain = Source::Make(str, samplerate, MakeFlags::all);
+    if((str >> skipws).peek() == ')') {
+        return;
+    }
+    m_phaseoffset = Source::Make(str, samplerate, MakeFlags::all);
     if((str >> skipws).peek() == ')') {
         shouldBeDefault = true;
         str.get();
     }
-    m_phasemul = a[0];
-    m_gain = a[1];
-    m_phaseoffset = a[2];
-
 }
 
-Generator::Generator(const Generator& g) : Source(g), playing_notes(), m_phasemul(g.m_phasemul), m_gain(g.m_gain), m_phaseoffset(g.m_phaseoffset) {
+Generator::Generator(const Generator& g) : Source(g), playing_notes(), m_phasemul(g.m_phasemul->copy()), m_gain(g.m_gain->copy()), m_phaseoffset(g.m_phaseoffset->copy()) {
     playing_notes.reserve(g.playing_notes.size());
     for(const auto& note : g.playing_notes) { playing_notes.emplace_back(note->copy()); }
 }
@@ -82,12 +85,19 @@ double Generator::getSample(int srate) {
     return getAccumulator();
 }
 
-double Generator::getFrequencyMultiplier(double t) {
-    return m_phasemul(t);
+double Generator::getSingleSample(double phase, double t, int srate) {
+    double fm = getFrequencyMultiplier(t, srate);
+    return getSample(fmod(phase*fm + m_phaseoffset->getSingleSample(t, t, srate), 1), t, srate) * m_gain->getSingleSample(t, t, srate);
 }
 
-void Generator::operator()(double phase, double t, int, double note_amplitude) {
-    m_accumulator += getSample(fmod(phase + m_phaseoffset(t), 1), t) * m_gain(t) * note_amplitude;
+double Generator::getFrequencyMultiplier(double t, int srate) {
+    double fm = m_phasemul->getFrequencyMultiplier(t, srate);
+    (*m_phasemul)(t*fm, t, srate, 1);
+    return m_phasemul->getSample(srate);
+}
+
+void Generator::operator()(double phase, double t, int srate, double note_amplitude) {
+    m_accumulator += getSample(fmod(phase + m_phaseoffset->getSingleSample(t, t, srate), 1), t, srate) * m_gain->getSingleSample(t, t, srate) * note_amplitude;
 }
 
 std::string Generator::getFormattedMetadata() {
@@ -98,11 +108,11 @@ std::string Generator::getFormattedMetadata() {
     return ret;
 }
 void Generator::WriteBaseParams(std::ostream& str) const {
-    m_phasemul.Write(str);
+    m_phasemul->Write(str);
     str << "  ";
-    m_gain.Write(str);
+    m_gain->Write(str);
     str << "  ";
-    m_phaseoffset.Write(str); 
+    m_phaseoffset->Write(str); 
 }
 
 void Generator::Write(std::ostream& str) const {

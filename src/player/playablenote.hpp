@@ -94,7 +94,7 @@ public:
     void AddSample(Source* p, int srate) override {
         double t = getTime();
         double ampl = PlayableNoteBase::getAmplitude();
-        double freq_mul = p->getFrequencyMultiplier(t);
+        double freq_mul = p->getFrequencyMultiplier(t, srate);
         (*p)(phase, t, srate, ampl);
         advance(srate, freq_mul);
     }

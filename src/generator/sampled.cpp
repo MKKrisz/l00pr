@@ -1,4 +1,5 @@
 #include "sampled.hpp"
+#include "value.hpp"
 
 #include <cstring>
 #include <fstream>
@@ -13,33 +14,46 @@ SampledGenerator::SampledGenerator(std::string filename,
 SampledGenerator::SampledGenerator(const SampledGenerator& g)
     : Generator(g), samples(g.samples), filename(g.filename), timestep(g.timestep) {}
 
-SampledGenerator::SampledGenerator(std::istream& str) {
+SampledGenerator::SampledGenerator(std::istream& str, int samplerate) {
     char c;
     str >> expect('(');
     while((c = str.peek()) != ')' && !isspace(c)) {
         str.get();
         filename += c;
     }
-    Interpolated<double> a[3] = {1, 1, 0.0f};
-    shouldBeDefault = false;
-    for(int i = 0; i < 3; i++) {
-        if((str >> skipws).peek() == ')') {
-            break;
-        }
-        a[i].Clear();
-        str >> a[i];
+    
+    Interpolated<double> a[3] = {1.0, 1.0, 0.0};
+
+    if((str >> skipws).peek() != '('){
+        m_phasemul = std::make_unique<ValueGenerator>(a[0]);
+        m_gain = std::make_unique<ValueGenerator>(a[1]);
+        m_phaseoffset = std::make_unique<ValueGenerator>(a[2]);
+        shouldBeDefault = true;
+        return;
     }
+    shouldBeDefault = false;
+    str.get();
+    if((str >> skipws).peek() == ')') {
+        return;
+    }
+    m_phasemul = Source::Make(str, samplerate, MakeFlags::all);
+    if((str >> skipws).peek() == ')') {
+        return;
+    }
+    m_gain = Source::Make(str, samplerate, MakeFlags::all);
+    if((str >> skipws).peek() == ')') {
+        return;
+    }
+    m_phaseoffset = Source::Make(str, samplerate, MakeFlags::all);
     if((str >> skipws).peek() == ')') {
         shouldBeDefault = true;
         str.get();
     }
-    m_phasemul = a[0];
-    m_gain = a[1];
-    m_phaseoffset = a[2];
+
     parse_file(filename);
 }
 
-double SampledGenerator::getSample(double, double) {
+double SampledGenerator::getSample(double, double, int) {
     return 0;
 }
 

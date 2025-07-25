@@ -16,8 +16,6 @@ Register::Register(const Register& r) : Generator(r) {
 }
 
 void Register::operator()(double p, double t, int srate, double a) {
-    p = fmod(p * m_phasemul(t) + m_phaseoffset(t), 1);
-    a *= m_gain(t);
     for(auto& g : generators) {
         (*g)(p, t, srate, a);
     }
@@ -28,6 +26,13 @@ double Register::getSample(int srate) {
         m_accumulator += g->getSample(srate);
     }
     return getAccumulator();
+}
+double Register::getSingleSample(double p, double t, int s) {
+    double sum = 0;
+    for(auto& g : generators) {
+        sum += g->getSingleSample(p, t, s);
+    }
+    return sum;
 }
 
 void Register::addNote(std::unique_ptr<Note> note) {

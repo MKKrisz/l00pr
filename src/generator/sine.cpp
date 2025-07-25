@@ -13,11 +13,11 @@ SineGenerator::SineGenerator(Interpolated<double> phasemul,
 
 SineGenerator::SineGenerator(const SineGenerator& g) : Generator(g){}
 
-double SineGenerator::getSample(double p, double) {
+double SineGenerator::getSample(double p, double, int) {
     return std::sin(p*2*M_PI);
 }
 
-SineGenerator::SineGenerator(std::istream& stream) : Generator(stream) {
+SineGenerator::SineGenerator(std::istream& stream, int srate) : Generator(stream, srate) {
     if(shouldBeDefault) { 
         return;
     }
@@ -30,6 +30,6 @@ std::unique_ptr<Source> SineGenerator::copy() {
     return std::make_unique<SineGenerator>(*this);
 }
 
-std::unique_ptr<SineGenerator> SineGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
-    return std::make_unique<SineGenerator>(stream);
+std::unique_ptr<SineGenerator> SineGenerator::Create(std::istream& stream, const int srate, const MakeFlags&) {
+    return std::make_unique<SineGenerator>(stream, srate);
 }

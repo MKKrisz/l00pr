@@ -10,7 +10,7 @@
 /// </summary>
 class SquareGenerator :public Generator {
     /// <summary> A value between 0 and 1, represents the point where the generator switches from high to low </summary>
-    Interpolated<double> m_dutyCycle;
+    std::unique_ptr<Source> m_dutyCycle;
 
 public: 
     SquareGenerator(Interpolated<double> amplitude = 1.0f,
@@ -18,9 +18,9 @@ public:
                     Interpolated<double> offset = 0.0f,
                     Interpolated<double> duty = 0.5f);
 
-    SquareGenerator(std::istream& stream);
+    SquareGenerator(std::istream& stream, int srate);
     SquareGenerator(const SquareGenerator& g);
-    double getSample(double phase, double t) override;
+    double getSample(double phase, double t, int) override;
     std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Square"; }
 
@@ -28,7 +28,7 @@ public:
         str << "square(";
         WriteBaseParams(str);
         str << "  "; 
-        m_dutyCycle.Write(str);
+        m_dutyCycle->Write(str);
         str << ") ";
     }
 

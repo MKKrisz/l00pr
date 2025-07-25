@@ -132,11 +132,11 @@ void SourceRef::addSample(double sample) {
 }
 std::vector<SourceRef*> SourceRef::getSourceRefs() { return {this}; }
 
-double SourceRef::getFrequencyMultiplier(double t) {
+double SourceRef::getFrequencyMultiplier(double t, int srate) {
 #ifndef NDEBUG
     assert_resolved();
 #endif
-    return src->getFrequencyMultiplier(t);
+    return src->getFrequencyMultiplier(t, srate);
 }
 
 double SourceRef::getSample(int srate) {
@@ -144,6 +144,12 @@ double SourceRef::getSample(int srate) {
     assert_resolved();
 #endif
     return src->getSample(srate);
+}
+double SourceRef::getSingleSample(double phase, double t, int srate) {
+#ifndef NDEBUG
+    assert_resolved();
+#endif
+    return src->getSingleSample(phase, t, srate);
 }
 
 std::unique_ptr<Source> SourceRef::copy() {

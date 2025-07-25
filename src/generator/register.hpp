@@ -15,7 +15,8 @@ public:
     std::vector<SourceRef*> getSourceRefs();
     std::vector<Source*> getLabeled();
 
-    double getSample(double, double) {return 0;}
+    double getSample(double, double, int) {return 0;}
+    double getSingleSample(double, double, int);
     Register(std::vector<Source*> gen);
     Register(std::istream& stream, const int, const MakeFlags& = MakeFlags::all);
     Register(const Register& r);

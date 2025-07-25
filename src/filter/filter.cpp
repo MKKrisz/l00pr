@@ -37,6 +37,9 @@ void Filter::addNote(std::unique_ptr<Note> note) {
 double Filter::getSample(int samplerate) {
     return filter(src == nullptr? getAccumulator() : src->getSample(samplerate), 0, 0, 0) + m_feedback;
 }
+double Filter::getSingleSample(double p, double t, int samplerate) {
+    return filter(src == nullptr? 0 : src->getSingleSample(p, t, samplerate), 0, 0, 0);
+}
 
 std::string Filter::getFormattedMetadata() {
     std::string ret = "";

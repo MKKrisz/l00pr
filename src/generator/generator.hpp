@@ -23,20 +23,22 @@ protected:
     std::vector<std::unique_ptr<Note>> playing_notes;
 
     /// <summary> The frequency multiplier that should be applied </summary>
-    Interpolated<double> m_phasemul;
+    std::unique_ptr<Source> m_phasemul = nullptr;
 
     /// <summary> The gain multiplier that should be applied </summary>
-    Interpolated<double> m_gain;
+    std::unique_ptr<Source> m_gain = nullptr;
 
     /// <summary> The phase offset that should be applied </summary>
-    Interpolated<double> m_phaseoffset;
+    std::unique_ptr<Source> m_phaseoffset = nullptr;
+
+    Generator(bool will_self_initialize);
 
     // Base constructors for subclasses
     Generator(Interpolated<double> mul = 1.0f, Interpolated<double> gain = 1.0f, Interpolated<double> offs = 0.0f);
 
     Generator(const Generator& g);
     
-    Generator(std::istream&);
+    Generator(std::istream&, int);
 
     /// <summary> Value that indicates that there will be no new arguments to this generator </summary>
     bool shouldBeDefault;
@@ -47,12 +49,13 @@ public:
 
     double getSample(int samplerate) override;
 
-    double getFrequencyMultiplier(double t) override;
+    double getFrequencyMultiplier(double t, int srate) override;
     
     /// <summary> Gets a sample of this generator </summary>
     /// <param name="phase"> A value going from 0 to 1 </param>
     /// <param name="t"> A timestamp so that the member values of type Interpolated<double> can be applied properly </param>
-    virtual double getSample(double phase, double t) = 0;
+    virtual double getSample(double phase, double t, int srate) = 0;
+    double getSingleSample(double phase, double t, int srate) override;
 
     /// <summary> Generates the sample from this generator with all the modifiers applied, then adds that to the accumulator </summary>
     virtual void operator()(double phase, double t, int srate, double note_amplitude) override;

@@ -10,7 +10,7 @@
 class NoGenerator : public Generator {
 public: 
     NoGenerator();
-    double getSample(double, double);
+    double getSample(double, double, int);
     std::unique_ptr<Source> copy();
     std::string ToString() const { return "Dummy"; }
     void Write(std::ostream& str) const {str << "none";}

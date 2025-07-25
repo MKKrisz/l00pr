@@ -87,6 +87,8 @@ public:
     /// <returns> The filtered sample </summary>
     virtual double getSample(int samplerate) override;
 
+    virtual double getSingleSample(double, double, int) override;
+
     /// <summary> Propagates the call down to the base generator </summary>
     virtual void operator()(double phase, double t, int srate, double note_amplitude) override;
     

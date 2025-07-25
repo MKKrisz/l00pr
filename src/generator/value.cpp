@@ -1,26 +1,31 @@
 #include "value.hpp"
 #include "../util.hpp"
+#include "../player/note.hpp"
 
-#include <cmath>
-
-ValueGenerator::ValueGenerator(Interpolated<double> amplitude) : Generator(1.0, amplitude, 0.0){}
+ValueGenerator::ValueGenerator(Interpolated<double> amplitude) : Generator(true), m_value(amplitude){}
 
 
-ValueGenerator::ValueGenerator(const ValueGenerator& g) : Generator(g) {}
-
-double ValueGenerator::getSample(double, double t) {
-    return m_gain(t);
+ValueGenerator::ValueGenerator(const ValueGenerator& g) : m_value(g.m_value) {
+    playing_notes.reserve(g.playing_notes.size());
+    for(const auto& note : g.playing_notes) { playing_notes.emplace_back(note->copy()); }
 }
 
-ValueGenerator::ValueGenerator(std::istream& stream) : Generator() {
+double ValueGenerator::getSample(double, double t, int) {
+    return m_value(t);
+}
+
+ValueGenerator::ValueGenerator(std::istream& stream) : Generator(), m_value() {
     if((stream >> skipws).peek() != '('){ return; }
     stream.get();
-    m_gain.Clear();
-    stream >> skipws >> m_gain >> expect(')');
+    m_value.Clear();
+    stream >> skipws >> m_value >> expect(')');
 }
 
 std::unique_ptr<Source> ValueGenerator::copy() { 
     return std::make_unique<ValueGenerator>(*this);
+}
+void ValueGenerator::operator()(double phase, double t, int srate, double note_amplitude) {
+    m_accumulator += getSample(phase, t, srate) * note_amplitude;
 }
 
 std::unique_ptr<ValueGenerator> ValueGenerator::Create(std::istream& stream, const int, const MakeFlags&) {
@@ -36,6 +41,6 @@ std::unique_ptr<ValueGenerator> ValueGenerator::CreateAsDefault(std::istream& st
 
 void ValueGenerator::Write(std::ostream& str) const {
     str << "constant("; 
-    m_gain.Write(str);
+    m_value.Write(str);
     str << ") ";
 }

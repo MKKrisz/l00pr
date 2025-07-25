@@ -87,11 +87,12 @@ public:
         m_accumulator += sample;
     }
 
-    virtual double getFrequencyMultiplier(double) { return 1; }
+    virtual double getFrequencyMultiplier(double, int) { return 1; }
 
     /// <summary> Sends accumulated sample values through the filter chain to be processed </summary>
     /// <remarks> For filters, this function should end up processing the samples </remarks> 
     virtual double getSample(int) { return getAccumulator() + m_feedback; }
+    virtual double getSingleSample(double phase, double t, int srate) = 0;
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
     virtual std::unique_ptr<Source> copy() = 0;
@@ -128,8 +129,10 @@ public:
     void addNote(std::unique_ptr<Note> note) override;
     void addSample(double sample) override;
     std::vector<SourceRef*> getSourceRefs() override;
-    double getFrequencyMultiplier(double t) override;
+    double getFrequencyMultiplier(double t, int srate) override;
     double getSample(int srate) override;
+    double getSingleSample(double phase, double t, int srate) override;
+
     std::unique_ptr<Source> copy() override;
     void operator()(double phase, double t, int srate, double extmul) override;
     std::string ToString() const override;

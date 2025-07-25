@@ -14,8 +14,8 @@ public:
                   Interpolated<double> offset = 0.0f);
     SineGenerator(const SineGenerator& g);
 
-    SineGenerator(std::istream& stream);
-    double getSample(double, double) override;
+    SineGenerator(std::istream& stream, int);
+    double getSample(double, double, int) override;
     std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Sine"; }
 

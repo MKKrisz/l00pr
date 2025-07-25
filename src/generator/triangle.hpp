@@ -11,17 +11,17 @@
 /// <remarks> In this context, Sawtooth waves are also triangles </summary>
 class TriangleGenerator :public Generator {
     /// <summary> A value between 0 and 1, marks the point where the wave peaks. </summary>
-    Interpolated<double> m_peak;
+    std::unique_ptr<Source> m_peak;
     
 public:
     TriangleGenerator(Interpolated<double> amplitude = 1.0f, 
                       Interpolated<double> phasemul = 1.0f, 
                       Interpolated<double> offset = 0.0f, 
                       Interpolated<double> peak = 0.5f);
-    TriangleGenerator(std::istream& stream);
+    TriangleGenerator(std::istream& stream, int srate);
     TriangleGenerator(const TriangleGenerator&);
 
-    double getSample(double phase, double t) override;
+    double getSample(double phase, double t, int srate) override;
     std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Triangle"; }
 
@@ -29,7 +29,7 @@ public:
         str << "triangle(";
         WriteBaseParams(str);
         str << "  "; 
-        m_peak.Write(str);
+        m_peak->Write(str);
         str << ") ";
     }
 

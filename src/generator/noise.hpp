@@ -13,10 +13,10 @@ public:
 
     // cctors
     NoiseGenerator(Interpolated<double> gain = 1) : Generator(1, gain, 0.0) {}
-    NoiseGenerator(std::istream& str);
+    NoiseGenerator(std::istream& str, int srate);
     NoiseGenerator(const NoiseGenerator& g) : Generator(g) {}
 
-    double getSample(double, double t) override { return double(rand())/RAND_MAX * m_gain(t);}
+    double getSample(double, double, int) override { return double(rand())/RAND_MAX; }
     std::unique_ptr<Source> copy() override { return std::make_unique<NoiseGenerator>(*this); }
     std::string ToString() const override { return "Noise"; }
 
