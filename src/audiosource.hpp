@@ -48,12 +48,13 @@ protected:
 
     /// <summary> Accumulates generators' generated values for this sample before sending it through the filter chain </summary>
     double m_accumulator;
+    double m_prev_sample = 0;
 
     /// <summary> Returns (and then resets) the accumulator value </summary>
     double getAccumulator() {
-        double ac = m_accumulator;
+        m_prev_sample = m_accumulator;
         m_accumulator = 0;
-        return ac;
+        return m_prev_sample;
     }
 
     // Base constructors for subclasses.
@@ -92,6 +93,7 @@ public:
     /// <summary> Sends accumulated sample values through the filter chain to be processed </summary>
     /// <remarks> For filters, this function should end up processing the samples </remarks> 
     virtual double getSample(int) { return getAccumulator() + m_feedback; }
+    virtual double getLastSample() { return m_prev_sample; }
     virtual double getSingleSample(double phase, double t, int srate) = 0;
 
     /// <summary> Creates a heap-allocated copy of this src </summary>
@@ -120,17 +122,20 @@ class SourceRef : public Source {
 public:
     SourceRef(const std::string& label, const std::string& err_str = "");
     SourceRef(size_t id, const std::string& err_str = "");
-    std::pair<const std::string&, size_t> getWanted();
-    const std::string& getError();
+    SourceRef(const SourceRef& other) = default;
+    std::pair<std::string, size_t> getWanted() const;
+    const std::string& getError() const;
     void setSource(Source* src);
-    bool resolved();
-    bool labeled();
+    Source* getSource();
+    bool resolved() const;
+    bool labeled() const;
 
     void addNote(std::unique_ptr<Note> note) override;
     void addSample(double sample) override;
     std::vector<SourceRef*> getSourceRefs() override;
     double getFrequencyMultiplier(double t, int srate) override;
     double getSample(int srate) override;
+    double getLastSample() override;
     double getSingleSample(double phase, double t, int srate) override;
 
     std::unique_ptr<Source> copy() override;

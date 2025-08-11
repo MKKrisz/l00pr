@@ -106,13 +106,14 @@ Source* Source::getByName(const std::vector<std::unique_ptr<Source>>& sources, c
 SourceRef::SourceRef(const std::string& label, const std::string& err) : Source(), wanted_label(label), wanted_id(0), err_str(err) {}
 SourceRef::SourceRef(size_t id, const std::string& err) : Source(), wanted_label(""), wanted_id(id), err_str(err) {}
 
-std::pair<const std::string&, size_t> SourceRef::getWanted() {return std::make_pair(wanted_label, wanted_id);}
+std::pair<std::string, size_t> SourceRef::getWanted() const {return std::make_pair(wanted_label, wanted_id);}
 
 void SourceRef::setSource(Source* src) {this->src = src;}
-const std::string& SourceRef::getError() {return err_str; }
+Source* SourceRef::getSource() {return this->src;}
+const std::string& SourceRef::getError() const {return err_str; }
 
-bool SourceRef::resolved() { return src != nullptr && (labeled() ? src->label() == wanted_label : true ); } // We have no way of checking if it's the correct ID
-bool SourceRef::labeled() {return !wanted_label.empty(); }
+bool SourceRef::resolved() const { return src != nullptr && (labeled() ? src->label() == wanted_label : true ); } // We have no way of checking if it's the correct ID
+bool SourceRef::labeled() const {return !wanted_label.empty(); }
 
 void SourceRef::assert_resolved() {
      if(src == nullptr) throw std::runtime_error("Unresolved source reference " + wanted_label);
@@ -144,6 +145,12 @@ double SourceRef::getSample(int srate) {
     assert_resolved();
 #endif
     return src->getSample(srate);
+}
+double SourceRef::getLastSample() {
+#ifndef NDEBUG
+    assert_resolved();
+#endif
+    return src->getLastSample();
 }
 double SourceRef::getSingleSample(double phase, double t, int srate) {
 #ifndef NDEBUG
