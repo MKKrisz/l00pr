@@ -10,7 +10,7 @@ public:
     std::string desc;
     Gen_Metadata(const char* kw, std::function<std::unique_ptr<Source>(std::istream&, const int, const MakeFlags&)> func, const char* syn, const char* desc) 
         : Metadata(kw, func), syntax(syn), desc(desc) {};
-    Gen_Metadata(const Gen_Metadata& meta) : Metadata(meta), syntax(meta.syntax), desc(meta.desc) {}
+    Gen_Metadata(const Gen_Metadata& meta) = default;
     std::string ToString() const override;
 
     Gen_Metadata& operator=(const Gen_Metadata& m) = default;

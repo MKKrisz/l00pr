@@ -16,14 +16,14 @@ std::string Gen_Metadata::ToString() const {
 }
 
 void Generator::Init() {
+    AddMetadata(Gen_Metadata("constant", ValueGenerator::Create, "constant([value])", "Same as value, just for some backwards compatibility"));
+    AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([amplitude])", "Generates white noise"));
+    AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
+    AddMetadata(Gen_Metadata("register", Register::Create, "register { [src_1] [src_2] ... [src_n]}", "Wraps multiple sources into one"));
+    AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "loads a (.wav) file from disk and plays it back. Note frequency controls playback speed")); //TODO: proper description
     AddMetadata(Gen_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", "Generates a sine wave"));
     AddMetadata(Gen_Metadata("square", SquareGenerator::Create, "square([freq_multiplier] [amplitude] [phase_offset] [duty_cycle])", "Generates square wave"));
     AddMetadata(Gen_Metadata("triangle", TriangleGenerator::Create, "triangle([freq_multiplier] [amplitude] [phase_offset] [peak_point])", "Generatess arbitrary triangle wawe (yes, sawtooth too)"));
-    AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([amplitude])", "Generates white noise"));
-    AddMetadata(Gen_Metadata("register", Register::Create, "register { [src_1] [src_2] ... [src_n]}", "Wraps multiple sources into one"));
-    AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "loads a (.wav) file from disk and plays it back. Note frequency controls playback speed")); //TODO: proper description
-    AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
-    AddMetadata(Gen_Metadata("constant", ValueGenerator::Create, "constant([value])", "Same as value, just for some backwards compatibility"));
     AddMetadata(Gen_Metadata("value", ValueGenerator::Create, "value([value])", "Returns a value interpolated over time"));
     default_meta = Gen_Metadata("value", ValueGenerator::CreateAsDefault, "value([value])", "Returns a value interpolated over time");
 }
@@ -86,18 +86,20 @@ double Generator::getSample(int srate) {
 }
 
 double Generator::getSingleSample(double phase, double t, int srate) {
-    double fm = getFrequencyMultiplier(t, srate);
+    const double fm = getFrequencyMultiplier(t, srate);
     return getSample(fmod(phase*fm + m_phaseoffset->getSingleSample(t, t, srate), 1), t, srate) * m_gain->getSingleSample(t, t, srate);
 }
 
 double Generator::getFrequencyMultiplier(double t, int srate) {
-    double fm = m_phasemul->getFrequencyMultiplier(t, srate);
+    const double fm = m_phasemul->getFrequencyMultiplier(t, srate);
     (*m_phasemul)(t*fm, t, srate, 1);
     return m_phasemul->getSample(srate);
 }
 
 void Generator::operator()(double phase, double t, int srate, double note_amplitude) {
-    m_accumulator += getSample(fmod(phase + m_phaseoffset->getSingleSample(t, t, srate), 1), t, srate) * m_gain->getSingleSample(t, t, srate) * note_amplitude;
+    phase += m_phaseoffset->getSingleSample(t, t, srate);
+    note_amplitude *= m_gain->getSingleSample(t, t, srate);
+    m_accumulator += getSample(fmod(phase, 1), t, srate) * note_amplitude;
 }
 
 std::string Generator::getFormattedMetadata() {
