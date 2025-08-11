@@ -58,9 +58,7 @@ std::unique_ptr<Register> Register::Create(std::istream& str, const int srate, c
     return std::make_unique<Register>(str, srate, flags);
 }
 void Register::Write(std::ostream& str) const {
-    str << "register(";
-    Generator::WriteBaseParams(str);
-    str << ") {";
+    str << "register {";
     for(auto& g : generators) {
         str << std::endl;
         g->Write(str);
