@@ -15,3 +15,8 @@ NoiseGenerator::NoiseGenerator(std::istream& stream, int srate) : Generator() {
 std::unique_ptr<NoiseGenerator> NoiseGenerator::Create(std::istream& str, const int srate, const MakeFlags&) {
     return std::make_unique<NoiseGenerator>(str, srate);
 }
+void NoiseGenerator::Write(std::ostream& str) const {
+    str << "noise(";
+    m_gain->Write(str);
+    str << ") ";
+}

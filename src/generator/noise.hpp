@@ -20,6 +20,8 @@ public:
     std::unique_ptr<Source> copy() override { return std::make_unique<NoiseGenerator>(*this); }
     std::string ToString() const override { return "Noise"; }
 
+    void Write(std::ostream&) const override;
+
     static std::unique_ptr<NoiseGenerator> Create(std::istream& str, const int, const MakeFlags&);
 };
 
