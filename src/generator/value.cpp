@@ -5,7 +5,7 @@
 ValueGenerator::ValueGenerator(Interpolated<double> amplitude) : Generator(true), m_value(amplitude){}
 
 
-ValueGenerator::ValueGenerator(const ValueGenerator& g) : m_value(g.m_value) {
+ValueGenerator::ValueGenerator(const ValueGenerator& g) : Generator(true), m_value(g.m_value) {
     playing_notes.reserve(g.playing_notes.size());
     for(const auto& note : g.playing_notes) { playing_notes.emplace_back(note->copy()); }
 }
@@ -40,7 +40,7 @@ std::unique_ptr<ValueGenerator> ValueGenerator::CreateAsDefault(std::istream& st
 }
 
 void ValueGenerator::Write(std::ostream& str) const {
-    str << "constant("; 
+    str << "value("; 
     m_value.Write(str);
     str << ") ";
 }

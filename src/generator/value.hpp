@@ -10,7 +10,7 @@ public:
 
     ValueGenerator(std::istream& stream);
     double getSample(double, double, int) override;
-    double getSingleSample(double p, double t, int s) override {return getSample(p, t, s);}
+    double getSingleSample(double, double t, int) override {return m_value(t);}
     double getFrequencyMultiplier(double, int) override { return 1; }
     std::unique_ptr<Source> copy() override;
     std::string ToString() const override { return "Value"; }
