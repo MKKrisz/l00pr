@@ -8,4 +8,7 @@ target_sources(${PROJECT_NAME} PUBLIC builtin.hpp
                                       splitter.hpp
                                       dummy.hpp
                                       bounds.hpp
+                                      reference.hpp
+                                      copy.hpp
+                                      absolute.hpp
 )

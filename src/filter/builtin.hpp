@@ -1,13 +1,16 @@
 #ifndef L00PR_FILTER_BUILTIN
 #define L00PR_FILTER_BUILTIN
 
-#include "fir.hpp"
-#include "delay.hpp"
-#include "gain.hpp"
-#include "feedback.hpp"
-#include "quantize.hpp"
-#include "splitter.hpp"
-#include "dummy.hpp"
+#include "absolute.hpp"
 #include "bounds.hpp"
+#include "copy.hpp"
+#include "delay.hpp"
+#include "dummy.hpp"
+#include "feedback.hpp"
+#include "fir.hpp"
+#include "gain.hpp"
+#include "quantize.hpp"
+#include "reference.hpp"
+#include "splitter.hpp"
 
 #endif
