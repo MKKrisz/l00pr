@@ -24,7 +24,7 @@ class SetterNote : public Note{
 public:
     // cctors
     SetterNote(Source* ptr);
-    SetterNote(const SetterNote& s) : gen(s.gen) {}
+    SetterNote(const SetterNote& s) : Note(), gen(s.gen) {}
 
     /// <summary> Parser for setter notes </summary>
     /// <param name="srate"> Used for accurate filter setup </param>

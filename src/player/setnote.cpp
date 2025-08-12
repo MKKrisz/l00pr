@@ -4,7 +4,7 @@
 
 SetterNote::SetterNote(Source* gen) : Note(), gen(gen){}
 
-SetterNote::SetterNote(std::istream& str, Tune* tune, int srate) : Note() {
+SetterNote::SetterNote(std::istream& str, Tune* tune, int) : Note() {
     gen = tune->getSource(str);
 }
 void SetterNote::Write(std::ostream& str) const {
