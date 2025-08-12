@@ -116,14 +116,13 @@ public:
         size_t aid, bid;
 
         if(data[id].first < t) { aid = id; bid = id + 1;}
-        else { aid = id - 1; bid = id;}
-        
-        if(bid == 0) {
+        else { 
             lowbuf = nullptr;
-            hightresh = data[bid].first;
-            highbuf = &(data[bid].second);
-            return data[bid].second;
+            hightresh = data[id].first;
+            highbuf = &(data[id].second);
+            return data[id].second;
         }
+        
         if(bid == data.size()) {
             highbuf = nullptr;
             lowtresh = data[aid].first;
@@ -138,6 +137,32 @@ public:
         auto& b = data[bid];
         hightresh = b.first;
         highbuf = &(b.second);
+
+        return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
+    }
+
+    T uncached_Get(double t) const {
+        if(data.size() == 1) return data[0].second;
+
+        // no room for hacky optimization
+        
+
+        int id = getId(t);
+        if(almostEQ(data[id].first, t)) return data[id].second;
+
+        size_t aid, bid;
+
+        if(data[id].first < t) { aid = id; bid = id + 1;}
+        else { 
+            return data[id].second;
+        }
+        
+        if(bid == data.size()) {
+            return data[aid].second;
+        }
+
+        auto& a = data[aid];
+        auto& b = data[bid];
 
         return itp(a.second, b.second, (t - a.first) / (b.first - a.first));
     }
@@ -158,6 +183,119 @@ public:
     void Set(std::pair<double, T> p) {
         ordered_add(data, p);
     };
+
+    Interpolated<T> Merge(const Interpolated<T> other) const {
+        Interpolated<T> ret {};
+        size_t aid = 0;
+        size_t bid = 0;
+        while(aid < Size() && bid < other.Size()) {
+            if(data[aid].first == data[bid].first) {
+                ret.Set(data[aid]);
+                aid++;
+                bid++;
+            }
+            if(data[aid].first < other.data[bid].first) {
+                ret.Set(data[aid]);
+                aid++;
+            }
+            else {
+                ret.Set(other.data[bid]);
+                bid++;
+            }
+        }
+        if(aid < Size()) {
+            for(size_t i = aid; i < Size(); i++) {
+                ret.Set(data[i]);
+            }
+        }
+        else if(bid < other.Size()) {
+            for(size_t i = bid; i < other.Size(); i++) {
+                ret.Set(other.data[i]);
+            }
+        }
+        return ret;
+    }
+    Interpolated<T> uncached_Add(const Interpolated<T> other) const {
+        Interpolated<T> ret {};
+        size_t aid = 0;
+        size_t bid = 0;
+        while(aid < Size() && bid < other.Size()) {
+            if(data[aid].first == data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second + other.data[bid].second));
+                aid++;
+                bid++;
+            }
+            if(data[aid].first < other.data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second + other.uncached_Get(data[aid].first)));
+                aid++;
+            }
+            else {
+                ret.Set(std::make_pair(other.data[bid].first, other.data[bid].second + uncached_Get(other.data[bid].first)));
+                bid++;
+            }
+        }
+        if(aid < Size()) {
+            float last_value = other.data[bid-1].second;
+            for(size_t i = aid; i < Size(); i++) {
+                ret.Set(std::make_pair(data[i].first, data[i].second + last_value));
+            }
+        }
+        else if(bid < other.Size()) {
+            float last_value = data[aid-1].second;
+            for(size_t i = bid; i < other.Size(); i++) {
+                ret.Set(std::make_pair(other.data[i].first, other.data[i].second + last_value));
+            }
+        }
+        return ret;
+    }
+
+    Interpolated<T> uncached_Multiply(const Interpolated<T>& other) const {
+        Interpolated<T> ret {};
+        size_t aid = 0;
+        size_t bid = 0;
+        while(aid < Size() && bid < other.Size()) {
+            if(data[aid].first == data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second * other.data[bid].second));
+                aid++;
+                bid++;
+            }
+            if(data[aid].first < other.data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second * other.uncached_Get(data[aid].first)));
+                aid++;
+            }
+            else {
+                ret.Set(std::make_pair(other.data[bid].first, other.data[bid].second * uncached_Get(other.data[bid].first)));
+                bid++;
+            }
+        }
+        if(aid < Size()) {
+            float last_value = other.data[bid-1].second;
+            for(size_t i = aid; i < Size(); i++) {
+                ret.Set(std::make_pair(data[i].first, data[i].second * last_value));
+            }
+        }
+        else if(bid < other.Size()) {
+            float last_value = data[aid-1].second;
+            for(size_t i = bid; i < other.Size(); i++) {
+                ret.Set(std::make_pair(other.data[i].first, other.data[i].second * last_value));
+            }
+        }
+        return ret;
+    }
+
+    Interpolated<T> time_offset(double offset) {
+        Interpolated<T> ret {};
+        for(size_t i = 0; i < Size(); i++) {
+            ret.Set(std::make_pair(data[i].first + offset, data[i].second));
+        }
+    }
+
+    Interpolated<T> time_multiply(double factor) {
+        Interpolated<T> ret {};
+        for(size_t i = 0; i < Size(); i++) {
+            ret.Set(std::make_pair(data[i].first * factor, data[i].second));
+        }
+    }
 
     /// <summary> Removes all datapoints </summary>
     void Clear() {
@@ -250,6 +388,89 @@ public:
             str << ts.first << ": " << ts.second;
             first = false;
         }
+    }
+
+    Interpolated<T> operator+(Interpolated<T>& other) {
+        Interpolated<T> ret {};
+        size_t aid = 0;
+        size_t bid = 0;
+        while(aid < Size() && bid < other.Size()) {
+            if(data[aid].first == data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second + other.data[bid].second));
+                aid++;
+                bid++;
+            }
+            if(data[aid].first < other.data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second + other.Get(data[aid].first)));
+                aid++;
+            }
+            else {
+                ret.Set(std::make_pair(other.data[bid].first, other.data[bid].second + Get(other.data[bid].first)));
+                bid++;
+            }
+        }
+        if(aid < Size()) {
+            float last_value = other.data[bid-1].second;
+            for(size_t i = aid; i < Size(); i++) {
+                ret.Set(std::make_pair(data[i].first, data[i].second + last_value));
+            }
+        }
+        else if(bid < other.Size()) {
+            float last_value = data[aid-1].second;
+            for(size_t i = bid; i < other.Size(); i++) {
+                ret.Set(std::make_pair(other.data[i].first, other.data[i].second + last_value));
+            }
+        }
+        return ret;
+    }
+
+    Interpolated<T> operator+(const T& offset) const {
+        Interpolated<T> ret {};
+        for(size_t i = 0; i < Size(); i++) {
+            ret.Set(std::make_pair(data[i].first, data[i].second + offset));
+        }
+        return ret;
+    }
+
+    Interpolated<T> operator*(Interpolated<T>& other) {
+        Interpolated<T> ret {};
+        size_t aid = 0;
+        size_t bid = 0;
+        while(aid < Size() && bid < other.Size()) {
+            if(data[aid].first == data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second * other.data[bid].second));
+                aid++;
+                bid++;
+            }
+            if(data[aid].first < other.data[bid].first) {
+                ret.Set(std::make_pair(data[aid].first, data[aid].second * other.Get(data[aid].first)));
+                aid++;
+            }
+            else {
+                ret.Set(std::make_pair(other.data[bid].first, other.data[bid].second * Get(other.data[bid].first)));
+                bid++;
+            }
+        }
+        if(aid < Size()) {
+            float last_value = other.data[bid-1].second;
+            for(size_t i = aid; i < Size(); i++) {
+                ret.Set(std::make_pair(data[i].first, data[i].second * last_value));
+            }
+        }
+        else if(bid < other.Size()) {
+            float last_value = data[aid-1].second;
+            for(size_t i = bid; i < other.Size(); i++) {
+                ret.Set(std::make_pair(other.data[i].first, other.data[i].second * last_value));
+            }
+        }
+        return ret;
+    }
+    Interpolated<T> operator*(const T& offset) const {
+        Interpolated<T> ret {};
+        for(size_t i = 0; i < Size(); i++) {
+            ret.Set(std::make_pair(data[i].first, data[i].second * offset));
+        }
+        return ret;
     }
 };
 
