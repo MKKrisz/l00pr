@@ -17,7 +17,7 @@ NoteStream::NoteStream(std::pair<double, Note*> p) : notes(){
 }
 
 NoteStream::NoteStream(const NoteStream& p) 
-    : notes(), bpm(p.bpm), polynote(p.polynote), srate(p.srate), lastNoteTs(p.lastNoteTs), len(p.len){
+    : notes(), bpm(p.bpm), polynote(p.polynote), srate(p.srate), len(p.len), lastNoteTs(p.lastNoteTs){
     for(size_t i = 0; i < p.notes.size(); i++) {
         notes.emplace_back(std::make_pair(p.notes[i].first, p.notes[i].second->copy()));
     }

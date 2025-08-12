@@ -68,6 +68,7 @@ public:
     }
 
     /// constructors
+    // TODO: make them use unique_ptr-s
     inline NoteStream() : notes() {calculateLen();}
     NoteStream(Note* n);
     NoteStream(double t, Note* n);
