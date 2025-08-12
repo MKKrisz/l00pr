@@ -4,13 +4,13 @@
 #include "generator.hpp"
 #include <vector>
 
+#include "noise.hpp"
 #include "none.hpp"
+#include "register.hpp"
+#include "sampled.hpp"
 #include "sine.hpp"
 #include "square.hpp"
 #include "triangle.hpp"
-#include "register.hpp"
-#include "noise.hpp"
-#include "sampled.hpp"
 #include "value.hpp"
 
 #endif
