@@ -2,7 +2,7 @@
 
 Loop::Loop(NoteStream& s, double r) : NoteStream(s), repAmount(r) {calculateLen();} 
 Loop::Loop(const Loop& l) 
-    : NoteStream(l), repAmount(l.repAmount), t(l.t), reps(l.reps), id(l.id) {}
+    : NoteStream(l), Note(), repAmount(l.repAmount), t(l.t), reps(l.reps), id(l.id) {}
 
 Loop::Loop(std::istream& str, Tune* tune, double bpm, bool poly, int srate) {
     setBpm(bpm); setPolynote(poly);

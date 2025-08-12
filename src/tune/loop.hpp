@@ -34,7 +34,7 @@ public:
 
     NoteStream& getBaseStream() {return *this; }
 
-    void AddToSource(Source* src) override {
+    void AddToSource(Source*) override {
         NoteStream::calculateLen();
     }
     void AddSample(Source*, int) override;
