@@ -18,7 +18,7 @@ template <typename T, typename ... Args>
 class Metadata : StringConvertible {
 protected:
     Metadata(const char* kw, std::function<T(std::istream&, Args...)> fn) : keyword(kw), create_func(fn) {}
-    Metadata(const Metadata& m) : keyword(m.keyword), create_func(m.create_func) {}
+    Metadata(const Metadata& m) = default;
 public:
     std::string keyword;
     std::function<T(std::istream&, Args...)> create_func;
