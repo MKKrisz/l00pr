@@ -48,14 +48,14 @@ void Program::remainOpen(Program* const p, const Argument& arg) {
     p->stayopen = stoi(arg.getArg());
 }
 
-void Program::listSources(Program* const p, const Argument&) {
+void Program::listSources(Program* const, const Argument&) {
     std::cout << "Generators:" << std::endl << Generator::getFormattedMetadata()
         << std::endl << "Filters:" << std::endl << Filter::getFormattedMetadata();
 }
-void Program::listGenerators(Program* const p, const Argument&) {
+void Program::listGenerators(Program* const, const Argument&) {
     std::cout << Generator::getFormattedMetadata();
 }
-void Program::listFilters(Program* const p, const Argument&) {
+void Program::listFilters(Program* const, const Argument&) {
     std::cout << Filter::getFormattedMetadata();
 }
 
