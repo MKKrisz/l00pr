@@ -15,7 +15,7 @@ bool PlayableNote::IsComplete() const {
 
 void PlayableNote::advance(int srate, double fm) {
     phase = fmod(phase + getDelta(srate) * fm, 1);
-    m_done += 1/double(srate);
+    m_done += 1.0/srate;
 }
 
 double PlayableNote::getDelta(int srate) {

@@ -33,7 +33,7 @@ protected:
     double m_done = 0;
     double m_length = 0;
     PlayableNoteBase() : Note() {}
-    PlayableNoteBase(double len, double done = 0) : Note(), m_length(len), m_done(done) {}
+    PlayableNoteBase(double len, double done = 0) : Note(), m_done(done), m_length(len) {}
     PlayableNoteBase(const PlayableNoteBase& n) : Note(), m_done(n.m_done), m_length(n.m_length) {}
 };
 
