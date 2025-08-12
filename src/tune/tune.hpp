@@ -32,6 +32,7 @@ public:
 
     /// <summary> Parses the player keyword </summary>
     void addLane(std::istream& stream);
+    void addLane(const Lane& l) {m_lanes.push_back(l);}
 
     void addSource(std::unique_ptr<Source> src);
     Source* getSource(std::istream& str);

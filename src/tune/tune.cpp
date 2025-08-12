@@ -23,7 +23,7 @@ Tune::Tune(Lane& p) : m_lanes(), p_sources(), p_refs(), p_labeled() {
     m_lanes.push_back(p);
 }
 
-Tune::Tune(const Tune& t) : m_lanes(t.m_lanes), p_sources(), p_globalFilter((std::unique_ptr<Filter>&&)std::move(t.p_globalFilter->copy())), m_bpm(t.m_bpm), m_srate(t.m_srate), m_polynote(t.m_polynote), p_refs(t.p_refs), p_labeled(t.p_labeled) {
+Tune::Tune(const Tune& t) : m_lanes(t.m_lanes), p_sources(), p_refs(t.p_refs), p_labeled(t.p_labeled), p_globalFilter((std::unique_ptr<Filter>&&)std::move(t.p_globalFilter->copy())), m_bpm(t.m_bpm), m_srate(t.m_srate), m_polynote(t.m_polynote) {
     for(auto& s : t.p_sources) {
         p_sources.emplace_back(s->copy());
     }
@@ -103,7 +103,7 @@ Source* Tune::getSource(std::istream& stream) {
     Source* gen = nullptr;
 
     if(isdigit(stream.peek())) {
-        int genId;
+        size_t genId;
         stream >> genId;
         if(genId >= p_sources.size()) {
             auto ref = std::make_unique<SourceRef>(genId, "The ID of the player source (" + std::to_string(genId) + ") is larger than the number of loaded generators. Maybe you're trying to load a multifile project?");
@@ -166,6 +166,15 @@ void Tune::resolveReferences() {
             if(!success) { throw std::runtime_error("Multiple sources with the same label aren't allowed! (label: " + l->label() + ")"); }
         }
     }
+    auto s_refs = p_globalFilter->getSourceRefs();
+    auto s_labels = p_globalFilter->getLabeled();
+
+    //insert
+    p_refs.insert(p_refs.begin(), s_refs.begin(), s_refs.end());
+    for(const auto& l : s_labels) {
+        bool success = p_labeled.emplace(l->label(), l).second;
+        if(!success) { throw std::runtime_error("Multiple sources with the same label aren't allowed! (label: " + l->label() + ")"); }
+    }
     for(auto& r : p_refs) {
         if(r->resolved()) continue;
         auto label = r->getWanted();
@@ -180,7 +189,7 @@ void Tune::resolveReferences() {
             auto src = p_labeled.at(label.first);
             r->setSource(src);
         } catch (std::out_of_range& err) {
-            throw std::out_of_range("Unresolved reference: No source labeled as :" + label.first + ": was found!\nIf you tried to create a source inplace, here is the error for that:\n\n" + r->getError());
+            throw std::out_of_range(label.first);//"Unresolved reference: No source labeled as :" + label.first + ": was found!\nIf you tried to create a source inplace, here is the error for that:\n\n" + r->getError());
         }
     }
 }
