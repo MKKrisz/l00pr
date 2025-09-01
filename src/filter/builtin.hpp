@@ -3,10 +3,12 @@
 
 #include "absolute.hpp"
 #include "bounds.hpp"
+#include "clamp.hpp"
 #include "copy.hpp"
 #include "delay.hpp"
 #include "dummy.hpp"
 #include "feedback.hpp"
+#include "fft.hpp"
 #include "fir.hpp"
 #include "gain.hpp"
 #include "quantize.hpp"
