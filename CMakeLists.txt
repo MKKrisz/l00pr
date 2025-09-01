@@ -26,16 +26,25 @@ FetchContent_MakeAvailable(googletest)
 
 find_package(SDL2 REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
+#include_directories(PkgConfig::FFTW)
+#link_libraries(PkgConfig::FFTW)
+
 #enable_testing()
 
 add_library(${PROJECT_NAME} SHARED l00pr.hpp)
 add_subdirectory(src)
 
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2 GTest::gtest GTest::gtest_main)
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2 PkgConfig::FFTW GTest::gtest GTest::gtest_main)
 
 project(l00pr)
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2 l00pr_core)
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2 PkgConfig::FFTW l00pr_core)
+
+project(benchmarker)
+add_executable(${PROJECT_NAME} benchmarker.cpp)
+target_link_libraries(${PROJECT_NAME} PkgConfig::FFTW  l00pr_core)
 
 add_subdirectory(plugins)
 #include(GoogleTest)
