@@ -5,6 +5,7 @@
 #include <ranges>
 #include <cmath>
 #include <type_traits>
+#include <vector>
 #include "concepts.hpp"
 
 /// <summary> 
@@ -20,7 +21,7 @@
 ///         between A and G, interprets value as a float
 /// </remarks>
 /// <exception cref="parse_error"> On failure. </exception>
-double getFreq(std::istream& stream);
+double getFreq(std::istream& stream, int transpone = 0);
 
 /// <summary>
 /// Gets the line and column number of the current stream position in the most
@@ -157,4 +158,8 @@ void brace(std::istream& str, char brace_char, F function) {
 }
 
 std::string trim(const std::string& str);
+
+bool FourierTransform(const double* src, size_t len, double* dst, size_t stride = 1);
+bool InverseFourierTransform(const double* src, size_t len, double* dst, size_t stride = 1);
+
 #endif
