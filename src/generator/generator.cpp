@@ -17,8 +17,12 @@ std::string Gen_Metadata::ToString() const {
 
 void Generator::Init() {
     AddMetadata(Gen_Metadata("constant", ValueGenerator::Create, "constant([value])", "Same as value, just for some backwards compatibility"));
+    AddMetadata(Gen_Metadata("mixer", Mixer::Create, "mixer { [src_1] [src_2] ... [src_n]}", "Multiplies the outputs of the wrapped sources"));
+    AddMetadata(Gen_Metadata("mix", Mixer::Create, "mix { [src_1] [src_2] ... [src_n]}", "Alias for 'mixer'"));
     AddMetadata(Gen_Metadata("noise", NoiseGenerator::Create, "noise([amplitude])", "Generates white noise"));
     AddMetadata(Gen_Metadata("none", NoGenerator::Create, "none", "Does nothing, plays silence"));
+    AddMetadata(Gen_Metadata("note_amplitude", NoteAmplitude::Create, "note_amplitude", "Returns the sum of the currently playing notes' amplitude"));
+    AddMetadata(Gen_Metadata("note_count", NoteCount::Create, "note_count", "Returns the number of notes currently playing on this source (casted to a float)"));
     AddMetadata(Gen_Metadata("register", Register::Create, "register { [src_1] [src_2] ... [src_n]}", "Wraps multiple sources into one"));
     AddMetadata(Gen_Metadata("sampled", SampledGenerator::Create, "sampled(<filename>)", "loads a (.wav) file from disk and plays it back. Note frequency controls playback speed")); //TODO: proper description
     AddMetadata(Gen_Metadata("sine", SineGenerator::Create, "sine([freq_multiplier] [amplitude] [phase_offset])", "Generates a sine wave"));
